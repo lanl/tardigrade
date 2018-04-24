@@ -1,32 +1,31 @@
 /*!
 ====================================================================
-|                  MicromorphicLinearElasticity.h                  |
+|                      MicromorphicMaterial.h                      |
 ====================================================================
 | The header file for a class which computes the cauchy stress and |
-| the associated jacobians for a linear elastic micromorphic       |
-| material.                                                        |
+| the associated jacobians for a micromorphic  material.           |
 --------------------------------------------------------------------
 | Notes: Relies on libraries from the micromorphic_element         |
 |        repository available at bitbucket.org/NateAM2             |
 ====================================================================
 */
 
-#ifndef MICROMORPHICLINEARELASTICITY_H
-#define MICROMORPHICLINEARELASTICITY_H
+#ifndef MICROMORPHICMATERIAL_H
+#define MICROMORPHICMATERIAL_H
 
 #include "Material.h"
-#include<micromorphic_linear_elasticity.h>
+#include<balance_equations.h>
 
 //Forward declarations
-class MicromorphicLinearElasticity;
+class MicromorphicMaterial;
 
 template <>
-InputParameters validParams<MicromorphicLinearElasticity>();
+InputParameters validParams<MicromorphicMaterial>();
 
-class MicromorphicLinearElasticity : public Material{
+class MicromorphicMaterial : public Material{
     /*!
     ======================================
-    |    MicromorphicLinearElasticity    |
+    |    MicromorphicMaterial    |
     ======================================
 
     Translation of the micromorphic_linear_elasticity library 
@@ -38,7 +37,7 @@ class MicromorphicLinearElasticity : public Material{
 
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        MicromorphicLinearElasticity(const InputParameters &parameters);
+        MicromorphicMaterial(const InputParameters &parameters);
 
     protected:
         virtual void computeQpProperties() override;
@@ -72,10 +71,23 @@ class MicromorphicLinearElasticity : public Material{
         const VariableGradient &_grad_phi_21;
 
         //Stresses (Material Properties in MOOSE parlance)
-        MaterialProperty<Vector_9>    &_cauchy;
-        MaterialProperty<Matrix_9x9>  &_DcauchyDgrad_u;
-        MaterialProperty<Matrix_9x9>  &_DcauchyDphi;
-        MaterialProperty<Matrix_9x27> &_DcauchyDgrad_phi;
+        MaterialProperty<Vector_9>     &_cauchy;
+        MaterialProperty<Vector_9>     &_s;
+        MaterialProperty<Vector_27>    &_m;
+
+        MaterialProperty<Matrix_9x9>   &_DcauchyDgrad_u;
+        MaterialProperty<Matrix_9x9>   &_DcauchyDphi;
+        MaterialProperty<Matrix_9x27>  &_DcauchyDgrad_phi;
+
+        MaterialProperty<Matrix_9x9>   &_DsDgrad_u;
+        MaterialProperty<Matrix_9x9>   &_DsDphi;
+        MaterialProperty<Matrix_9x27>  &_DsDgrad_phi;
+
+        MaterialProperty<Matrix_27x9>  &_DmDgrad_u;
+        MaterialProperty<Matrix_27x9>  &_DmDphi;
+        MaterialProperty<Matrix_27x27> &_DmDgrad_phi;
+
+        //TODO: Add additional values
 
 };
 
