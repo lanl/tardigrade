@@ -58,7 +58,7 @@ class InternalForce : public Kernel{
         //      We just need to have each DOF associated with some residual term.
         virtual Real computeQpJacobian() override;
 
-        const MaterialProperty<Vector_9> &_cauchy; //The cauchy stress
+        const MaterialProperty<Vector_9>    &_cauchy; //The cauchy stress
         const MaterialProperty<Matrix_9x9>  &_DcauchyDgrad_u;   //The gradient of the cauchy stress w.r.t. u
         const MaterialProperty<Matrix_9x9>  &_DcauchyDphi;      //The gradient of the cauchy stress w.r.t. the micro-deformation tensor
         const MaterialProperty<Matrix_9x27> &_DcauchyDgrad_phi; //The gradient of the cauchy stress w.r.t. the spatial gradient of the micro-deformation tensor
