@@ -15,6 +15,7 @@
 
 #include "Material.h"
 #include<balance_equations.h>
+#include<micromorphic_material_library.h>
 
 //Forward declarations
 class MicromorphicMaterial;
@@ -43,6 +44,14 @@ class MicromorphicMaterial : public Material{
         virtual void computeQpProperties() override;
 
     private:
+
+        //Parameters
+        std::vector<Real> _fparams;
+        int               _n_ADD_DOF;
+        int               _n_ADD_TERMS;
+        int               _n_ADD_JACOBIANS;
+        std::string       _model_name;
+
         //Coupled variables (i.e. u_i,j, phi_ij, and phi_ij,k)
         //grad u
         const VariableGradient & _grad_u1;
@@ -50,14 +59,15 @@ class MicromorphicMaterial : public Material{
         const VariableGradient & _grad_u3;
 
         //phi
-        const Variable &_phi_11;
-        const Variable &_phi_22;
-        const Variable &_phi_33;
-        const Variable &_phi_23;
-        const Variable &_phi_13;
-        const Variable &_phi_32;
-        const Variable &_phi_31;
-        const Variable &_phi_21;
+        const VariableValue &_phi_11;
+        const VariableValue &_phi_22;
+        const VariableValue &_phi_33;
+        const VariableValue &_phi_23;
+        const VariableValue &_phi_13;
+        const VariableValue &_phi_12;
+        const VariableValue &_phi_32;
+        const VariableValue &_phi_31;
+        const VariableValue &_phi_21;
 
         //grad phi
         const VariableGradient &_grad_phi_11;
@@ -71,23 +81,24 @@ class MicromorphicMaterial : public Material{
         const VariableGradient &_grad_phi_21;
 
         //Stresses (Material Properties in MOOSE parlance)
-        MaterialProperty<Vector_9>     &_cauchy;
-        MaterialProperty<Vector_9>     &_s;
-        MaterialProperty<Vector_27>    &_m;
+        MaterialProperty<std::vector<double>>               &_cauchy;
+        MaterialProperty<std::vector<double>>               &_s;
+        MaterialProperty<std::vector<double>>               &_m;
 
-        MaterialProperty<Matrix_9x9>   &_DcauchyDgrad_u;
-        MaterialProperty<Matrix_9x9>   &_DcauchyDphi;
-        MaterialProperty<Matrix_9x27>  &_DcauchyDgrad_phi;
+        MaterialProperty<std::vector<std::vector<double>>>  &_DcauchyDgrad_u;
+        MaterialProperty<std::vector<std::vector<double>>>  &_DcauchyDphi;
+        MaterialProperty<std::vector<std::vector<double>>>  &_DcauchyDgrad_phi;
 
-        MaterialProperty<Matrix_9x9>   &_DsDgrad_u;
-        MaterialProperty<Matrix_9x9>   &_DsDphi;
-        MaterialProperty<Matrix_9x27>  &_DsDgrad_phi;
+        MaterialProperty<std::vector<std::vector<double>>>  &_DsDgrad_u;
+        MaterialProperty<std::vector<std::vector<double>>>  &_DsDphi;
+        MaterialProperty<std::vector<std::vector<double>>>  &_DsDgrad_phi;
 
-        MaterialProperty<Matrix_27x9>  &_DmDgrad_u;
-        MaterialProperty<Matrix_27x9>  &_DmDphi;
-        MaterialProperty<Matrix_27x27> &_DmDgrad_phi;
+        MaterialProperty<std::vector<std::vector<double>>>  &_DmDgrad_u;
+        MaterialProperty<std::vector<std::vector<double>>>  &_DmDphi;
+        MaterialProperty<std::vector<std::vector<double>>>  &_DmDgrad_phi;
 
         //TODO: Add additional values
+        MaterialProperty<std::vector<std::vector<double>>>  &_ADD_TERMS;
 
 };
 

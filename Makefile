@@ -47,10 +47,17 @@ include $(MOOSE_DIR)/modules/modules.mk
 
 # dep apps
 APPLICATION_DIR    := $(CURDIR)
+SUPPORT_DIR        := /home/nathan/research/micromorphic_uel/src/cpp
 APPLICATION_NAME   := tardigrade
 BUILD_EXEC         := yes
 GEN_REVISION       := no
 include            $(FRAMEWORK_DIR)/app.mk
 
+ex_srcfiles := $(shell find $(APPLICATION_DIR) -name "*.C")
+ex_deps     := $(patsubst %.C, %.$(obj-suffix).d, $(ex_srcfiles))
+
 ###############################################################################
 # Additional special case targets should be added here
+
+ADDITIONAL_CPPFLAGS := -lmicromat -lmicrobalance -fmax-errors=5
+ADDITIONAL_CPPFLAGS := -I$(SUPPORT_DIR)

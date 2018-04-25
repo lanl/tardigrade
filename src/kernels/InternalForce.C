@@ -33,10 +33,10 @@ InternalForce::InternalForce(const InputParameters & parameters)
     : // We have to call the constructor for the base class first
         Kernel(parameters),
         _component(getParam<int>("component")),
-        _compoennt(getParam<int>("dof_num")),
+        _dof_num(getParam<int>("dof_num")),
         _cauchy(getMaterialProperty<Vector_9>("cauchy")),
         _DcauchyDgrad_u(getMaterialProperty<Matrix_9x9>("DcauchyDgrad_u")),
-        _Dcauchydphi(getMaterialProperty<Matrix_9x9>("DcauchyDphi")),
+        _DcauchyDphi(getMaterialProperty<Matrix_9x9>("DcauchyDphi")),
         _DcauchyDgrad_phi(getMaterialProperty<Matrix_9x27>("DcauchyDgrad_phi"))
     {
     /*!
@@ -66,7 +66,14 @@ Real InternalForce::computeQpResidual(){
 
     */
     Real fint;
-    balance_equations::compute_internal_force(_component, _grad_test[_i][_qp], _cauchy, fint);
+    
+    //Copy the test function so that the balance equation function can read it
+    double dNdx[3];
+    //const double *p;
+    //p = &_grad_test[_i][_qp](0);
+    for (int i=0; i<3; i++){dNdx[i] = *(&_grad_test[_i][_qp](i));}//p+i);}
+    
+    balance_equations::compute_internal_force(_component, dNdx, _cauchy[_qp], fint);
     return fint;
 }
 
@@ -81,8 +88,22 @@ Real InternalForce::computeQpJacobian(){
     */
 
     Real dfdUint;
+
+    //Copy the test and interpolation functions so that the balance equation function can read it
+    double dNdx[3];
+    double detadx[3];
+    //const double *p;
+    //const double *__p;
+    //p   = &_grad_test[_i][_qp](0);
+    //__p = &_grad_phi[_i][_qp](0);
+    for (int i=0; i<3; i++){
+        dNdx[i]   = *(&_grad_test[_i][_qp](i));//p+i);
+        detadx[i] = *(&_grad_phi[_i][_qp](i));//__p+i);;
+    }
+
+
     balance_equations::compute_internal_force_jacobian(_component,           _dof_num, 
-                                                       _test[_i][_qp],       _grad_test[_i][_qp], _phi[_j][_qp],          _grad_phi[_j][_qp],
-                                                       _DcauchyDgrad_u[_qp], _Dcauchydphi[_qp],   _DcauchyDgrad_phi[_qp], dfdUint);
+                                                       _test[_i][_qp],       dNdx, _phi[_j][_qp],          detadx,
+                                                       _DcauchyDgrad_u[_qp], _DcauchyDphi[_qp],   _DcauchyDgrad_phi[_qp], dfdUint);
     return dfdUint;
 }
