@@ -22,7 +22,7 @@ registerMooseObject("tardigrade", InternalForce);
 
 template<>
 InputParameters
-validParams<InputParameters>(){
+validParams<InternalForce>(){
     InputParameters params = validParams<Kernel>();
     params.addRequiredParam<int>("component", "The component of the internal force vector");
     params.addRequiredParam<int>("dof_num",   "The degree of freedom to use for the diagonal jacobian calculation");
@@ -34,10 +34,10 @@ InternalForce::InternalForce(const InputParameters & parameters)
         Kernel(parameters),
         _component(getParam<int>("component")),
         _dof_num(getParam<int>("dof_num")),
-        _cauchy(getMaterialProperty<Vector_9>("cauchy")),
-        _DcauchyDgrad_u(getMaterialProperty<Matrix_9x9>("DcauchyDgrad_u")),
-        _DcauchyDphi(getMaterialProperty<Matrix_9x9>("DcauchyDphi")),
-        _DcauchyDgrad_phi(getMaterialProperty<Matrix_9x27>("DcauchyDgrad_phi"))
+        _cauchy(getMaterialProperty<std::vector<double>>("cauchy")),
+        _DcauchyDgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DcauchyDgrad_u")),
+        _DcauchyDphi(getMaterialProperty<std::vector<std::vector<double>>>("DcauchyDphi")),
+        _DcauchyDgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DcauchyDgrad_phi"))
     {
     /*!
     =====================

@@ -187,19 +187,21 @@ void MicromorphicMaterial::computeQpProperties(){
 
     std::vector<std::vector<double>> ADD_grad_DOF;
     ADD_grad_DOF.resize(_n_ADD_DOF);
+
+    std::vector<std::vector<std::vector<double>>> ADD_JACOBIANS;
+    ADD_JACOBIANS.resize(_n_ADD_JACOBIANS);
     //END of hardcoded values
 
     //Set the sizes of the additional term vectors 
     _ADD_TERMS[_qp].resize(_n_ADD_TERMS);
 
-    std::vector<Eigen::MatrixXd> ADD_JACOBIANS;
-    ADD_JACOBIANS.resize(_n_ADD_JACOBIANS);
 
-    material->evaluate_model(time, _fparams, __grad_u, __phi, __grad_phi,  SDVS, ADD_DOF, ADD_grad_DOF, 
-                             _cauchy[_qp], _s[_qp], _m[_qp],
+    material->evaluate_model(time, _fparams, __grad_u, __phi, __grad_phi,
+                              SDVS,                ADD_DOF,           ADD_grad_DOF,
+                             _cauchy[_qp],         _s[_qp],           _m[_qp],
                              _DcauchyDgrad_u[_qp], _DcauchyDphi[_qp], _DcauchyDgrad_phi[_qp],
                              _DsDgrad_u[_qp],      _DsDphi[_qp],      _DsDgrad_phi[_qp],
                              _DmDgrad_u[_qp],      _DmDphi[_qp],      _DmDgrad_phi[_qp],
-                             _ADD_TERMS[_qp],            ADD_JACOBIANS);
+                             _ADD_TERMS[_qp],      ADD_JACOBIANS);
 }
 

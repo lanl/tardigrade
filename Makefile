@@ -60,4 +60,5 @@ ex_deps     := $(patsubst %.C, %.$(obj-suffix).d, $(ex_srcfiles))
 # Additional special case targets should be added here
 
 ADDITIONAL_CPPFLAGS := -lmicromat -lmicrobalance -fmax-errors=5
-ADDITIONAL_CPPFLAGS := -I$(SUPPORT_DIR)
+ADDITIONAL_CPPFLAGS += -I$(SUPPORT_DIR)
+EXTERNAL_FLAGS      := -L$(SUPPORT_DIR) -lmicromat -lmicrobalance
