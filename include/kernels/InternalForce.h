@@ -30,9 +30,9 @@ InputParameters validParams<InternalForce>();
 
 class InternalForce : public Kernel{
     /*!
-    ----------------------------------------
-    |    InernalForce kernel definition    |
-    ----------------------------------------
+    -----------------------------------------
+    |    InternalForce kernel definition    |
+    -----------------------------------------
 
     We define the kernel for the internal force to be
 
