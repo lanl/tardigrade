@@ -39,83 +39,83 @@
     type = InternalForce
     component = 0
     dof_num   = 0
-    variable = u_x
+    variable  = u_x
   [../]
   [./force_2]
     type = InternalForce
     component = 1
     dof_num   = 1
-    variable = u_y
+    variable  = u_y
   [../]
   [./force_3]
     type = InternalForce
     component = 2
     dof_num   = 2
-    variable = u_z
+    variable  = u_z
   [../]
   #Define the internal couple balance equations
   [./couple_11]
-    type = InternalForce
+    type = InternalCouple
     component_i = 0
     component_j = 0
-    dof_num   = 3
-    variable = phi_xx
+    dof_num     = 3
+    variable    = phi_xx
   [../]
   [./couple_22]
-    type = InternalForce
+    type = InternalCouple
     component_i = 1
     component_j = 1
-    dof_num   = 4
-    variable = phi_yy
+    dof_num     = 4
+    variable    = phi_yy
   [../]
   [./couple_33]
-    type = InternalForce
+    type = InternalCouple
     component_i = 2
     component_j = 2
-    dof_num   = 5
-    variable = phi_zz
+    dof_num     = 5
+    variable    = phi_zz
   [../]
   [./couple_23]
-    type = InternalForce
+    type = InternalCouple
     component_i = 1
     component_j = 2
-    dof_num   = 6
-    variable = phi_yz
+    dof_num     = 6
+    variable    = phi_yz
   [../]
   [./couple_13]
-    type = InternalForce
+    type = InternalCouple
     component_i = 0
     component_j = 2
-    dof_num   = 7
-    variable = phi_xz
+    dof_num     = 7
+    variable    = phi_xz
   [../]
   [./couple_12]
-    type = InternalForce
+    type = InternalCouple
     component_i = 0
     component_j = 1
-    dof_num   = 7
-    variable = phi_xy
+    dof_num     = 8
+    variable    = phi_xy
   [../]
   [./couple_32]
-    type = InternalForce
+    type = InternalCouple
     component_i = 2
     component_j = 1
-    dof_num   = 8
-    variable = phi_zy
+    dof_num     = 9
+    variable    = phi_zy
   [../]
   [./couple_31]
-    type = InternalForce
+    type = InternalCouple
     component_i = 2
     component_j = 0
-    dof_num   = 9
-    variable = phi_zx
+    dof_num     = 10
+    variable    = phi_zx
   [../]
   [./couple_21]
-    type = InternalForce
+    type = InternalCouple
     component_i = 1
     component_j = 0
-    dof_num   = 7
-    variable = phi_yx
+    dof_num     = 11
+    variable    = phi_yx
   [../]
 []
 
@@ -149,22 +149,22 @@
 [Materials]
   [./linear_elastic]
     type = MicromorphicMaterial
-    material_fparameters = '1000., 8e9, 11e9, 2e9, 1.538e9, -1e9, -1.39e9, -2.11e9, 0., 0., 0., 0., 0., 0., 0.769e6, 0., 0., 0., 0.'
+    material_fparameters = '1000. 8e9 11e9 2e9 1.538e9 -1e9 -1.39e9 -2.11e9 0. 0. 0. 0. 0. 0. 0.769e6 0. 0. 0. 0.'
     model_name = "LinearElasticity"
 
     #Coupled variables
     u1     = 'u_x'
     u2     = 'u_y'
     u3     = 'u_z'
-    phi_11 = 'phi_11'
-    phi_22 = 'phi_22'
-    phi_33 = 'phi_33'
-    phi_23 = 'phi_23'
-    phi_13 = 'phi_13'
-    phi_12 = 'phi_12'
-    phi_32 = 'phi_32'
-    phi_31 = 'phi_31'
-    phi_21 = 'phi_21'
+    phi_11 = 'phi_xx'
+    phi_22 = 'phi_yy'
+    phi_33 = 'phi_zz'
+    phi_23 = 'phi_yz'
+    phi_13 = 'phi_xz'
+    phi_12 = 'phi_xy'
+    phi_32 = 'phi_zy'
+    phi_31 = 'phi_zx'
+    phi_21 = 'phi_yx'
   [../]
 []
 

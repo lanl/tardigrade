@@ -13,7 +13,7 @@
 
 #include "MicromorphicMaterial.h"
 
-registerMooseObject("tartigrade", MicromorphicMaterial);
+registerMooseObject("tardigradeApp", MicromorphicMaterial);
 
 template<>
 InputParameters
@@ -27,13 +27,13 @@ validParams<MicromorphicMaterial>(){
     params.addRequiredParam<std::string>(
         "model_name", "The material model name");
 
-    params.addRequiredParam<int>(
+    params.addParam<int>(
         "number_ADD_DOF", 0, "The number of additional degrees of freedom beyond u and phi in the problem");
 
-    params.addRequiredParam<int>(
+    params.addParam<int>(
         "number_ADD_TERMS", 0, "The number of additional balance equations being solved beyond the balance of linear momentum and first moment of momentum");
 
-    params.addRequiredParam<int>(
+    params.addParam<int>(
         "number_ADD_JACOBIANS", 0, "The number of additional jacobians being provided beyond those of the stress measures");
 
     // Coupled variables
@@ -60,6 +60,9 @@ validParams<MicromorphicMaterial>(){
 
     params.addCoupledVar(
         "phi_13", "The xz component of the phi tensor.");
+
+    params.addCoupledVar(
+        "phi_12", "The xy component of the phi tensor.");
 
     params.addCoupledVar(
         "phi_32", "The zy component of the phi tensor.");

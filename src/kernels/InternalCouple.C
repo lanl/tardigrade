@@ -18,7 +18,7 @@
 #include<InternalCouple.h>
 
 //We define the valid parameters for this kernel and their default values
-registerMooseObject("tardigrade", InternalCouple);
+registerMooseObject("tardigradeApp", InternalCouple);
 
 template<>
 InputParameters

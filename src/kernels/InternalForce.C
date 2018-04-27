@@ -18,7 +18,7 @@
 #include<InternalForce.h>
 
 //We define the valid parameters for this kernel and their default values
-registerMooseObject("tardigrade", InternalForce);
+registerMooseObject("tardigradeApp", InternalForce);
 
 template<>
 InputParameters
@@ -69,8 +69,6 @@ Real InternalForce::computeQpResidual(){
     
     //Copy the test function so that the balance equation function can read it
     double dNdx[3];
-    //const double *p;
-    //p = &_grad_test[_i][_qp](0);
     for (int i=0; i<3; i++){dNdx[i] = *(&_grad_test[_i][_qp](i));}//p+i);}
     
     balance_equations::compute_internal_force(_component, dNdx, _cauchy[_qp], fint);
@@ -92,13 +90,9 @@ Real InternalForce::computeQpJacobian(){
     //Copy the test and interpolation functions so that the balance equation function can read it
     double dNdx[3];
     double detadx[3];
-    //const double *p;
-    //const double *__p;
-    //p   = &_grad_test[_i][_qp](0);
-    //__p = &_grad_phi[_i][_qp](0);
     for (int i=0; i<3; i++){
-        dNdx[i]   = *(&_grad_test[_i][_qp](i));//p+i);
-        detadx[i] = *(&_grad_phi[_i][_qp](i));//__p+i);;
+        dNdx[i]   = *(&_grad_test[_i][_qp](i));
+        detadx[i] = *(&_grad_phi[_i][_qp](i));
     }
 
 
