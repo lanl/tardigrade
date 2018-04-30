@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 10
-  ny = 10
-  nz = 10
+  nx = 2
+  ny = 2
+  nz = 2
 []
 
 [Variables]
@@ -129,42 +129,42 @@
   [./back]
     type = DirichletBC
     variable = u_y
-    boundary = back
+    boundary = bottom
     value = 0
   [../]
   [./bottom]
     type = DirichletBC
     variable = u_z
-    boundary = bottom
+    boundary = back
     value = 0
   [../]
   [./top]
     type = DirichletBC
     variable = u_y
-    boundary = front
-    value = 1
+    boundary = top
+    value = 0.1
   [../]
 []
 
 [Materials]
   [./linear_elastic]
     type = MicromorphicMaterial
-    material_fparameters = '1000. 8e9 11e9 2e9 1.538e9 -1e9 -1.39e9 -2.11e9 0. 0. 0. 0. 0. 0. 0.769e6 0. 0. 0. 0.'
+    material_fparameters = '8e9 11e9 2e9 1.538e9 -1e9 -1.39e9 -2.11e9 0. 0. 0. 0. 0. 0. 0.769e6 0. 0. 0. 0.'
     model_name = "LinearElasticity"
 
     #Coupled variables
-    u1     = 'u_x'
-    u2     = 'u_y'
-    u3     = 'u_z'
-    phi_11 = 'phi_xx'
-    phi_22 = 'phi_yy'
-    phi_33 = 'phi_zz'
-    phi_23 = 'phi_yz'
-    phi_13 = 'phi_xz'
-    phi_12 = 'phi_xy'
-    phi_32 = 'phi_zy'
-    phi_31 = 'phi_zx'
-    phi_21 = 'phi_yx'
+    u1     = u_x
+    u2     = u_y
+    u3     = u_z
+    phi_11 = phi_xx
+    phi_22 = phi_yy
+    phi_33 = phi_zz
+    phi_23 = phi_yz
+    phi_13 = phi_xz
+    phi_12 = phi_xy
+    phi_32 = phi_zy
+    phi_31 = phi_zx
+    phi_21 = phi_yx
   [../]
 []
 
@@ -172,7 +172,7 @@
   type = Steady
   solve_type = 'PJFNK'
   petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_value = 'hypre    boomeramg'
 []
 
 [Outputs]

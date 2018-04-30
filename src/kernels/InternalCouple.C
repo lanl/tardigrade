@@ -23,6 +23,7 @@ registerMooseObject("tardigradeApp", InternalCouple);
 template<>
 InputParameters
 validParams<InternalCouple>(){
+//    std::cout << "In InputParameters InternalCouple\n";
     InputParameters params = validParams<Kernel>();
     params.addRequiredParam<int>("component_i", "The i component of the internal couple tensor");
     params.addRequiredParam<int>("component_j", "The j component of the internal couple tensor");
@@ -59,6 +60,7 @@ InternalCouple::InternalCouple(const InputParameters & parameters)
     assignments.
 
     */
+//    std::cout << "In InternalCouple Constructor\n";
 }
 
 Real InternalCouple::computeQpResidual(){
@@ -80,13 +82,12 @@ Real InternalCouple::computeQpResidual(){
     
     //Copy the test function so that the balance equation function can read it
     double dNdx[3];
-    //const double *p;
-    //p = &_grad_test[_i][_qp](0);
-    for (int i=0; i<3; i++){dNdx[i] = *(&_grad_test[_i][_qp](i));}//p+i);}
+    for (int indx=0; indx<3; indx++){dNdx[indx] = _grad_test[_i][_qp](indx);}//p+i);}
     
     balance_equations::compute_internal_couple(_component_i, _component_j, _test[_i][_qp], dNdx, 
-                                               _cauchy[_qp], _s[_qp], _m[_qp],
+                                               _cauchy[_qp], _s[_qp],      _m[_qp],
                                                cint);
+//    std::cout << "cint: " << cint << "\n";
     return cint;
 }
 
@@ -99,27 +100,22 @@ Real InternalCouple::computeQpJacobian(){
     Compute the diagonal jacobian term.
 
     */
-
     Real dcdUint;
 
     //Copy the test and interpolation functions so that the balance equation function can read it
     double dNdx[3];
     double detadx[3];
-    //const double *p;
-    //const double *__p;
-    //p   = &_grad_test[_i][_qp](0);
-    //__p = &_grad_phi[_i][_qp](0);
-    for (int i=0; i<3; i++){
-        dNdx[i]   = *(&_grad_test[_i][_qp](i));//p+i);
-        detadx[i] = *(&_grad_phi[_i][_qp](i));//__p+i);;
+    for (int indx=0; indx<3; indx++){
+        dNdx[indx]   = _grad_test[_i][_qp](indx);
+        detadx[indx] = _grad_phi[_i][_qp](indx);
     }
 
 
-    balance_equations::compute_internal_couple_jacobian(_component_i,  _component_j, _dof_num, 
-                                                        _test[_i][_qp], dNdx, _phi[_j][_qp], detadx,
+    balance_equations::compute_internal_couple_jacobian(_component_i,         _component_j,      _dof_num, 
+                                                        _test[_i][_qp],        dNdx,             _phi[_j][_qp],          detadx,
                                                         _DcauchyDgrad_u[_qp], _DcauchyDphi[_qp], _DcauchyDgrad_phi[_qp],
-                                                        _DsDgrad_u[_qp], _DsDphi[_qp], _DsDgrad_phi[_qp],
-                                                        _DmDgrad_u[_qp], _DmDphi[_qp], _DmDgrad_phi[_qp],
+                                                        _DsDgrad_u[_qp],      _DsDphi[_qp],      _DsDgrad_phi[_qp],
+                                                        _DmDgrad_u[_qp],      _DmDphi[_qp],      _DmDgrad_phi[_qp],
                                                         dcdUint);
     return dcdUint;
 }

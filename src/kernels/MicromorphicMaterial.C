@@ -130,7 +130,17 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
     _DmDgrad_u(declareProperty<std::vector<std::vector<double>>>("DmDgrad_u")),
     _DmDphi(declareProperty<std::vector<std::vector<double>>>("DmDphi")),
     _DmDgrad_phi(declareProperty<std::vector<std::vector<double>>>("DmDgrad_phi")),
-    _ADD_TERMS(declareProperty<std::vector<std::vector<double>>>("ADD_TERMS")){}
+    _ADD_TERMS(declareProperty<std::vector<std::vector<double>>>("ADD_TERMS")){
+    /*!
+    ==============================
+    |    MicromorphicMaterial    |
+    ==============================
+
+    The constructor for MicromorphicMaterial.
+    */
+
+
+}
 
 void MicromorphicMaterial::computeQpProperties(){
     /*!
@@ -144,14 +154,26 @@ void MicromorphicMaterial::computeQpProperties(){
 
     //Define required DOF values for the
     //balance of linear momentum and first moment of momentum
+
     double __grad_u[3][3];
     double __phi[9];
     double __grad_phi[9][3];
     
     //Copy over the gradient of u
-    for (int i=0; i<3; i++){__grad_u[0][i] = *(&_grad_u1[_qp](i));}
-    for (int i=0; i<3; i++){__grad_u[1][i] = *(&_grad_u2[_qp](i));}
-    for (int i=0; i<3; i++){__grad_u[2][i] = *(&_grad_u3[_qp](i));}
+    bool print_grad_u = false;
+    for (int i=0; i<3; i++){__grad_u[0][i] = _grad_u1[_qp](i); if(1e-6<fabs(__grad_u[0][i])){print_grad_u=true;}}
+    for (int i=0; i<3; i++){__grad_u[1][i] = _grad_u2[_qp](i); if(1e-6<fabs(__grad_u[1][i])){print_grad_u=true;}}
+    for (int i=0; i<3; i++){__grad_u[2][i] = _grad_u3[_qp](i); if(1e-6<fabs(__grad_u[2][i])){print_grad_u=true;}}
+
+    if(print_grad_u){
+    std::cout << "__grad_u:\n";
+    for (int i=0; i<3; i++){
+        for (int j=0; j<3; j++){
+            std::cout << __grad_u[i][j] << " ";
+        }
+        std::cout << "\n";
+    }
+    }
     
     //Copy over phi
     __phi[0] = _phi_11[_qp];
@@ -164,16 +186,28 @@ void MicromorphicMaterial::computeQpProperties(){
     __phi[7] = _phi_31[_qp];
     __phi[8] = _phi_21[_qp];
 
+    //std::cout << "__phi: ";
+    //for (int i=0; i<9; i++){std::cout << __phi[i] << " ";}
+    //std::cout << "\n";
+
     //Copy over grad_phi
-    for (int i=0; i<3; i++){__grad_phi[0][i] = *(&_grad_phi_11[_qp](i));}
-    for (int i=0; i<3; i++){__grad_phi[1][i] = *(&_grad_phi_22[_qp](i));}
-    for (int i=0; i<3; i++){__grad_phi[2][i] = *(&_grad_phi_33[_qp](i));}
-    for (int i=0; i<3; i++){__grad_phi[3][i] = *(&_grad_phi_23[_qp](i));}
-    for (int i=0; i<3; i++){__grad_phi[4][i] = *(&_grad_phi_13[_qp](i));}
-    for (int i=0; i<3; i++){__grad_phi[5][i] = *(&_grad_phi_12[_qp](i));}
-    for (int i=0; i<3; i++){__grad_phi[6][i] = *(&_grad_phi_32[_qp](i));}
-    for (int i=0; i<3; i++){__grad_phi[7][i] = *(&_grad_phi_31[_qp](i));}
-    for (int i=0; i<3; i++){__grad_phi[8][i] = *(&_grad_phi_21[_qp](i));}
+    for (int i=0; i<3; i++){__grad_phi[0][i] = _grad_phi_11[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[1][i] = _grad_phi_22[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[2][i] = _grad_phi_33[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[3][i] = _grad_phi_23[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[4][i] = _grad_phi_13[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[5][i] = _grad_phi_12[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[6][i] = _grad_phi_32[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[7][i] = _grad_phi_31[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[8][i] = _grad_phi_21[_qp](i);}
+ 
+    //std::cout << "__grad_phi:\n";
+    //for (int i=0; i<9; i++){
+    //    for (int j=0; j<3; j++){
+    //        std::cout << __grad_phi[i][j] << " ";
+    //    }
+    //    std::cout << "\n";
+    //}
 
     //Evaluate the stresses and their jacobians
     auto &factory = micromorphic_material_library::MaterialFactory::Instance();
@@ -195,10 +229,10 @@ void MicromorphicMaterial::computeQpProperties(){
     ADD_JACOBIANS.resize(_n_ADD_JACOBIANS);
     //END of hardcoded values
 
-    //Set the sizes of the additional term vectors 
+    //Set the sizes of the additional term vectors
     _ADD_TERMS[_qp].resize(_n_ADD_TERMS);
 
-
+    //Evaluate the model
     material->evaluate_model(time, _fparams, __grad_u, __phi, __grad_phi,
                               SDVS,                ADD_DOF,           ADD_grad_DOF,
                              _cauchy[_qp],         _s[_qp],           _m[_qp],
@@ -206,5 +240,7 @@ void MicromorphicMaterial::computeQpProperties(){
                              _DsDgrad_u[_qp],      _DsDphi[_qp],      _DsDgrad_phi[_qp],
                              _DmDgrad_u[_qp],      _DmDphi[_qp],      _DmDgrad_phi[_qp],
                              _ADD_TERMS[_qp],      ADD_JACOBIANS);
+
+    
 }
 
