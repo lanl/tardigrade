@@ -9,99 +9,99 @@
 
 [Variables]
   [./u_x]
-    [./InitialCondition]
-      type = RandomIC
-      min  = -1
-      max  =  1
-    [../]
+#    [./InitialCondition]
+#      type = RandomIC
+#      min  = -1
+#      max  =  1
+#    [../]
 #    scaling = 1e6
   [../]
   [./u_y]
-    [./InitialCondition]
-      type = RandomIC
-      min  = -1
-      max  =  1
-    [../]
+#    [./InitialCondition]
+#      type = RandomIC
+#      min  = -1
+#      max  =  1
+#    [../]
 #    scaling = 1e6
   [../]
   [./u_z]
-    [./InitialCondition]
-      type = RandomIC
-      min  = -1
-      max  =  1
-    [../]
+#    [./InitialCondition]
+#      type = RandomIC
+#      min  = -1
+#      max  =  1
+#    [../]
 #    scaling = 1e6
   [../]
   [./phi_xx]
-    [./InitialCondition]
-      type = RandomIC
-      min  = -1
-      max  =  1
-    [../]
+#    [./InitialCondition]
+#      type = RandomIC
+#      min  = -1
+#      max  =  1
+#    [../]
 #    scaling = 1e6
   [../]
   [./phi_yy]
-    [./InitialCondition]
-      type = RandomIC
-      min  = -1
-      max  =  1
-    [../]
+#    [./InitialCondition]
+#      type = RandomIC
+#      min  = -1
+#      max  =  1
+#    [../]
 #    scaling = 1e6
   [../]
   [./phi_zz]
-    [./InitialCondition]
-      type = RandomIC
-      min  = -1
-      max  =  1
-    [../]
+#    [./InitialCondition]
+#      type = RandomIC
+#      min  = -1
+#      max  =  1
+#    [../]
 #    scaling = 1e6
   [../]
   [./phi_yz]
-    [./InitialCondition]
-      type = RandomIC
-      min  = -1
-      max  =  1
-    [../]
+#    [./InitialCondition]
+#      type = RandomIC
+#      min  = -1
+#      max  =  1
+#    [../]
 #    scaling = 1e6
   [../]
   [./phi_xz]
-    [./InitialCondition]
-      type = RandomIC
-      min  = -1
-      max  =  1
-    [../]
+#    [./InitialCondition]
+#      type = RandomIC
+#      min  = -1
+#      max  =  1
+#    [../]
 #    scaling = 1e6
   [../]
   [./phi_xy]
-    [./InitialCondition]
-      type = RandomIC
-      min  = -1
-      max  =  1
-    [../]
+#    [./InitialCondition]
+#      type = RandomIC
+#      min  = -1
+#      max  =  1
+#    [../]
 #    scaling = 1e6
   [../]
   [./phi_zy]
-    [./InitialCondition]
-      type = RandomIC
-      min  = -1
-      max  =  1
-    [../]
+#    [./InitialCondition]
+#      type = RandomIC
+#      min  = -1
+#      max  =  1
+#    [../]
 #    scaling = 1e6
   [../]
   [./phi_zx]
-    [./InitialCondition]
-      type = RandomIC
-      min  = -1
-      max  =  1
-    [../]
+#    [./InitialCondition]
+#      type = RandomIC
+#      min  = -1
+#      max  =  1
+#    [../]
 #    scaling = 1e6
   [../]
   [./phi_yx]
-    [./InitialCondition]
-      type = RandomIC
-      min  = -1
-      max  =  1
-    [../]
+#    [./InitialCondition]
+#      type = RandomIC
+#      min  = -1
+#      max  =  1
+#    [../]
 #    scaling = 1e6
   [../]
 []
@@ -381,7 +381,7 @@
     type = DirichletBC
     variable = u_y
     boundary = 'top'
-    value = 1.0
+    value = 0.01
   [../]
 []
 
@@ -407,19 +407,22 @@
   [../]
 []
 
-[Preconditioning]
-  [./SMP]
-    type = SMP
-    full = true
-  [../]
-[]
+#[Preconditioning]
+#  [./SMP]
+#    type = SMP
+#    full = true
+#  [../]
+#[]
 
 [Executioner]
   type = Steady
-  solve_type = 'JFNK'
-  l_max_its  = 100
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre    boomeramg'
+  solve_type = 'NEWTON'
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-8
+  nl_max_its = 10
+#  l_max_its  = 20
+#  petsc_options_iname = '-pc_type -pc_hypre_type'
+#  petsc_options_value = 'hypre    boomeramg'
 []
 
 [Outputs]
