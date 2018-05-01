@@ -65,6 +65,7 @@ Real InternalForce::computeQpResidual(){
     where i = _component
 
     */
+
     Real fint;
     
     //Copy the test function so that the balance equation function can read it

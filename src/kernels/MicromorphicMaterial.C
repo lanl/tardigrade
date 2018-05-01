@@ -37,41 +37,41 @@ validParams<MicromorphicMaterial>(){
         "number_ADD_JACOBIANS", 0, "The number of additional jacobians being provided beyond those of the stress measures");
 
     // Coupled variables
-    params.addCoupledVar(
-        "u1", "The displacement in the x direction.");
+    params.addRequiredCoupledVar(
+        "u1", "The displacement in the 1 direction.");
 
-    params.addCoupledVar(
-        "u2", "The displacement in the y direction.");
+    params.addRequiredCoupledVar(
+        "u2", "The displacement in the 2 direction.");
 
-    params.addCoupledVar(
-        "u3", "The displacement in the z direction.");
+    params.addRequiredCoupledVar(
+        "u3", "The displacement in the 3 direction.");
 
-    params.addCoupledVar(
-        "phi_11", "The xx component of the phi tensor.");
+    params.addRequiredCoupledVar(
+        "phi_11", "The 11 component of the phi tensor.");
 
-    params.addCoupledVar(
-        "phi_22", "The yy component of the phi tensor.");
+    params.addRequiredCoupledVar(
+        "phi_22", "The 22 component of the phi tensor.");
 
-    params.addCoupledVar(
-        "phi_33", "The zz component of the phi tensor.");
+    params.addRequiredCoupledVar(
+        "phi_33", "The 33 component of the phi tensor.");
 
-    params.addCoupledVar(
-        "phi_23", "The yz component of the phi tensor.");
+    params.addRequiredCoupledVar(
+        "phi_23", "The 23 component of the phi tensor.");
 
-    params.addCoupledVar(
-        "phi_13", "The xz component of the phi tensor.");
+    params.addRequiredCoupledVar(
+        "phi_13", "The 13 component of the phi tensor.");
 
-    params.addCoupledVar(
-        "phi_12", "The xy component of the phi tensor.");
+    params.addRequiredCoupledVar(
+        "phi_12", "The 12 component of the phi tensor.");
 
-    params.addCoupledVar(
-        "phi_32", "The zy component of the phi tensor.");
+    params.addRequiredCoupledVar(
+        "phi_32", "The 32 component of the phi tensor.");
 
-    params.addCoupledVar(
-        "phi_31", "The zx component of the phi tensor.");
+    params.addRequiredCoupledVar(
+        "phi_31", "The 31 component of the phi tensor.");
 
-    params.addCoupledVar(
-        "phi_21", "The yx component of the phi tensor.");
+    params.addRequiredCoupledVar(
+        "phi_21", "The 21 component of the phi tensor.");
 
     return params;
 }
@@ -85,12 +85,12 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
     _n_ADD_TERMS(getParam<int>("number_ADD_TERMS")),
     _n_ADD_JACOBIANS(getParam<int>("number_ADD_JACOBIANS")),
     _model_name(getParam<std::string>("model_name")),
-    _grad_u1(isCoupled("u1") ? coupledGradient("u1")
-                             : _grad_zero),
-    _grad_u2(isCoupled("u2") ? coupledGradient("u2")
-                             : _grad_zero),
-    _grad_u3(isCoupled("u3") ? coupledGradient("u2")
-                             : _grad_zero),
+    _u1(coupledValue("u1")),
+    _u2(coupledValue("u2")),
+    _u3(coupledValue("u3")),
+    _grad_u1(coupledGradient("u1")),
+    _grad_u2(coupledGradient("u2")),
+    _grad_u3(coupledGradient("u3")),
     _phi_11(coupledValue("phi_11")),
     _phi_22(coupledValue("phi_22")),
     _phi_33(coupledValue("phi_33")),
@@ -130,7 +130,8 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
     _DmDgrad_u(declareProperty<std::vector<std::vector<double>>>("DmDgrad_u")),
     _DmDphi(declareProperty<std::vector<std::vector<double>>>("DmDphi")),
     _DmDgrad_phi(declareProperty<std::vector<std::vector<double>>>("DmDgrad_phi")),
-    _ADD_TERMS(declareProperty<std::vector<std::vector<double>>>("ADD_TERMS")){
+    _ADD_TERMS(declareProperty<std::vector<std::vector<double>>>("ADD_TERMS")),
+    _ADD_JACOBIANS(declareProperty<std::vector<std::vector<std::vector<double>>>>("ADD_JACOBIANS")){
     /*!
     ==============================
     |    MicromorphicMaterial    |
@@ -160,20 +161,21 @@ void MicromorphicMaterial::computeQpProperties(){
     double __grad_phi[9][3];
     
     //Copy over the gradient of u
-    bool print_grad_u = false;
-    for (int i=0; i<3; i++){__grad_u[0][i] = _grad_u1[_qp](i); if(1e-6<fabs(__grad_u[0][i])){print_grad_u=true;}}
-    for (int i=0; i<3; i++){__grad_u[1][i] = _grad_u2[_qp](i); if(1e-6<fabs(__grad_u[1][i])){print_grad_u=true;}}
-    for (int i=0; i<3; i++){__grad_u[2][i] = _grad_u3[_qp](i); if(1e-6<fabs(__grad_u[2][i])){print_grad_u=true;}}
+    for (int i=0; i<3; i++){__grad_u[0][i] = _grad_u1[_qp](i);}
+    for (int i=0; i<3; i++){__grad_u[1][i] = _grad_u2[_qp](i);}
+    for (int i=0; i<3; i++){__grad_u[2][i] = _grad_u3[_qp](i);}
 
-    if(print_grad_u){
-    std::cout << "__grad_u:\n";
-    for (int i=0; i<3; i++){
-        for (int j=0; j<3; j++){
-            std::cout << __grad_u[i][j] << " ";
-        }
-        std::cout << "\n";
-    }
-    }
+    std::cout << "u: " << _u1[_qp] << " " << _u2[_qp] << " " << _u3[_qp] << "\n";
+
+//    if(print_grad_u){
+//    std::cout << "__grad_u:\n";
+//    for (int i=0; i<3; i++){
+//        for (int j=0; j<3; j++){
+//            std::cout << __grad_u[i][j] << " ";
+//        }
+//        std::cout << "\n";
+//    }
+//    }
     
     //Copy over phi
     __phi[0] = _phi_11[_qp];
@@ -224,13 +226,11 @@ void MicromorphicMaterial::computeQpProperties(){
 
     std::vector<std::vector<double>> ADD_grad_DOF;
     ADD_grad_DOF.resize(_n_ADD_DOF);
-
-    std::vector<std::vector<std::vector<double>>> ADD_JACOBIANS;
-    ADD_JACOBIANS.resize(_n_ADD_JACOBIANS);
     //END of hardcoded values
 
     //Set the sizes of the additional term vectors
     _ADD_TERMS[_qp].resize(_n_ADD_TERMS);
+    _ADD_JACOBIANS[_qp].resize(_n_ADD_JACOBIANS);
 
     //Evaluate the model
     material->evaluate_model(time, _fparams, __grad_u, __phi, __grad_phi,
@@ -239,7 +239,7 @@ void MicromorphicMaterial::computeQpProperties(){
                              _DcauchyDgrad_u[_qp], _DcauchyDphi[_qp], _DcauchyDgrad_phi[_qp],
                              _DsDgrad_u[_qp],      _DsDphi[_qp],      _DsDgrad_phi[_qp],
                              _DmDgrad_u[_qp],      _DmDphi[_qp],      _DmDgrad_phi[_qp],
-                             _ADD_TERMS[_qp],      ADD_JACOBIANS);
+                             _ADD_TERMS[_qp],      _ADD_JACOBIANS[_qp]);
 
     
 }

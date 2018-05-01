@@ -87,7 +87,7 @@ Real InternalCouple::computeQpResidual(){
     balance_equations::compute_internal_couple(_component_i, _component_j, _test[_i][_qp], dNdx, 
                                                _cauchy[_qp], _s[_qp],      _m[_qp],
                                                cint);
-//    std::cout << "cint: " << cint << "\n";
+    //std::cout << "cint: " << cint << "\n";
     return cint;
 }
 
@@ -101,7 +101,7 @@ Real InternalCouple::computeQpJacobian(){
 
     */
     Real dcdUint;
-
+    //mooseError("fail");
     //Copy the test and interpolation functions so that the balance equation function can read it
     double dNdx[3];
     double detadx[3];

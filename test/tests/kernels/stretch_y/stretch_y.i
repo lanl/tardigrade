@@ -1,15 +1,20 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 2
-  ny = 2
-  nz = 2
+  nx = 1
+  ny = 1
+  nz = 1
 []
+
+#[Mesh]
+#  file = unit_cube.e
+#[]
 
 [Variables]
   [./u_x]
   [../]
   [./u_y]
+    initial_condition = 0.0
   [../]
   [./u_z]
   [../]
@@ -120,25 +125,25 @@
 []
 
 [BCs]
-  [./left]
+  [./left_x]
     type = DirichletBC
     variable = u_x
     boundary = left
     value = 0
   [../]
-  [./back]
-    type = DirichletBC
-    variable = u_y
-    boundary = bottom
-    value = 0
-  [../]
-  [./bottom]
+  [./back_z]
     type = DirichletBC
     variable = u_z
     boundary = back
     value = 0
   [../]
-  [./top]
+  [./bottom_y]
+    type = DirichletBC
+    variable = u_y
+    boundary = bottom
+    value = 0
+  [../]
+  [./top_y]
     type = DirichletBC
     variable = u_y
     boundary = top
@@ -171,6 +176,7 @@
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'
+  l_max_its  = 10
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre    boomeramg'
 []

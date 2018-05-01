@@ -54,51 +54,55 @@ class MicromorphicMaterial : public Material{
 
         //Coupled variables (i.e. u_i,j, phi_ij, and phi_ij,k)
         //grad u
+        const VariableValue    & _u1;
+        const VariableValue    & _u2;
+        const VariableValue    & _u3;
         const VariableGradient & _grad_u1;
         const VariableGradient & _grad_u2;
         const VariableGradient & _grad_u3;
 
         //phi
-        const VariableValue &_phi_11;
-        const VariableValue &_phi_22;
-        const VariableValue &_phi_33;
-        const VariableValue &_phi_23;
-        const VariableValue &_phi_13;
-        const VariableValue &_phi_12;
-        const VariableValue &_phi_32;
-        const VariableValue &_phi_31;
-        const VariableValue &_phi_21;
+        const VariableValue    & _phi_11;
+        const VariableValue    & _phi_22;
+        const VariableValue    & _phi_33;
+        const VariableValue    & _phi_23;
+        const VariableValue    & _phi_13;
+        const VariableValue    & _phi_12;
+        const VariableValue    & _phi_32;
+        const VariableValue    & _phi_31;
+        const VariableValue    & _phi_21;
 
         //grad phi
-        const VariableGradient &_grad_phi_11;
-        const VariableGradient &_grad_phi_22;
-        const VariableGradient &_grad_phi_33;
-        const VariableGradient &_grad_phi_23;
-        const VariableGradient &_grad_phi_13;
-        const VariableGradient &_grad_phi_12;
-        const VariableGradient &_grad_phi_32;
-        const VariableGradient &_grad_phi_31;
-        const VariableGradient &_grad_phi_21;
+        const VariableGradient & _grad_phi_11;
+        const VariableGradient & _grad_phi_22;
+        const VariableGradient & _grad_phi_33;
+        const VariableGradient & _grad_phi_23;
+        const VariableGradient & _grad_phi_13;
+        const VariableGradient & _grad_phi_12;
+        const VariableGradient & _grad_phi_32;
+        const VariableGradient & _grad_phi_31;
+        const VariableGradient & _grad_phi_21;
 
         //Stresses (Material Properties in MOOSE parlance)
-        MaterialProperty<std::vector<double>>               &_cauchy;
-        MaterialProperty<std::vector<double>>               &_s;
-        MaterialProperty<std::vector<double>>               &_m;
+        MaterialProperty<std::vector<double>>               & _cauchy;
+        MaterialProperty<std::vector<double>>               & _s;
+        MaterialProperty<std::vector<double>>               & _m;
 
-        MaterialProperty<std::vector<std::vector<double>>>  &_DcauchyDgrad_u;
-        MaterialProperty<std::vector<std::vector<double>>>  &_DcauchyDphi;
-        MaterialProperty<std::vector<std::vector<double>>>  &_DcauchyDgrad_phi;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DcauchyDgrad_u;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DcauchyDphi;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DcauchyDgrad_phi;
 
-        MaterialProperty<std::vector<std::vector<double>>>  &_DsDgrad_u;
-        MaterialProperty<std::vector<std::vector<double>>>  &_DsDphi;
-        MaterialProperty<std::vector<std::vector<double>>>  &_DsDgrad_phi;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DsDgrad_u;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DsDphi;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DsDgrad_phi;
 
-        MaterialProperty<std::vector<std::vector<double>>>  &_DmDgrad_u;
-        MaterialProperty<std::vector<std::vector<double>>>  &_DmDphi;
-        MaterialProperty<std::vector<std::vector<double>>>  &_DmDgrad_phi;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DmDgrad_u;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DmDphi;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DmDgrad_phi;
 
         //TODO: Add additional values
-        MaterialProperty<std::vector<std::vector<double>>>  &_ADD_TERMS;
+        MaterialProperty<std::vector<std::vector<double>>>  & _ADD_TERMS;
+        MaterialProperty<std::vector<std::vector<std::vector<double>>>>  & _ADD_JACOBIANS;
 
 };
 
