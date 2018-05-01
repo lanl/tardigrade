@@ -4,48 +4,57 @@
   nx = 1
   ny = 1
   nz = 1
-[]
-
-#[Mesh]
 #  file = unit_cube.e
-#[]
+[]
 
 [Variables]
   [./u_x]
-    initial_condition = 1.22
+#    initial_condition = 1.22
+#    scaling = 1e6
   [../]
   [./u_y]
-    initial_condition = 2.1
+#    initial_condition = 2.1
+#    scaling = 1e6
   [../]
   [./u_z]
-    initial_condition = 4.1
+#    initial_condition = 4.1
+#    scaling = 1e6
   [../]
   [./phi_xx]
-    initial_condition = -2.3
+#    initial_condition = -2.3
+#    scaling = 1e6
   [../]
   [./phi_yy]
-    initial_condition = 0.124
+#    initial_condition = 0.124
+#    scaling = 1e6
   [../]
   [./phi_zz]
-    initial_condition = 7.2
+#    initial_condition = 7.2
+#    scaling = 1e6
   [../]
   [./phi_yz]
-    initial_condition = -8.2
+#    initial_condition = -8.2
+#    scaling = 1e6
   [../]
   [./phi_xz]
-    initial_condition = 0.28
+#    initial_condition = 0.28
+#    scaling = 1e6
   [../]
   [./phi_xy]
-    initial_condition = 7.21
+#    initial_condition = 7.21
+#    scaling = 1e6
   [../]
   [./phi_zy]
-    initial_condition = 2.1
+#    initial_condition = 2.1
+#    scaling = 1e6
   [../]
   [./phi_zx]
-    initial_condition = -9.2
+#    initial_condition = -9.2
+#    scaling = 1e6
   [../]
   [./phi_yx]
-    initial_condition = 3.1
+#    initial_condition = 3.1
+#    scaling = 1e6
   [../]
 []
 
@@ -58,7 +67,6 @@
     variable  = u_x
 
     #Coupled variables
-    u1     = u_x
     u2     = u_y
     u3     = u_z
     phi_11 = phi_xx
@@ -66,7 +74,7 @@
     phi_33 = phi_zz
     phi_23 = phi_yz
     phi_13 = phi_xz
-    phi_12 = phi_zy
+    phi_12 = phi_xy
     phi_32 = phi_zy
     phi_31 = phi_zx
     phi_21 = phi_yx
@@ -79,14 +87,13 @@
 
     #Coupled variables
     u1     = u_x
-    u2     = u_y
     u3     = u_z
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
     phi_23 = phi_yz
     phi_13 = phi_xz
-    phi_12 = phi_zy
+    phi_12 = phi_xy
     phi_32 = phi_zy
     phi_31 = phi_zx
     phi_21 = phi_yx
@@ -100,13 +107,12 @@
     #Coupled variables
     u1     = u_x
     u2     = u_y
-    u3     = u_z
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
     phi_23 = phi_yz
     phi_13 = phi_xz
-    phi_12 = phi_zy
+    phi_12 = phi_xy
     phi_32 = phi_zy
     phi_31 = phi_zx
     phi_21 = phi_yx
@@ -123,12 +129,11 @@
     u1     = u_x
     u2     = u_y
     u3     = u_z
-    phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
     phi_23 = phi_yz
     phi_13 = phi_xz
-    phi_12 = phi_zy
+    phi_12 = phi_xy
     phi_32 = phi_zy
     phi_31 = phi_zx
     phi_21 = phi_yx
@@ -145,11 +150,10 @@
     u2     = u_y
     u3     = u_z
     phi_11 = phi_xx
-    phi_22 = phi_yy
     phi_33 = phi_zz
     phi_23 = phi_yz
     phi_13 = phi_xz
-    phi_12 = phi_zy
+    phi_12 = phi_xy
     phi_32 = phi_zy
     phi_31 = phi_zx
     phi_21 = phi_yx
@@ -167,10 +171,9 @@
     u3     = u_z
     phi_11 = phi_xx
     phi_22 = phi_yy
-    phi_33 = phi_zz
     phi_23 = phi_yz
     phi_13 = phi_xz
-    phi_12 = phi_zy
+    phi_12 = phi_xy
     phi_32 = phi_zy
     phi_31 = phi_zx
     phi_21 = phi_yx
@@ -189,9 +192,8 @@
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
-    phi_23 = phi_yz
     phi_13 = phi_xz
-    phi_12 = phi_zy
+    phi_12 = phi_xy
     phi_32 = phi_zy
     phi_31 = phi_zx
     phi_21 = phi_yx
@@ -211,8 +213,7 @@
     phi_22 = phi_yy
     phi_33 = phi_zz
     phi_23 = phi_yz
-    phi_13 = phi_xz
-    phi_12 = phi_zy
+    phi_12 = phi_xy
     phi_32 = phi_zy
     phi_31 = phi_zx
     phi_21 = phi_yx
@@ -233,7 +234,6 @@
     phi_33 = phi_zz
     phi_23 = phi_yz
     phi_13 = phi_xz
-    phi_12 = phi_zy
     phi_32 = phi_zy
     phi_31 = phi_zx
     phi_21 = phi_yx
@@ -254,8 +254,7 @@
     phi_33 = phi_zz
     phi_23 = phi_yz
     phi_13 = phi_xz
-    phi_12 = phi_zy
-    phi_32 = phi_zy
+    phi_12 = phi_xy
     phi_31 = phi_zx
     phi_21 = phi_yx
   [../]
@@ -275,9 +274,8 @@
     phi_33 = phi_zz
     phi_23 = phi_yz
     phi_13 = phi_xz
-    phi_12 = phi_zy
+    phi_12 = phi_xy
     phi_32 = phi_zy
-    phi_31 = phi_zx
     phi_21 = phi_yx
   [../]
   [./couple_21]
@@ -296,10 +294,9 @@
     phi_33 = phi_zz
     phi_23 = phi_yz
     phi_13 = phi_xz
-    phi_12 = phi_zy
+    phi_12 = phi_xy
     phi_32 = phi_zy
     phi_31 = phi_zx
-    phi_21 = phi_yx
   [../]
 []
 
@@ -307,26 +304,26 @@
   [./left_x]
     type = DirichletBC
     variable = u_x
-    boundary = left
+    boundary = 'left'
     value = 0
   [../]
   [./back_z]
     type = DirichletBC
     variable = u_z
-    boundary = back
+    boundary = 'back'
     value = 0
   [../]
   [./bottom_y]
     type = DirichletBC
     variable = u_y
-    boundary = bottom
+    boundary = 'bottom'
     value = 0
   [../]
   [./top_y]
     type = DirichletBC
     variable = u_y
-    boundary = top
-    value = 0.1
+    boundary = 'top'
+    value = 1.0
   [../]
 []
 
@@ -337,34 +334,34 @@
     model_name = "LinearElasticity"
 
     #Coupled variables
-    u1     = u_x
-    u2     = u_y
-    u3     = u_z
-    phi_11 = phi_xx
-    phi_22 = phi_yy
-    phi_33 = phi_zz
-    phi_23 = phi_yz
-    phi_13 = phi_xz
-    phi_12 = phi_xy
-    phi_32 = phi_zy
-    phi_31 = phi_zx
-    phi_21 = phi_yx
+    u1     = 'u_x'
+    u2     = 'u_y'
+    u3     = 'u_z'
+    phi_11 = 'phi_xx'
+    phi_22 = 'phi_yy'
+    phi_33 = 'phi_zz'
+    phi_23 = 'phi_yz'
+    phi_13 = 'phi_xz'
+    phi_12 = 'phi_xy'
+    phi_32 = 'phi_zy'
+    phi_31 = 'phi_zx'
+    phi_21 = 'phi_yx'
   [../]
 []
 
-#[Preconditioning]
-#  [./SMP]
-#    type = SMP
-#    full = true
-#  [../]
-#[]
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
+  [../]
+[]
 
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'
   l_max_its  = 5
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre    boomeramg'
+#  petsc_options_iname = '-pc_type -pc_hypre_type'
+#  petsc_options_value = 'hypre    boomeramg'
 []
 
 [Outputs]
