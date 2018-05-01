@@ -58,9 +58,27 @@ class InternalForce : public Kernel{
         //      We just need to have each DOF associated with some residual term.
         virtual Real computeQpJacobian() override;
 
+        //The off diagonal members of the residual at a quadrature point.
+        virtual Real computeQpOffDiagJacobian(unsigned int jvar) override; 
+
         //Parameters
         const int _component;
         const int _dof_num;
+
+        //Coupled degrees of freedom
+        unsigned int _u1_int;
+        unsigned int _u2_int;
+        unsigned int _u3_int;
+
+        unsigned int _phi_11_int;
+        unsigned int _phi_22_int;
+        unsigned int _phi_33_int;
+        unsigned int _phi_23_int;
+        unsigned int _phi_13_int;
+        unsigned int _phi_12_int;
+        unsigned int _phi_32_int;
+        unsigned int _phi_31_int;
+        unsigned int _phi_21_int;
 
         const MaterialProperty<std::vector<double>>              &_cauchy;           //The cauchy stress
         const MaterialProperty<std::vector<std::vector<double>>> &_DcauchyDgrad_u;   //The gradient of the cauchy stress w.r.t. u

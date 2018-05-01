@@ -165,8 +165,10 @@ void MicromorphicMaterial::computeQpProperties(){
     for (int i=0; i<3; i++){__grad_u[1][i] = _grad_u2[_qp](i);}
     for (int i=0; i<3; i++){__grad_u[2][i] = _grad_u3[_qp](i);}
 
-    std::cout << "u: " << _u1[_qp] << " " << _u2[_qp] << " " << _u3[_qp] << "\n";
-
+//    std::cout << "u:   " << _u1[_qp] << " " << _u2[_qp] << " " << _u3[_qp] << "\n";
+//    std::cout << "phi: " << _phi_11[_qp] << " " << _phi_12[_qp] << " " << _phi_13[_qp] << "\n";
+//    std::cout << "     " << _phi_21[_qp] << " " << _phi_22[_qp] << " " << _phi_23[_qp] << "\n";
+//    std::cout << "     " << _phi_31[_qp] << " " << _phi_32[_qp] << " " << _phi_33[_qp] << "\n";
 //    if(print_grad_u){
 //    std::cout << "__grad_u:\n";
 //    for (int i=0; i<3; i++){
@@ -188,9 +190,9 @@ void MicromorphicMaterial::computeQpProperties(){
     __phi[7] = _phi_31[_qp];
     __phi[8] = _phi_21[_qp];
 
-    //std::cout << "__phi: ";
-    //for (int i=0; i<9; i++){std::cout << __phi[i] << " ";}
-    //std::cout << "\n";
+//    std::cout << "__phi: ";
+//    for (int i=0; i<9; i++){std::cout << __phi[i] << " ";}
+//    std::cout << "\n";
 
     //Copy over grad_phi
     for (int i=0; i<3; i++){__grad_phi[0][i] = _grad_phi_11[_qp](i);}
@@ -203,13 +205,13 @@ void MicromorphicMaterial::computeQpProperties(){
     for (int i=0; i<3; i++){__grad_phi[7][i] = _grad_phi_31[_qp](i);}
     for (int i=0; i<3; i++){__grad_phi[8][i] = _grad_phi_21[_qp](i);}
  
-    //std::cout << "__grad_phi:\n";
-    //for (int i=0; i<9; i++){
-    //    for (int j=0; j<3; j++){
-    //        std::cout << __grad_phi[i][j] << " ";
-    //    }
-    //    std::cout << "\n";
-    //}
+//    std::cout << "__grad_phi:\n";
+//    for (int i=0; i<9; i++){
+//        for (int j=0; j<3; j++){
+//            std::cout << __grad_phi[i][j] << " ";
+//        }
+//        std::cout << "\n";
+//    }
 
     //Evaluate the stresses and their jacobians
     auto &factory = micromorphic_material_library::MaterialFactory::Instance();
@@ -241,6 +243,10 @@ void MicromorphicMaterial::computeQpProperties(){
                              _DmDgrad_u[_qp],      _DmDphi[_qp],      _DmDgrad_phi[_qp],
                              _ADD_TERMS[_qp],      _ADD_JACOBIANS[_qp]);
 
-    
+//    std::cout << "cauchy: ";
+//    for (int i=0; i<9; i++){std::cout << _cauchy[_qp][i] << " ";}
+//    std::cout << "\n";
+//
+//    mooseError("failing");
 }
 

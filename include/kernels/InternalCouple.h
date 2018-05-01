@@ -54,15 +54,32 @@ class InternalCouple : public Kernel{
         //      as many of these as dimensions in our problem.
         virtual Real computeQpResidual() override;
         
-        //The diagonal members of the residual at a quadrature point.
+        //The diagonal members of the jacobian at a quadrature point.
         //Note: The parameter chosen as the "diagonal" member is totally arbitrary
         //      We just need to have each DOF associated with some residual term.
         virtual Real computeQpJacobian() override;
+
+        //The off-diagonal members of the jacobian at the quadrature point.
+        virtual Real computeQpOffDiagJacobian(unsigned int jvar) override; 
 
         //Parameters
         const int _component_i;
         const int _component_j;
         const int _dof_num;
+
+        unsigned int _u1_int;
+        unsigned int _u2_int;
+        unsigned int _u3_int;
+
+        unsigned int _phi_11_int;
+        unsigned int _phi_22_int;
+        unsigned int _phi_33_int;
+        unsigned int _phi_23_int;
+        unsigned int _phi_13_int;
+        unsigned int _phi_12_int;
+        unsigned int _phi_32_int;
+        unsigned int _phi_31_int;
+        unsigned int _phi_21_int;
 
         const MaterialProperty<std::vector<double>>              &_cauchy;           //The cauchy stress
         const MaterialProperty<std::vector<double>>              &_s;                //The symmetric stress
