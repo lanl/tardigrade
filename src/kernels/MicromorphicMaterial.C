@@ -100,24 +100,15 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
     _phi_32(coupledValue("phi_32")),
     _phi_31(coupledValue("phi_31")),
     _phi_21(coupledValue("phi_21")),
-    _grad_phi_11(isCoupled("phi_11") ? coupledGradient("phi_11")
-                                     : _grad_zero),
-    _grad_phi_22(isCoupled("phi_22") ? coupledGradient("phi_22")
-                                     : _grad_zero),
-    _grad_phi_33(isCoupled("phi_33") ? coupledGradient("phi_33")
-                                     : _grad_zero),
-    _grad_phi_23(isCoupled("phi_23") ? coupledGradient("phi_23")
-                                     : _grad_zero),
-    _grad_phi_13(isCoupled("phi_13") ? coupledGradient("phi_13")
-                                     : _grad_zero),
-    _grad_phi_12(isCoupled("phi_12") ? coupledGradient("phi_12")
-                                     : _grad_zero),
-    _grad_phi_32(isCoupled("phi_32") ? coupledGradient("phi_32")
-                                     : _grad_zero),
-    _grad_phi_31(isCoupled("phi_31") ? coupledGradient("phi_31")
-                                     : _grad_zero),
-    _grad_phi_21(isCoupled("phi_21") ? coupledGradient("phi_21")
-                                     : _grad_zero),
+    _grad_phi_11(coupledGradient("phi_11")),
+    _grad_phi_22(coupledGradient("phi_22")),
+    _grad_phi_33(coupledGradient("phi_33")),
+    _grad_phi_23(coupledGradient("phi_23")),
+    _grad_phi_13(coupledGradient("phi_13")),
+    _grad_phi_12(coupledGradient("phi_12")),
+    _grad_phi_32(coupledGradient("phi_32")),
+    _grad_phi_31(coupledGradient("phi_31")),
+    _grad_phi_21(coupledGradient("phi_21")),
     _cauchy(declareProperty<std::vector<double>>("cauchy")),
     _s(declareProperty<std::vector<double>>("s")),
     _m(declareProperty<std::vector<double>>("m")),
@@ -164,20 +155,6 @@ void MicromorphicMaterial::computeQpProperties(){
     for (int i=0; i<3; i++){__grad_u[0][i] = _grad_u1[_qp](i);}
     for (int i=0; i<3; i++){__grad_u[1][i] = _grad_u2[_qp](i);}
     for (int i=0; i<3; i++){__grad_u[2][i] = _grad_u3[_qp](i);}
-
-//    std::cout << "u:   " << _u1[_qp] << " " << _u2[_qp] << " " << _u3[_qp] << "\n";
-//    std::cout << "phi: " << _phi_11[_qp] << " " << _phi_12[_qp] << " " << _phi_13[_qp] << "\n";
-//    std::cout << "     " << _phi_21[_qp] << " " << _phi_22[_qp] << " " << _phi_23[_qp] << "\n";
-//    std::cout << "     " << _phi_31[_qp] << " " << _phi_32[_qp] << " " << _phi_33[_qp] << "\n";
-//    if(print_grad_u){
-//    std::cout << "__grad_u:\n";
-//    for (int i=0; i<3; i++){
-//        for (int j=0; j<3; j++){
-//            std::cout << __grad_u[i][j] << " ";
-//        }
-//        std::cout << "\n";
-//    }
-//    }
     
     //Copy over phi
     __phi[0] = _phi_11[_qp];
@@ -190,10 +167,6 @@ void MicromorphicMaterial::computeQpProperties(){
     __phi[7] = _phi_31[_qp];
     __phi[8] = _phi_21[_qp];
 
-//    std::cout << "__phi: ";
-//    for (int i=0; i<9; i++){std::cout << __phi[i] << " ";}
-//    std::cout << "\n";
-
     //Copy over grad_phi
     for (int i=0; i<3; i++){__grad_phi[0][i] = _grad_phi_11[_qp](i);}
     for (int i=0; i<3; i++){__grad_phi[1][i] = _grad_phi_22[_qp](i);}
@@ -204,14 +177,6 @@ void MicromorphicMaterial::computeQpProperties(){
     for (int i=0; i<3; i++){__grad_phi[6][i] = _grad_phi_32[_qp](i);}
     for (int i=0; i<3; i++){__grad_phi[7][i] = _grad_phi_31[_qp](i);}
     for (int i=0; i<3; i++){__grad_phi[8][i] = _grad_phi_21[_qp](i);}
- 
-//    std::cout << "__grad_phi:\n";
-//    for (int i=0; i<9; i++){
-//        for (int j=0; j<3; j++){
-//            std::cout << __grad_phi[i][j] << " ";
-//        }
-//        std::cout << "\n";
-//    }
 
     //Evaluate the stresses and their jacobians
     auto &factory = micromorphic_material_library::MaterialFactory::Instance();
@@ -243,10 +208,5 @@ void MicromorphicMaterial::computeQpProperties(){
                              _DmDgrad_u[_qp],      _DmDphi[_qp],      _DmDgrad_phi[_qp],
                              _ADD_TERMS[_qp],      _ADD_JACOBIANS[_qp]);
 
-//    std::cout << "cauchy: ";
-//    for (int i=0; i<9; i++){std::cout << _cauchy[_qp][i] << " ";}
-//    std::cout << "\n";
-//
-//    mooseError("failing");
 }
 

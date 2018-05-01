@@ -9,51 +9,99 @@
 
 [Variables]
   [./u_x]
-#    initial_condition = 1.22
+    [./InitialCondition]
+      type = RandomIC
+      min  = -1
+      max  =  1
+    [../]
 #    scaling = 1e6
   [../]
   [./u_y]
-#    initial_condition = 2.1
+    [./InitialCondition]
+      type = RandomIC
+      min  = -1
+      max  =  1
+    [../]
 #    scaling = 1e6
   [../]
   [./u_z]
-#    initial_condition = 4.1
+    [./InitialCondition]
+      type = RandomIC
+      min  = -1
+      max  =  1
+    [../]
 #    scaling = 1e6
   [../]
   [./phi_xx]
-#    initial_condition = -2.3
+    [./InitialCondition]
+      type = RandomIC
+      min  = -1
+      max  =  1
+    [../]
 #    scaling = 1e6
   [../]
   [./phi_yy]
-#    initial_condition = 0.124
+    [./InitialCondition]
+      type = RandomIC
+      min  = -1
+      max  =  1
+    [../]
 #    scaling = 1e6
   [../]
   [./phi_zz]
-#    initial_condition = 7.2
+    [./InitialCondition]
+      type = RandomIC
+      min  = -1
+      max  =  1
+    [../]
 #    scaling = 1e6
   [../]
   [./phi_yz]
-#    initial_condition = -8.2
+    [./InitialCondition]
+      type = RandomIC
+      min  = -1
+      max  =  1
+    [../]
 #    scaling = 1e6
   [../]
   [./phi_xz]
-#    initial_condition = 0.28
+    [./InitialCondition]
+      type = RandomIC
+      min  = -1
+      max  =  1
+    [../]
 #    scaling = 1e6
   [../]
   [./phi_xy]
-#    initial_condition = 7.21
+    [./InitialCondition]
+      type = RandomIC
+      min  = -1
+      max  =  1
+    [../]
 #    scaling = 1e6
   [../]
   [./phi_zy]
-#    initial_condition = 2.1
+    [./InitialCondition]
+      type = RandomIC
+      min  = -1
+      max  =  1
+    [../]
 #    scaling = 1e6
   [../]
   [./phi_zx]
-#    initial_condition = -9.2
+    [./InitialCondition]
+      type = RandomIC
+      min  = -1
+      max  =  1
+    [../]
 #    scaling = 1e6
   [../]
   [./phi_yx]
-#    initial_condition = 3.1
+    [./InitialCondition]
+      type = RandomIC
+      min  = -1
+      max  =  1
+    [../]
 #    scaling = 1e6
   [../]
 []
@@ -67,6 +115,7 @@
     variable  = u_x
 
     #Coupled variables
+    u1     = u_x
     u2     = u_y
     u3     = u_z
     phi_11 = phi_xx
@@ -87,6 +136,7 @@
 
     #Coupled variables
     u1     = u_x
+    u2     = u_y
     u3     = u_z
     phi_11 = phi_xx
     phi_22 = phi_yy
@@ -107,6 +157,7 @@
     #Coupled variables
     u1     = u_x
     u2     = u_y
+    u3     = u_z
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
@@ -129,6 +180,7 @@
     u1     = u_x
     u2     = u_y
     u3     = u_z
+    phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
     phi_23 = phi_yz
@@ -150,6 +202,7 @@
     u2     = u_y
     u3     = u_z
     phi_11 = phi_xx
+    phi_22 = phi_yy
     phi_33 = phi_zz
     phi_23 = phi_yz
     phi_13 = phi_xz
@@ -171,6 +224,7 @@
     u3     = u_z
     phi_11 = phi_xx
     phi_22 = phi_yy
+    phi_33 = phi_zz
     phi_23 = phi_yz
     phi_13 = phi_xz
     phi_12 = phi_xy
@@ -192,6 +246,7 @@
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
+    phi_23 = phi_yz
     phi_13 = phi_xz
     phi_12 = phi_xy
     phi_32 = phi_zy
@@ -276,6 +331,7 @@
     phi_13 = phi_xz
     phi_12 = phi_xy
     phi_32 = phi_zy
+    phi_31 = phi_zx
     phi_21 = phi_yx
   [../]
   [./couple_21]
@@ -297,10 +353,12 @@
     phi_12 = phi_xy
     phi_32 = phi_zy
     phi_31 = phi_zx
+    phi_21 = phi_yx
   [../]
 []
 
 [BCs]
+  active = 'left_x back_z bottom_y top_y'
   [./left_x]
     type = DirichletBC
     variable = u_x
@@ -358,10 +416,10 @@
 
 [Executioner]
   type = Steady
-  solve_type = 'PJFNK'
-  l_max_its  = 5
-#  petsc_options_iname = '-pc_type -pc_hypre_type'
-#  petsc_options_value = 'hypre    boomeramg'
+  solve_type = 'JFNK'
+  l_max_its  = 100
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre    boomeramg'
 []
 
 [Outputs]

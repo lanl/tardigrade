@@ -26,18 +26,18 @@ validParams<InternalForce>(){
     InputParameters params = validParams<Kernel>();
     params.addRequiredParam<int>("component", "The component of the internal force vector");
     params.addRequiredParam<int>("dof_num",   "The degree of freedom to use for the diagonal jacobian calculation");
-    params.addCoupledVar("u1", "The degree of freedom in the x direction");
-    params.addCoupledVar("u2", "The degree of freedom in the y direction");
-    params.addCoupledVar("u3", "The degree of freedom in the z direction");
-    params.addCoupledVar("phi_11", "The xx component of the phi tensor");
-    params.addCoupledVar("phi_22", "The yy component of the phi tensor");
-    params.addCoupledVar("phi_33", "The zz component of the phi tensor");
-    params.addCoupledVar("phi_23", "The yz component of the phi tensor");
-    params.addCoupledVar("phi_13", "The yz component of the phi tensor");
-    params.addCoupledVar("phi_12", "The yz component of the phi tensor");
-    params.addCoupledVar("phi_32", "The yz component of the phi tensor");
-    params.addCoupledVar("phi_31", "The yz component of the phi tensor");
-    params.addCoupledVar("phi_21", "The yz component of the phi tensor");
+    params.addCoupledVar("u1", "The degree of freedom in the 1 direction");
+    params.addCoupledVar("u2", "The degree of freedom in the 2 direction");
+    params.addCoupledVar("u3", "The degree of freedom in the 3 direction");
+    params.addCoupledVar("phi_11", "The 11 component of the phi tensor");
+    params.addCoupledVar("phi_22", "The 22 component of the phi tensor");
+    params.addCoupledVar("phi_33", "The 33 component of the phi tensor");
+    params.addCoupledVar("phi_23", "The 23 component of the phi tensor");
+    params.addCoupledVar("phi_13", "The 13 component of the phi tensor");
+    params.addCoupledVar("phi_12", "The 12 component of the phi tensor");
+    params.addCoupledVar("phi_32", "The 32 component of the phi tensor");
+    params.addCoupledVar("phi_31", "The 31 component of the phi tensor");
+    params.addCoupledVar("phi_21", "The 21 component of the phi tensor");
     return params;
 }
 
@@ -110,7 +110,7 @@ Real InternalForce::computeQpResidual(){
     for (int indx=0; indx<3; indx++){dNdx[indx] = _grad_test[_i][_qp](indx);}//p+i);}
 
     balance_equations::compute_internal_force(_component, dNdx, _cauchy[_qp], fint);
-//    std::cout << "fint: " << fint << "\n";
+    //std::cout << "fint: " << fint << "\n";
     return fint;
 }
 
@@ -130,81 +130,12 @@ Real InternalForce::computeQpJacobian(){
     double detadx[3];
     for (int indx=0; indx<3; indx++){
         dNdx[indx]   = _grad_test[_i][_qp](indx);
-        detadx[indx] = _grad_phi[_i][_qp](indx);
+        detadx[indx] = _grad_phi[_j][_qp](indx);
     }
 
     balance_equations::compute_internal_force_jacobian(_component,           _dof_num, 
                                                        _test[_i][_qp],       dNdx, _phi[_j][_qp],          detadx,
                                                        _DcauchyDgrad_u[_qp], _DcauchyDphi[_qp],   _DcauchyDgrad_phi[_qp], dfdUint);
-
-//    std::cout << "N:    " << _test[_i][_qp] << "\n";
-//    std::cout << "dNdx: ";
-//    for (int indx=0; indx<3; indx++){ std::cout << dNdx[indx] << " ";}
-//    std::cout << "\n";
-//
-//    std::cout << "eta:    " << _phi[_i][_qp] << "\n";
-//    std::cout << "detadx: ";
-//    for (int indx=0; indx<3; indx++){ std::cout << detadx[indx] << " ";}
-//    std::cout << "\n";
-//
-//    std::cout << "_DcauchyDgrad_u:\n";
-//    for (int indx=0; indx<_DcauchyDgrad_u[_qp].size(); indx++){
-//        for (int jndx=0; jndx<_DcauchyDgrad_u[_qp][indx].size(); jndx++){
-//            std::cout << _DcauchyDgrad_u[_qp][indx][jndx] << " ";
-//        }
-//        std::cout << "\n";
-//    }
-//
-//    std::cout << "_DcauchyDphi:\n";
-//    for (int indx=0; indx<_DcauchyDphi[_qp].size(); indx++){
-//        for (int jndx=0; jndx<_DcauchyDphi[_qp][indx].size(); jndx++){
-//            std::cout << _DcauchyDphi[_qp][indx][jndx] << " ";
-//        }
-//        std::cout << "\n";
-//    }
-//
-//    std::cout << "_DcauchyDgrad_phi:\n";
-//    for (int indx=0; indx<_DcauchyDgrad_phi[_qp].size(); indx++){
-//        for (int jndx=0; jndx<_DcauchyDgrad_phi[_qp][indx].size(); jndx++){
-//            std::cout << _DcauchyDgrad_phi[_qp][indx][jndx] << " ";
-//        }
-//        std::cout << "\n";
-//    }
-//
-//
-//
-//    std::cout << "(i,dof): (" << _component << ", " <<  _dof_num << ")\n";
-//    std::cout << "N: " << _test[_i][_qp] << "\n";
-//    std::cout << "dNdx: " << dNdx[0] << ", " << dNdx[1] << ", " << dNdx[2] << "\n";
-//    std::cout << "eta: " << _phi[_j][_qp] << "\n";
-//    std::cout << "detadx: " << detadx[0] << ", " << detadx[1] << ", " << detadx[2] << "\n";
-//    std::cout << "cauchy: ";
-//    for (int i=0; i<9; i++){std::cout << _cauchy[_qp][i] << " ";}
-//    std::cout << "\n";
-//    std::cout << "\nDcauchyDgrad_u[_qp]:\n";
-//    for (int i=0; i<9; i++){
-//        for (int j=0; j<9; j++){
-//            std::cout << _DcauchyDgrad_u[_qp][i][j] << " ";
-//        }
-//        std::cout << "\n";
-//    }
-//    std::cout << "\nDcauchyDphi[_qp}:\n";
-//    for (int i=0; i<9; i++){
-//        for (int j=0; j<9; j++){
-//            std::cout << _DcauchyDphi[_qp][i][j] << " ";
-//        }
-//        std::cout << "\n";
-//    }
-//
-//    std::cout << "\nDcauchyDgrad_phi[_qp]:\n";
-//    for (int i=0; i<9; i++){
-//        for (int j=0; j<27; j++){
-//            std::cout << _DcauchyDgrad_phi[_qp][i][j] << " ";
-//        }
-//        std::cout << "\n";
-//    }
-//    std::cout << "dfdUint: " << dfdUint;
-//    mooseError("fail");
     return dfdUint;
 }
 
@@ -220,6 +151,8 @@ Real InternalForce::computeQpOffDiagJacobian(unsigned int jvar){
 
     Real dfdUint;
     int  _off_diag_dof_num = -1;
+
+//    std::cout << "jvar: " << jvar << "\n";
 
     if(jvar == _u1_int){
         _off_diag_dof_num = 0;
@@ -264,7 +197,7 @@ Real InternalForce::computeQpOffDiagJacobian(unsigned int jvar){
     double detadx[3];
     for (int indx=0; indx<3; indx++){
         dNdx[indx]   = _grad_test[_i][_qp](indx);
-        detadx[indx] = _grad_phi[_i][_qp](indx);
+        detadx[indx] = _grad_phi[_j][_qp](indx);
     }
     if(_off_diag_dof_num>=0){
         balance_equations::compute_internal_force_jacobian(_component,           _off_diag_dof_num, 

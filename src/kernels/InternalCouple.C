@@ -123,7 +123,6 @@ Real InternalCouple::computeQpResidual(){
     balance_equations::compute_internal_couple(_component_i, _component_j, _test[_i][_qp], dNdx, 
                                                _cauchy[_qp], _s[_qp],      _m[_qp],
                                                cint);
-    //std::cout << "cint: " << cint << "\n";
     return cint;
 }
 
@@ -143,7 +142,7 @@ Real InternalCouple::computeQpJacobian(){
     double detadx[3];
     for (int indx=0; indx<3; indx++){
         dNdx[indx]   = _grad_test[_i][_qp](indx);
-        detadx[indx] = _grad_phi[_i][_qp](indx);
+        detadx[indx] = _grad_phi[_j][_qp](indx);
     }
 
 
@@ -153,35 +152,6 @@ Real InternalCouple::computeQpJacobian(){
                                                         _DsDgrad_u[_qp],      _DsDphi[_qp],      _DsDgrad_phi[_qp],
                                                         _DmDgrad_u[_qp],      _DmDphi[_qp],      _DmDgrad_phi[_qp],
                                                         dcdUint);
-//    std::cout << "(i,j,dof): (" << _component_i << ", " << _component_j << ", " << _dof_num << ")\n";
-//    std::cout << "N: " << _test[_i][_qp] << "\n";
-//    std::cout << "dNdx: " << dNdx[0] << ", " << dNdx[1] << ", " << dNdx[2] << "\n";
-//    std::cout << "eta: " << _phi[_j][_qp] << "\n";
-//    std::cout << "detadx: " << detadx[0] << ", " << detadx[1] << ", " << detadx[2] << "\n";
-//    std::cout << "\nDcauchyDgrad_u[_qp]:\n";
-//    for (int i=0; i<9; i++){
-//        for (int j=0; j<9; j++){
-//            std::cout << _DcauchyDgrad_u[_qp][i][j] << " ";
-//        }
-//        std::cout << "\n";
-//    }
-//    std::cout << "\nDcauchyDphi[_qp}:\n";
-//    for (int i=0; i<9; i++){
-//        for (int j=0; j<9; j++){
-//            std::cout << _DcauchyDphi[_qp][i][j] << " ";
-//        }
-//        std::cout << "\n";
-//    }
-//
-//    std::cout << "\nDcauchyDgrad_phi[_qp]:\n";
-//    for (int i=0; i<9; i++){
-//        for (int j=0; j<27; j++){
-//            std::cout << _DcauchyDgrad_phi[_qp][i][j] << " ";
-//        }
-//        std::cout << "\n";
-//    }
-//    std::cout << "dcdUint: " << dcdUint;
-//    mooseError("fail");
     return dcdUint;
 }
 
@@ -239,7 +209,7 @@ Real InternalCouple::computeQpOffDiagJacobian(unsigned int jvar){
     double detadx[3];
     for (int indx=0; indx<3; indx++){
         dNdx[indx]   = _grad_test[_i][_qp](indx);
-        detadx[indx] = _grad_phi[_i][_qp](indx);
+        detadx[indx] = _grad_phi[_j][_qp](indx);
     }
 
     if(_off_diag_dof_num >= 0){
