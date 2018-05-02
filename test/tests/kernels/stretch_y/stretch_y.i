@@ -14,7 +14,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e6
+    scaling = 1e-3
   [../]
   [./u_y]
 #    [./InitialCondition]
@@ -22,7 +22,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e6
+    scaling = 1e-3
   [../]
   [./u_z]
 #    [./InitialCondition]
@@ -30,7 +30,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e6
+    scaling = 1e-3
   [../]
   [./phi_xx]
 #    [./InitialCondition]
@@ -38,7 +38,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e6
+    scaling = 1e-3
   [../]
   [./phi_yy]
 #    [./InitialCondition]
@@ -46,7 +46,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e6
+    scaling = 1e-3
   [../]
   [./phi_zz]
 #    [./InitialCondition]
@@ -54,7 +54,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e6
+    scaling = 1e-3
   [../]
   [./phi_yz]
 #    [./InitialCondition]
@@ -62,7 +62,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e6
+    scaling = 1e-3
   [../]
   [./phi_xz]
 #    [./InitialCondition]
@@ -70,7 +70,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e6
+    scaling = 1e-3
   [../]
   [./phi_xy]
 #    [./InitialCondition]
@@ -78,7 +78,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e6
+    scaling = 1e-3
   [../]
   [./phi_zy]
 #    [./InitialCondition]
@@ -86,7 +86,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e6
+    scaling = 1e-3
   [../]
   [./phi_zx]
 #    [./InitialCondition]
@@ -94,7 +94,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e6
+    scaling = 1e-3
   [../]
   [./phi_yx]
 #    [./InitialCondition]
@@ -102,7 +102,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e6
+    scaling = 1e-3
   [../]
 []
 
@@ -388,7 +388,7 @@
 [Materials]
   [./linear_elastic]
     type = MicromorphicMaterial
-    material_fparameters = '8e9 11e9 2e9 1.538e9 -1e9 -1.39e9 -2.11e9 0. 0. 0. 0. 0. 0. 0.769e6 0. 0. 0. 0.'
+    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0. 0. 0. 0. 0. 0. 0.769 0. 0. 0. 0.'
     model_name = "LinearElasticity"
 
     #Coupled variables
@@ -416,10 +416,12 @@
 
 [Executioner]
   type = Steady
-  solve_type = 'NEWTON'
+  solve_type = 'PJFNK'
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
-  nl_max_its = 10
+  nl_max_its = 100
+  #Terms for debugging
+#  petsc_options_value = '-snes_converged_reason -ksp_converged_reason'
 #  l_max_its  = 20
 #  petsc_options_iname = '-pc_type -pc_hypre_type'
 #  petsc_options_value = 'hypre    boomeramg'
