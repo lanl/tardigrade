@@ -396,6 +396,18 @@
     boundary = 'left right bottom top back front'
     function = u3_fxn
   [../]
+  [./all_phi_xx]
+    type = FunctionDirichletBC
+    variable = phi_xx
+    boundary = 'left right bottom top back front'
+    function = phi_11_fxn
+  [../]
+  [./all_phi_yy]
+    type = FunctionDirichletBC
+    variable = phi_yy
+    boundary = 'left right bottom top back front'
+    function = phi_22_fxn
+  [../]
 []
 
 [Materials]
@@ -455,6 +467,34 @@
   [./phi_22_fxn]
     type = ParsedFunction
     value = 1.31
+  [../]
+  [./phi_33_fxn]
+    type = ParsedFunction
+    value = -2.012
+  [../]
+  [./phi_23_fxn]
+    type = ParsedFunction
+    value = 0.177
+  [../]
+  [./phi_13_fxn]
+    type = ParsedFunction
+    value = -0.606
+  [../]
+  [./phi_12_fxn]
+    type = ParsedFunction
+    value = 3.72
+  [../]
+  [./phi_32_fxn]
+    type = ParsedFunction
+    value = .827
+  [../]
+  [./phi_31_fxn]
+    type = ParsedFunction
+    value = .718
+  [../]
+  [./phi_21_fxn]
+    type = ParsedFunction
+    value = -2.271
   [../]
 []
 
