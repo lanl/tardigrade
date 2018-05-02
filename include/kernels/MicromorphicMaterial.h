@@ -19,15 +19,16 @@
 
 //Forward declarations
 class MicromorphicMaterial;
+class Function;
 
 template <>
 InputParameters validParams<MicromorphicMaterial>();
 
 class MicromorphicMaterial : public Material{
     /*!
-    ======================================
+    ==============================
     |    MicromorphicMaterial    |
-    ======================================
+    ==============================
 
     Translation of the micromorphic_linear_elasticity library 
     available in the micromorphic_element repository for use 
@@ -51,6 +52,7 @@ class MicromorphicMaterial : public Material{
         int               _n_ADD_TERMS;
         int               _n_ADD_JACOBIANS;
         std::string       _model_name;
+        bool              _MMS;
 
         //Coupled variables (i.e. u_i,j, phi_ij, and phi_ij,k)
         //grad u
@@ -104,6 +106,25 @@ class MicromorphicMaterial : public Material{
         MaterialProperty<std::vector<std::vector<double>>>  & _ADD_TERMS;
         MaterialProperty<std::vector<std::vector<std::vector<double>>>>  & _ADD_JACOBIANS;
 
+        //MMS function values
+        Function & _u1_fxn;
+        Function & _u2_fxn;
+        Function & _u3_fxn;
+        Function & _phi_11_fxn;
+        Function & _phi_22_fxn;
+        Function & _phi_33_fxn;
+        Function & _phi_23_fxn;
+        Function & _phi_13_fxn;
+        Function & _phi_12_fxn;
+        Function & _phi_32_fxn;
+        Function & _phi_31_fxn;
+        Function & _phi_21_fxn;
+
+        //MMS stress measures
+        MaterialProperty<std::vector<double>> & _cauchy_MMS;
+        MaterialProperty<std::vector<double>> & _s_MMS;
+        MaterialProperty<std::vector<double>> & _m_MMS;
+        MaterialProperty<std::vector<std::vector<double>>> & _ADD_TERMS_MMS;
 };
 
 #endif

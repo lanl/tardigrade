@@ -66,6 +66,7 @@ class InternalCouple : public Kernel{
         const int _component_i;
         const int _component_j;
         const int _dof_num;
+        const bool _MMS;
 
         unsigned int _u1_int;
         unsigned int _u2_int;
@@ -93,6 +94,10 @@ class InternalCouple : public Kernel{
         const MaterialProperty<std::vector<std::vector<double>>> &_DmDgrad_u;        //The gradient of the higher order couple stress w.r.t. u
         const MaterialProperty<std::vector<std::vector<double>>> &_DmDphi;           //The gradient of the higher order couple stress w.r.t. the micro-deformation tensor
         const MaterialProperty<std::vector<std::vector<double>>> &_DmDgrad_phi;      //The gradient of the higher order couple stress w.r.t. the spatial gradient of the micro-deformation tensor
+
+        const MaterialProperty<std::vector<double>>              &_cauchy_MMS;       //The cauchy stress
+        const MaterialProperty<std::vector<double>>              &_s_MMS;            //The symmetric stress
+        const MaterialProperty<std::vector<double>>              &_m_MMS;            //The higher order couple stress
 };
 
 #endif

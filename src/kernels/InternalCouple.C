@@ -28,6 +28,7 @@ validParams<InternalCouple>(){
     params.addRequiredParam<int>("component_i", "The i component of the internal couple tensor");
     params.addRequiredParam<int>("component_j", "The j component of the internal couple tensor");
     params.addRequiredParam<int>("dof_num",   "The degree of freedom to use for the diagonal jacobian calculation");
+    params.addParam<bool>("MMS", false, "The flag indicating whether the method of manufactured solutions is being used");
     params.addCoupledVar("u1", "The degree of freedom in the x direction");
     params.addCoupledVar("u2", "The degree of freedom in the y direction");
     params.addCoupledVar("u3", "The degree of freedom in the z direction");
@@ -49,6 +50,7 @@ InternalCouple::InternalCouple(const InputParameters & parameters)
         _component_i(getParam<int>("component_i")),
         _component_j(getParam<int>("component_j")),
         _dof_num(getParam<int>("dof_num")),
+        _MMS(getParam<bool>("MMS")),
         _u1_int(isCoupled("u1") ? coupled("u1")
                                 : 100),
         _u2_int(isCoupled("u2") ? coupled("u2")
@@ -84,7 +86,10 @@ InternalCouple::InternalCouple(const InputParameters & parameters)
         _DsDgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DsDgrad_phi")),
         _DmDgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DmDgrad_u")),
         _DmDphi(getMaterialProperty<std::vector<std::vector<double>>>("DmDphi")),
-        _DmDgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DmDgrad_phi"))
+        _DmDgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DmDgrad_phi")),
+        _cauchy_MMS(getMaterialProperty<std::vector<double>>("cauchy_MMS")),
+        _s_MMS(getMaterialProperty<std::vector<double>>("s_MMS")),
+        _m_MMS(getMaterialProperty<std::vector<double>>("m_MMS"))
     {
     /*!
     =====================
@@ -96,7 +101,6 @@ InternalCouple::InternalCouple(const InputParameters & parameters)
     assignments.
 
     */
-//    std::cout << "In InternalCouple Constructor\n";
 }
 
 Real InternalCouple::computeQpResidual(){
@@ -115,6 +119,7 @@ Real InternalCouple::computeQpResidual(){
 
     */
     Real cint;
+    Real cint_MMS;
     
     //Copy the test function so that the balance equation function can read it
     double dNdx[3];
@@ -123,6 +128,14 @@ Real InternalCouple::computeQpResidual(){
     balance_equations::compute_internal_couple(_component_i, _component_j, _test[_i][_qp], dNdx, 
                                                _cauchy[_qp], _s[_qp],      _m[_qp],
                                                cint);
+
+    if(_MMS){
+        
+        balance_equations::compute_internal_couple(_component_i,     _component_j,     _test[_i][_qp], dNdx, 
+                                                   _cauchy_MMS[_qp], _s_MMS[_qp],      _m_MMS[_qp],
+                                                   cint_MMS);
+        cint -= cint_MMS;
+    }
     return cint;
 }
 

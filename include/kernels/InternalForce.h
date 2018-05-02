@@ -64,6 +64,7 @@ class InternalForce : public Kernel{
         //Parameters
         const int _component;
         const int _dof_num;
+        const bool _MMS;
 
         //Coupled degrees of freedom
         unsigned int _u1_int;
@@ -84,6 +85,8 @@ class InternalForce : public Kernel{
         const MaterialProperty<std::vector<std::vector<double>>> &_DcauchyDgrad_u;   //The gradient of the cauchy stress w.r.t. u
         const MaterialProperty<std::vector<std::vector<double>>> &_DcauchyDphi;      //The gradient of the cauchy stress w.r.t. the micro-deformation tensor
         const MaterialProperty<std::vector<std::vector<double>>> &_DcauchyDgrad_phi; //The gradient of the cauchy stress w.r.t. the spatial gradient of the micro-deformation tensor
+
+        const MaterialProperty<std::vector<double>>              &_cauchy_MMS;       //The manufactured solutions cauchy stress
 };
 
 #endif

@@ -26,6 +26,7 @@ validParams<InternalForce>(){
     InputParameters params = validParams<Kernel>();
     params.addRequiredParam<int>("component", "The component of the internal force vector");
     params.addRequiredParam<int>("dof_num",   "The degree of freedom to use for the diagonal jacobian calculation");
+    params.addParam<bool>("MMS", false,       "The flag for whether the run will be using the method of manufactured solutions");
     params.addCoupledVar("u1", "The degree of freedom in the 1 direction");
     params.addCoupledVar("u2", "The degree of freedom in the 2 direction");
     params.addCoupledVar("u3", "The degree of freedom in the 3 direction");
@@ -46,6 +47,7 @@ InternalForce::InternalForce(const InputParameters & parameters)
         Kernel(parameters),
         _component(getParam<int>("component")),
         _dof_num(getParam<int>("dof_num")),
+        _MMS(getParam<bool>("MMS")),
         _u1_int(isCoupled("u1") ? coupled("u1")
                                 : 100),
         _u2_int(isCoupled("u2") ? coupled("u2")
@@ -73,8 +75,8 @@ InternalForce::InternalForce(const InputParameters & parameters)
         _cauchy(getMaterialProperty<std::vector<double>>("cauchy")),
         _DcauchyDgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DcauchyDgrad_u")),
         _DcauchyDphi(getMaterialProperty<std::vector<std::vector<double>>>("DcauchyDphi")),
-        _DcauchyDgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DcauchyDgrad_phi"))
-
+        _DcauchyDgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DcauchyDgrad_phi")),
+        _cauchy_MMS(getMaterialProperty<std::vector<double>>("cauchy_MMS"))
     {
     /*!
     =====================
@@ -86,6 +88,7 @@ InternalForce::InternalForce(const InputParameters & parameters)
     assignments.
 
     */
+
 }
 
 Real InternalForce::computeQpResidual(){
@@ -104,6 +107,7 @@ Real InternalForce::computeQpResidual(){
     */
 
     Real fint;
+    Real fint_MMS;
     
     //Copy the test function so that the balance equation function can read it
     double dNdx[3];
@@ -111,6 +115,12 @@ Real InternalForce::computeQpResidual(){
 
     balance_equations::compute_internal_force(_component, dNdx, _cauchy[_qp], fint);
     //std::cout << "fint: " << fint << "\n";
+
+    if(_MMS){
+        balance_equations::compute_internal_force(_component, dNdx, _cauchy_MMS[_qp], fint_MMS);
+        fint -= fint_MMS;
+    }
+
     return fint;
 }
 

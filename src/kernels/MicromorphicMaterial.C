@@ -13,6 +13,9 @@
 
 #include "MicromorphicMaterial.h"
 
+//MOOSE includes
+#include "Function.h"
+
 registerMooseObject("tardigradeApp", MicromorphicMaterial);
 
 template<>
@@ -35,6 +38,9 @@ validParams<MicromorphicMaterial>(){
 
     params.addParam<int>(
         "number_ADD_JACOBIANS", 0, "The number of additional jacobians being provided beyond those of the stress measures");
+
+    params.addParam<bool>(
+        "MMS", false, "Flag for whether to compute the method of manufactured solutions");
 
     // Coupled variables
     params.addRequiredCoupledVar(
@@ -73,6 +79,43 @@ validParams<MicromorphicMaterial>(){
     params.addRequiredCoupledVar(
         "phi_21", "The 21 component of the phi tensor.");
 
+    // Functions for method of manufactured solutions
+    params.addParam<FunctionName>(
+        "u1_fxn", "0", "The function for displacement in the 1 direction.");
+
+    params.addParam<FunctionName>(
+        "u2_fxn", "0", "The function for displacement in the 2 direction.");
+
+    params.addParam<FunctionName>(
+        "u3_fxn", "0", "The function for displacement in the 3 direction.");
+
+    params.addParam<FunctionName>(
+        "phi_11_fxn", "0", "The function for the 11 component of the phi tensor.");
+
+    params.addParam<FunctionName>(
+        "phi_22_fxn", "0", "The function for the 22 component of the phi tensor.");
+
+    params.addParam<FunctionName>(
+        "phi_33_fxn", "0", "The function for the 33 component of the phi tensor.");
+
+    params.addParam<FunctionName>(
+        "phi_23_fxn", "0", "The function for the 23 component of the phi tensor.");
+
+    params.addParam<FunctionName>(
+        "phi_13_fxn", "0", "The function for the 13 component of the phi tensor.");
+
+    params.addParam<FunctionName>(
+        "phi_12_fxn", "0", "The function for the 12 component of the phi tensor.");
+
+    params.addParam<FunctionName>(
+        "phi_32_fxn", "0", "The function for the 32 component of the phi tensor.");
+
+    params.addParam<FunctionName>(
+        "phi_31_fxn", "0", "The function for the 31 component of the phi tensor.");
+
+    params.addParam<FunctionName>(
+        "phi_21_fxn", "0", "The function for the 21 component of the phi tensor.");
+
     return params;
 }
 
@@ -85,6 +128,7 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
     _n_ADD_TERMS(getParam<int>("number_ADD_TERMS")),
     _n_ADD_JACOBIANS(getParam<int>("number_ADD_JACOBIANS")),
     _model_name(getParam<std::string>("model_name")),
+    _MMS(getParam<bool>("MMS")),
     _u1(coupledValue("u1")),
     _u2(coupledValue("u2")),
     _u3(coupledValue("u3")),
@@ -122,7 +166,25 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
     _DmDphi(declareProperty<std::vector<std::vector<double>>>("DmDphi")),
     _DmDgrad_phi(declareProperty<std::vector<std::vector<double>>>("DmDgrad_phi")),
     _ADD_TERMS(declareProperty<std::vector<std::vector<double>>>("ADD_TERMS")),
-    _ADD_JACOBIANS(declareProperty<std::vector<std::vector<std::vector<double>>>>("ADD_JACOBIANS")){
+    _ADD_JACOBIANS(declareProperty<std::vector<std::vector<std::vector<double>>>>("ADD_JACOBIANS")),
+    _u1_fxn(getFunction("u1_fxn")),
+    _u2_fxn(getFunction("u2_fxn")),
+    _u3_fxn(getFunction("u3_fxn")),
+    _phi_11_fxn(getFunction("phi_11_fxn")),
+    _phi_22_fxn(getFunction("phi_22_fxn")),
+    _phi_33_fxn(getFunction("phi_33_fxn")),
+    _phi_23_fxn(getFunction("phi_23_fxn")),
+    _phi_13_fxn(getFunction("phi_13_fxn")),
+    _phi_12_fxn(getFunction("phi_12_fxn")),
+    _phi_32_fxn(getFunction("phi_32_fxn")),
+    _phi_31_fxn(getFunction("phi_31_fxn")),
+    _phi_21_fxn(getFunction("phi_21_fxn")),
+    _cauchy_MMS(declareProperty<std::vector<double>>("cauchy_MMS")),
+    _s_MMS(declareProperty<std::vector<double>>("s_MMS")),
+    _m_MMS(declareProperty<std::vector<double>>("m_MMS")),
+    _ADD_TERMS_MMS(declareProperty<std::vector<std::vector<double>>>("ADD_TERMS_MMS"))
+
+{
     /*!
     ==============================
     |    MicromorphicMaterial    |
@@ -130,7 +192,6 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
 
     The constructor for MicromorphicMaterial.
     */
-
 
 }
 
@@ -150,7 +211,9 @@ void MicromorphicMaterial::computeQpProperties(){
     double __grad_u[3][3];
     double __phi[9];
     double __grad_phi[9][3];
-    
+
+    RealVectorValue tmp_grad;
+
     //Copy over the gradient of u
     for (int i=0; i<3; i++){__grad_u[0][i] = _grad_u1[_qp](i);}
     for (int i=0; i<3; i++){__grad_u[1][i] = _grad_u2[_qp](i);}
@@ -207,6 +270,57 @@ void MicromorphicMaterial::computeQpProperties(){
                              _DsDgrad_u[_qp],      _DsDphi[_qp],      _DsDgrad_phi[_qp],
                              _DmDgrad_u[_qp],      _DmDphi[_qp],      _DmDgrad_phi[_qp],
                              _ADD_TERMS[_qp],      _ADD_JACOBIANS[_qp]);
+
+    //Evaluate method of manufactured solutions stresses
+    if(_MMS){
+
+        //Compute and copy the gradient of u
+        tmp_grad = _u1_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){__grad_u[0][i] = tmp_grad(i);}
+        tmp_grad = _u2_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){__grad_u[1][i] = tmp_grad(i);}
+        tmp_grad = _u3_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){__grad_u[2][i] = tmp_grad(i);}
+
+        //Compute and copy phi
+        __phi[0] = _phi_11_fxn.value(_t,_q_point[_qp]);
+        __phi[1] = _phi_22_fxn.value(_t,_q_point[_qp]);
+        __phi[2] = _phi_33_fxn.value(_t,_q_point[_qp]);
+        __phi[3] = _phi_23_fxn.value(_t,_q_point[_qp]);
+        __phi[4] = _phi_13_fxn.value(_t,_q_point[_qp]);
+        __phi[5] = _phi_12_fxn.value(_t,_q_point[_qp]);
+        __phi[6] = _phi_32_fxn.value(_t,_q_point[_qp]);
+        __phi[7] = _phi_31_fxn.value(_t,_q_point[_qp]);
+        __phi[8] = _phi_21_fxn.value(_t,_q_point[_qp]);
+
+        //Compute and copy grad_phi
+        tmp_grad = _phi_11_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){__grad_phi[0][i] = tmp_grad(i);}
+        tmp_grad = _phi_22_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){__grad_phi[1][i] = tmp_grad(i);}
+        tmp_grad = _phi_33_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){__grad_phi[2][i] = tmp_grad(i);}
+        tmp_grad = _phi_23_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){__grad_phi[3][i] = tmp_grad(i);}
+        tmp_grad = _phi_13_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){__grad_phi[4][i] = tmp_grad(i);}
+        tmp_grad = _phi_12_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){__grad_phi[5][i] = tmp_grad(i);}
+        tmp_grad = _phi_32_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){__grad_phi[6][i] = tmp_grad(i);}
+        tmp_grad = _phi_31_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){__grad_phi[7][i] = tmp_grad(i);}
+        tmp_grad = _phi_21_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){__grad_phi[8][i] = tmp_grad(i);}
+
+        //TODO: Add in function support for the additional DOF and their gradients.        
+
+        //Evaluate the method of manufactured solutions stresses
+        material->evaluate_model(time, _fparams, __grad_u, __phi, __grad_phi,
+                                 SDVS,             ADD_DOF,     ADD_grad_DOF,
+                                 _cauchy_MMS[_qp], _s_MMS[_qp], _m_MMS[_qp], _ADD_TERMS_MMS[_qp]);
+
+    }
 
 }
 
