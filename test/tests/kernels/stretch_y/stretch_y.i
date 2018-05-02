@@ -1,36 +1,44 @@
+###############################################################################
+#                                stretch_y.i                                  #
+###############################################################################
+# A ``sign of life'' test which makes sure that a simple stretching test      #
+# problem runs to completion.                                                 #
+###############################################################################
+
 [Mesh]
   type = GeneratedMesh
+  displacements = 'disp_x disp_y disp_z'
   dim = 3
-  nx = 1
-  ny = 1
-  nz = 1
+  nx = 4
+  ny = 4
+  nz = 4
 #  file = unit_cube.e
 []
 
 [Variables]
-  [./u_x]
+  [./disp_x]
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+    scaling = 1e-5
   [../]
-  [./u_y]
+  [./disp_y]
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+    scaling = 1e-5
   [../]
-  [./u_z]
+  [./disp_z]
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+    scaling = 1e-5
   [../]
   [./phi_xx]
 #    [./InitialCondition]
@@ -38,7 +46,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+    scaling = 1e-5
   [../]
   [./phi_yy]
 #    [./InitialCondition]
@@ -46,7 +54,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+    scaling = 1e-5
   [../]
   [./phi_zz]
 #    [./InitialCondition]
@@ -54,7 +62,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+    scaling = 1e-5
   [../]
   [./phi_yz]
 #    [./InitialCondition]
@@ -62,7 +70,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+    scaling = 1e-5
   [../]
   [./phi_xz]
 #    [./InitialCondition]
@@ -70,7 +78,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+    scaling = 1e-5
   [../]
   [./phi_xy]
 #    [./InitialCondition]
@@ -78,7 +86,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+    scaling = 1e-5
   [../]
   [./phi_zy]
 #    [./InitialCondition]
@@ -86,7 +94,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+    scaling = 1e-5
   [../]
   [./phi_zx]
 #    [./InitialCondition]
@@ -94,7 +102,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+    scaling = 1e-5
   [../]
   [./phi_yx]
 #    [./InitialCondition]
@@ -102,7 +110,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+    scaling = 1e-5
   [../]
 []
 
@@ -112,12 +120,12 @@
     type = InternalForce
     component = 0
     dof_num   = 0
-    variable  = u_x
+    variable  = disp_x
 
     #Coupled variables
-    u1     = u_x
-    u2     = u_y
-    u3     = u_z
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
@@ -132,12 +140,12 @@
     type = InternalForce
     component = 1
     dof_num   = 1
-    variable  = u_y
+    variable  = disp_y
 
     #Coupled variables
-    u1     = u_x
-    u2     = u_y
-    u3     = u_z
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
@@ -152,12 +160,12 @@
     type = InternalForce
     component = 2
     dof_num   = 2
-    variable  = u_z
+    variable  = disp_z
 
     #Coupled variables
-    u1     = u_x
-    u2     = u_y
-    u3     = u_z
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
@@ -177,9 +185,9 @@
     variable    = phi_xx
 
     #Coupled variables
-    u1     = u_x
-    u2     = u_y
-    u3     = u_z
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
@@ -198,9 +206,9 @@
     variable    = phi_yy
 
     #Coupled variables
-    u1     = u_x
-    u2     = u_y
-    u3     = u_z
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
@@ -219,9 +227,9 @@
     variable    = phi_zz
 
     #Coupled variables
-    u1     = u_x
-    u2     = u_y
-    u3     = u_z
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
@@ -240,9 +248,9 @@
     variable    = phi_yz
 
     #Coupled variables
-    u1     = u_x
-    u2     = u_y
-    u3     = u_z
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
@@ -261,9 +269,9 @@
     variable    = phi_xz
 
     #Coupled variables
-    u1     = u_x
-    u2     = u_y
-    u3     = u_z
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
@@ -281,9 +289,9 @@
     variable    = phi_xy
 
     #Coupled variables
-    u1     = u_x
-    u2     = u_y
-    u3     = u_z
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
@@ -301,9 +309,9 @@
     variable    = phi_zy
 
     #Coupled variables
-    u1     = u_x
-    u2     = u_y
-    u3     = u_z
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
@@ -321,9 +329,9 @@
     variable    = phi_zx
 
     #Coupled variables
-    u1     = u_x
-    u2     = u_y
-    u3     = u_z
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
@@ -342,9 +350,9 @@
     variable    = phi_yx
 
     #Coupled variables
-    u1     = u_x
-    u2     = u_y
-    u3     = u_z
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
     phi_11 = phi_xx
     phi_22 = phi_yy
     phi_33 = phi_zz
@@ -361,27 +369,31 @@
   active = 'left_x back_z bottom_y top_y'
   [./left_x]
     type = DirichletBC
-    variable = u_x
+    #type = PresetBC
+    variable = disp_x
     boundary = 'left'
     value = 0
   [../]
   [./back_z]
     type = DirichletBC
-    variable = u_z
+    #type = PresetBC
+    variable = disp_z
     boundary = 'back'
     value = 0
   [../]
   [./bottom_y]
     type = DirichletBC
-    variable = u_y
+    #type = PresetBC
+    variable = disp_y
     boundary = 'bottom'
     value = 0
   [../]
   [./top_y]
     type = DirichletBC
-    variable = u_y
+    #type = PresetBC
+    variable = disp_y
     boundary = 'top'
-    value = 0.01
+    value = 0.1
   [../]
 []
 
@@ -392,9 +404,9 @@
     model_name = "LinearElasticity"
 
     #Coupled variables
-    u1     = 'u_x'
-    u2     = 'u_y'
-    u3     = 'u_z'
+    u1     = 'disp_x'
+    u2     = 'disp_y'
+    u3     = 'disp_z'
     phi_11 = 'phi_xx'
     phi_22 = 'phi_yy'
     phi_33 = 'phi_zz'
@@ -417,14 +429,18 @@
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-8
-  nl_max_its = 100
+#  solve_type = 'NEWTON'
+#  nl_rel_tol = 1e-8
+#  nl_abs_tol = 1e-8
+#  nl_max_its = 100
   #Terms for debugging
-#  petsc_options_value = '-snes_converged_reason -ksp_converged_reason'
-#  l_max_its  = 20
-#  petsc_options_iname = '-pc_type -pc_hypre_type'
-#  petsc_options_value = 'hypre    boomeramg'
+  petsc_options = 'snes_type_test -snes_test_display' 
+#  petsc_options = '-snes_converged_reason -ksp_converged_reason'
+#  l_max_its  = 10
+#  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
+#  petsc_options_value = 'hypre    boomeramg      100'
+  petsc_options_iname = '-ksp_gmres_restart'
+  petsc_options_value = '100'
 []
 
 [Outputs]
