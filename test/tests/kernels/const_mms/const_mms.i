@@ -17,99 +17,39 @@
 
 [Variables]
   [./disp_x]
-#    [./InitialCondition]
-#      type = RandomIC
-#      min  = -1
-#      max  =  1
-#    [../]
 #    scaling = 1e-1
   [../]
   [./disp_y]
-#    [./InitialCondition]
-#      type = RandomIC
-#      min  = -1
-#      max  =  1
-#    [../]
 #    scaling = 1e-1
   [../]
   [./disp_z]
-#    [./InitialCondition]
-#      type = RandomIC
-#      min  = -1
-#      max  =  1
-#    [../]
 #    scaling = 1e-1
   [../]
   [./phi_xx]
-#    [./InitialCondition]
-#      type = RandomIC
-#      min  = -1
-#      max  =  1
-#    [../]
 #    scaling = 1e-1
   [../]
   [./phi_yy]
-#    [./InitialCondition]
-#      type = RandomIC
-#      min  = -1
-#      max  =  1
-#    [../]
 #    scaling = 1e-1
   [../]
   [./phi_zz]
-#    [./InitialCondition]
-#      type = RandomIC
-#      min  = -1
-#      max  =  1
-#    [../]
 #    scaling = 1e-1
   [../]
   [./phi_yz]
-#    [./InitialCondition]
-#      type = RandomIC
-#      min  = -1
-#      max  =  1
-#    [../]
 #    scaling = 1e-1
   [../]
   [./phi_xz]
-#    [./InitialCondition]
-#      type = RandomIC
-#      min  = -1
-#      max  =  1
-#    [../]
 #    scaling = 1e-1
   [../]
   [./phi_xy]
-#    [./InitialCondition]
-#      type = RandomIC
-#      min  = -1
-#      max  =  1
-#    [../]
 #    scaling = 1e-1
   [../]
   [./phi_zy]
-#    [./InitialCondition]
-#      type = RandomIC
-#      min  = -1
-#      max  =  1
-#    [../]
 #    scaling = 1e-1
   [../]
   [./phi_zx]
-#    [./InitialCondition]
-#      type = RandomIC
-#      min  = -1
-#      max  =  1
-#    [../]
 #    scaling = 1e-1
   [../]
   [./phi_yx]
-#    [./InitialCondition]
-#      type = RandomIC
-#      min  = -1
-#      max  =  1
-#    [../]
 #    scaling = 1e-1
   [../]
 []
@@ -398,35 +338,59 @@
     boundary = 'left right bottom top back front'
     function = u3_fxn
   [../]
-#  [./all_phi_xx]
-#    type = FunctionDirichletBC
-#    variable = phi_xx
-#    boundary = 'left right bottom top back front'
-#    function = phi_11_fxn
-#  [../]
-#  [./all_phi_yy]
-#    type = FunctionDirichletBC
-#    variable = phi_yy
-#    boundary = 'left right bottom top back front'
-#    function = phi_22_fxn
-#  [../]
+  [./all_phi_xx]
+    type = FunctionDirichletBC
+    variable = phi_xx
+    boundary = 'left right bottom top back front'
+    function = phi_11_fxn
+  [../]
+  [./all_phi_yy]
+    type = FunctionDirichletBC
+    variable = phi_yy
+    boundary = 'left right bottom top back front'
+    function = phi_22_fxn
+  [../]
   [./all_phi_zz]
     type = FunctionDirichletBC
     variable = phi_zz
     boundary = 'left right bottom top back front'
     function = phi_33_fxn
   [../]
-#  [./all_phi_yz]
-#    type = FunctionDirichletBC
-#    variable = phi_yz
-#    boundary = 'left right bottom top back front'
-#    function = phi_23_fxn
-#  [../]
-  [./all_phi_xz]
+  [./all_phi_yz]
     type = FunctionDirichletBC
-    variable = phi_xz
+    variable = phi_yz
     boundary = 'left right bottom top back front'
-    function = phi_13_fxn
+    function = phi_23_fxn
+  [../]
+#  [./all_phi_xz]
+#    type = FunctionDirichletBC
+#    variable = phi_xz
+#    boundary = 'left right bottom top back front'
+#    function = phi_13_fxn
+#  [../]
+#  [./all_phi_xy]
+#    type = FunctionDirichletBC
+#    variable = phi_xy
+#    boundary = 'left right bottom top back front'
+#    function = phi_12_fxn
+#  [../]
+#  [./all_phi_zy]
+#    type = FunctionDirichletBC
+#    variable = phi_zy
+#    boundary = 'left right bottom top back front'
+#    function = phi_32_fxn
+#  [../]
+#  [./all_phi_zx]
+#    type = FunctionDirichletBC
+#    variable = phi_zx
+#    boundary = 'left right bottom top back front'
+#    function = phi_31_fxn
+#  [../]
+  [./all_phi_yx]
+    type = FunctionDirichletBC
+    variable = phi_yx
+    boundary = 'left right bottom top back front'
+    function = phi_21_fxn
   [../]
 []
 
@@ -455,15 +419,15 @@
     u1_fxn     = 'u1_fxn'
     u2_fxn     = 'u2_fxn'
     u3_fxn     = 'u3_fxn'
-#    phi_11_fxn = 'phi_11_fxn'
-#    phi_22_fxn = 'phi_22_fxn'
+    phi_11_fxn = 'phi_11_fxn'
+    phi_22_fxn = 'phi_22_fxn'
     phi_33_fxn = 'phi_33_fxn'
-#    phi_23_fxn = 'phi_23_fxn'
-    phi_13_fxn = 'phi_13_fxn'
+    phi_23_fxn = 'phi_23_fxn'
+#    phi_13_fxn = 'phi_13_fxn'
 #    phi_12_fxn = 'phi_12_fxn'
 #    phi_32_fxn = 'phi_32_fxn'
 #    phi_31_fxn = 'phi_31_fxn'
-#    phi_21_fxn = 'phi_21_fxn'
+    phi_21_fxn = 'phi_21_fxn'
   [../]
 []
 
@@ -522,7 +486,8 @@
 
 [Preconditioning]
   [./SMP]
-    type = SMP
+    #type = SMP
+    type = FDP
     full = true
   [../]
 []
