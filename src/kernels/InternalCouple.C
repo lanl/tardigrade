@@ -123,7 +123,7 @@ Real InternalCouple::computeQpResidual(){
     
     //Copy the test function so that the balance equation function can read it
     double dNdx[3];
-    for (int indx=0; indx<3; indx++){dNdx[indx] = _grad_test[_i][_qp](indx);}//p+i);}
+    for (int indx=0; indx<3; indx++){dNdx[indx] = _grad_test[_i][_qp](indx);}
     
     balance_equations::compute_internal_couple(_component_i, _component_j, _test[_i][_qp], dNdx, 
                                                _cauchy[_qp], _s[_qp],      _m[_qp],
@@ -135,6 +135,7 @@ Real InternalCouple::computeQpResidual(){
                                                    _cauchy_MMS[_qp], _s_MMS[_qp],      _m_MMS[_qp],
                                                    cint_MMS);
         cint -= cint_MMS;
+//        std::cout << "cint - cint_MMS: " << cint << "\n";
     }
     return cint;
 }

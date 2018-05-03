@@ -119,6 +119,7 @@ Real InternalForce::computeQpResidual(){
     if(_MMS){
         balance_equations::compute_internal_force(_component, dNdx, _cauchy_MMS[_qp], fint_MMS);
         fint -= fint_MMS;
+        //std::cout << "fint - fint_MMS: " << fint << "\n";
     }
 
     return fint;

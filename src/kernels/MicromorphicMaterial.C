@@ -245,9 +245,14 @@ void MicromorphicMaterial::computeQpProperties(){
     auto &factory = micromorphic_material_library::MaterialFactory::Instance();
     auto material = factory.GetMaterial(_model_name);
 
-    //TODO: Remove these hardcoded values
+    //Extract the time
     std::vector<double> time;
     time.resize(2);
+
+    time[0] = _t;
+    time[1] = _dt;
+
+    //TODO: Remove these hardcoded values
     std::vector<double> SDVS;
     SDVS.resize(0);
 
@@ -319,7 +324,15 @@ void MicromorphicMaterial::computeQpProperties(){
         material->evaluate_model(time, _fparams, __grad_u, __phi, __grad_phi,
                                  SDVS,             ADD_DOF,     ADD_grad_DOF,
                                  _cauchy_MMS[_qp], _s_MMS[_qp], _m_MMS[_qp], _ADD_TERMS_MMS[_qp]);
-
+/*        std::cout << "_cauchy_MMS[_qp]: ";
+        for (int i=0; i<9; i++){std::cout << _cauchy_MMS[_qp][i] << " ";}
+        std::cout << "\n";
+        std::cout << "_s_MMS[_qp]: ";
+        for (int i=0; i<9; i++){std::cout << _s_MMS[_qp][i] << " ";}
+        std::cout << "\n";
+        std::cout << "_m_MMS[_qp]: ";
+        for (int i=0; i<27; i++){std::cout << _m_MMS[_qp][i] << " ";}
+        std::cout << "\n";*/
     }
 
 }
