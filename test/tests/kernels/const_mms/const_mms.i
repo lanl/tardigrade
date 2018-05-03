@@ -362,12 +362,12 @@
     boundary = 'left right bottom top back front'
     function = phi_23_fxn
   [../]
-#  [./all_phi_xz]
-#    type = FunctionDirichletBC
-#    variable = phi_xz
-#    boundary = 'left right bottom top back front'
-#    function = phi_13_fxn
-#  [../]
+  [./all_phi_xz]
+    type = FunctionDirichletBC
+    variable = phi_xz
+    boundary = 'left right bottom top back front'
+    function = phi_13_fxn
+  [../]
 #  [./all_phi_xy]
 #    type = FunctionDirichletBC
 #    variable = phi_xy
@@ -397,7 +397,8 @@
 [Materials]
   [./linear_elastic]
     type = MicromorphicMaterial
-    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0. 0. 0. 0. 0. 0. 0.769 0. 0. 0. 0.'
+#    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0. 0. 0. 0. 0. 0. 0.769 0. 0. 0. 0.'
+    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0.12 0.51 0.72 0.84 0.443 0.62 0.769 0.945 0.47 0.63 0.58'
     model_name = "LinearElasticity"
     MMS       = true
 
@@ -423,7 +424,7 @@
     phi_22_fxn = 'phi_22_fxn'
     phi_33_fxn = 'phi_33_fxn'
     phi_23_fxn = 'phi_23_fxn'
-#    phi_13_fxn = 'phi_13_fxn'
+    phi_13_fxn = 'phi_13_fxn'
 #    phi_12_fxn = 'phi_12_fxn'
 #    phi_32_fxn = 'phi_32_fxn'
 #    phi_31_fxn = 'phi_31_fxn'
