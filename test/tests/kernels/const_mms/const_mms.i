@@ -9,9 +9,9 @@
   type = GeneratedMesh
   displacements = 'disp_x disp_y disp_z'
   dim = 3
-  nx = 4
-  ny = 4
-  nz = 4
+  nx = 2
+  ny = 2
+  nz = 2
 #  file = unit_cube.e
 []
 
@@ -22,7 +22,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+#    scaling = 1e-1
   [../]
   [./disp_y]
 #    [./InitialCondition]
@@ -30,7 +30,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+#    scaling = 1e-1
   [../]
   [./disp_z]
 #    [./InitialCondition]
@@ -38,7 +38,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+#    scaling = 1e-1
   [../]
   [./phi_xx]
 #    [./InitialCondition]
@@ -46,7 +46,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+#    scaling = 1e-1
   [../]
   [./phi_yy]
 #    [./InitialCondition]
@@ -54,7 +54,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+#    scaling = 1e-1
   [../]
   [./phi_zz]
 #    [./InitialCondition]
@@ -62,7 +62,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+#    scaling = 1e-1
   [../]
   [./phi_yz]
 #    [./InitialCondition]
@@ -70,7 +70,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+#    scaling = 1e-1
   [../]
   [./phi_xz]
 #    [./InitialCondition]
@@ -78,7 +78,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+#    scaling = 1e-1
   [../]
   [./phi_xy]
 #    [./InitialCondition]
@@ -86,7 +86,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+#    scaling = 1e-1
   [../]
   [./phi_zy]
 #    [./InitialCondition]
@@ -94,7 +94,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+#    scaling = 1e-1
   [../]
   [./phi_zx]
 #    [./InitialCondition]
@@ -102,7 +102,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+#    scaling = 1e-1
   [../]
   [./phi_yx]
 #    [./InitialCondition]
@@ -110,7 +110,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-    scaling = 1e-3
+#    scaling = 1e-1
   [../]
 []
 
@@ -284,6 +284,7 @@
     phi_22 = phi_yy
     phi_33 = phi_zz
     phi_23 = phi_yz
+    phi_13 = phi_xz
     phi_12 = phi_xy
     phi_32 = phi_zy
     phi_31 = phi_zx
@@ -328,6 +329,7 @@
     phi_23 = phi_yz
     phi_13 = phi_xz
     phi_12 = phi_xy
+    phi_32 = phi_zy
     phi_31 = phi_zx
     phi_21 = phi_yx
   [../]
@@ -396,17 +398,35 @@
     boundary = 'left right bottom top back front'
     function = u3_fxn
   [../]
-  [./all_phi_xx]
+#  [./all_phi_xx]
+#    type = FunctionDirichletBC
+#    variable = phi_xx
+#    boundary = 'left right bottom top back front'
+#    function = phi_11_fxn
+#  [../]
+#  [./all_phi_yy]
+#    type = FunctionDirichletBC
+#    variable = phi_yy
+#    boundary = 'left right bottom top back front'
+#    function = phi_22_fxn
+#  [../]
+  [./all_phi_zz]
     type = FunctionDirichletBC
-    variable = phi_xx
+    variable = phi_zz
     boundary = 'left right bottom top back front'
-    function = phi_11_fxn
+    function = phi_33_fxn
   [../]
-  [./all_phi_yy]
+#  [./all_phi_yz]
+#    type = FunctionDirichletBC
+#    variable = phi_yz
+#    boundary = 'left right bottom top back front'
+#    function = phi_23_fxn
+#  [../]
+  [./all_phi_xz]
     type = FunctionDirichletBC
-    variable = phi_yy
+    variable = phi_xz
     boundary = 'left right bottom top back front'
-    function = phi_22_fxn
+    function = phi_13_fxn
   [../]
 []
 
@@ -435,11 +455,11 @@
     u1_fxn     = 'u1_fxn'
     u2_fxn     = 'u2_fxn'
     u3_fxn     = 'u3_fxn'
-    phi_11_fxn = 'phi_11_fxn'
-    phi_22_fxn = 'phi_22_fxn'
-#    phi_33_fxn = 'phi_33_fxn'
+#    phi_11_fxn = 'phi_11_fxn'
+#    phi_22_fxn = 'phi_22_fxn'
+    phi_33_fxn = 'phi_33_fxn'
 #    phi_23_fxn = 'phi_23_fxn'
-#    phi_13_fxn = 'phi_13_fxn'
+    phi_13_fxn = 'phi_13_fxn'
 #    phi_12_fxn = 'phi_12_fxn'
 #    phi_32_fxn = 'phi_32_fxn'
 #    phi_31_fxn = 'phi_31_fxn'
@@ -447,6 +467,7 @@
   [../]
 []
 
+# Functions for the method of manufactured solutions
 [Functions]
   [./u1_fxn]
     type  = ParsedFunction
@@ -470,15 +491,16 @@
   [../]
   [./phi_33_fxn]
     type = ParsedFunction
-    value = -2.012
+    #value = 2.142
+    value = -.521
   [../]
   [./phi_23_fxn]
     type = ParsedFunction
-    value = 0.177
+    value = -0.177
   [../]
   [./phi_13_fxn]
     type = ParsedFunction
-    value = -0.606
+    value = 0.606
   [../]
   [./phi_12_fxn]
     type = ParsedFunction
@@ -494,32 +516,35 @@
   [../]
   [./phi_21_fxn]
     type = ParsedFunction
-    value = -2.271
+    value = 2.271
   [../]
 []
 
-#[Preconditioning]
-#  [./SMP]
-#    type = SMP
-#    full = true
-#  [../]
-#[]
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
+  [../]
+[]
 
 [Executioner]
   type = Steady
-  solve_type = 'PJFNK'
-#  solve_type = 'NEWTON'
+#  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
 #  nl_rel_tol = 1e-8
 #  nl_abs_tol = 1e-8
 #  nl_max_its = 100
   #Terms for debugging
-  petsc_options = 'snes_type_test -snes_test_display' 
+#  petsc_options = 'snes_type_test -snes_test_display' 
 #  petsc_options = '-snes_converged_reason -ksp_converged_reason'
 #  l_max_its  = 10
 #  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
 #  petsc_options_value = 'hypre    boomeramg      100'
-  petsc_options_iname = '-ksp_gmres_restart'
-  petsc_options_value = '100'
+#  petsc_options_iname = '-ksp_gmres_restart'
+#  petsc_options_value = '100'
+  petsc_options = '-snes_ksp_ew -snes_converged_reason -ksp_converged_reason'
+  petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart'
+  petsc_options_value = 'asm      lu           1               101'
 []
 
 [Outputs]
