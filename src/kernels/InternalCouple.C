@@ -112,7 +112,7 @@ Real InternalCouple::computeQpResidual(){
     Compute the residual at the quadrature point for 
     the indicated component.
 
-    cint_ij = pse(sigma_ij - s_ij) -psi_k m_kji
+    cint_ij = -(psi (sigma_ij - s_ij) -psi_k m_kji)
 
     where i = _component_i
           j = _component_j
