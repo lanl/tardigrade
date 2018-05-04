@@ -36,11 +36,11 @@ validParams<InternalCouple>(){
     params.addCoupledVar("phi_22", "The yy component of the phi tensor");
     params.addCoupledVar("phi_33", "The zz component of the phi tensor");
     params.addCoupledVar("phi_23", "The yz component of the phi tensor");
-    params.addCoupledVar("phi_13", "The yz component of the phi tensor");
-    params.addCoupledVar("phi_12", "The yz component of the phi tensor");
-    params.addCoupledVar("phi_32", "The yz component of the phi tensor");
-    params.addCoupledVar("phi_31", "The yz component of the phi tensor");
-    params.addCoupledVar("phi_21", "The yz component of the phi tensor");
+    params.addCoupledVar("phi_13", "The xz component of the phi tensor");
+    params.addCoupledVar("phi_12", "The xy component of the phi tensor");
+    params.addCoupledVar("phi_32", "The zy component of the phi tensor");
+    params.addCoupledVar("phi_31", "The zx component of the phi tensor");
+    params.addCoupledVar("phi_21", "The yx component of the phi tensor");
     return params;
 }
 
