@@ -368,29 +368,29 @@
     boundary = 'left right bottom top back front'
     function = phi_13_fxn
   [../]
-#  [./all_phi_xy]
-#    type = FunctionDirichletBC
-#    variable = phi_xy
-#    boundary = 'left right bottom top back front'
-#    function = phi_12_fxn
-#  [../]
-#  [./all_phi_zy]
-#    type = FunctionDirichletBC
-#    variable = phi_zy
-#    boundary = 'left right bottom top back front'
-#    function = phi_32_fxn
-#  [../]
-#  [./all_phi_zx]
-#    type = FunctionDirichletBC
-#    variable = phi_zx
-#    boundary = 'left right bottom top back front'
-#    function = phi_31_fxn
-#  [../]
+  [./all_phi_xy]
+     type = FunctionDirichletBC
+     variable = phi_xy
+     boundary = 'left right bottom top back front'
+     function = phi_12_fxn
+  [../]
+  [./all_phi_zy]
+     type = FunctionDirichletBC
+     variable = phi_zy
+     boundary = 'left right bottom top back front'
+     function = phi_32_fxn
+  [../]
+  [./all_phi_zx]
+     type = FunctionDirichletBC
+     variable = phi_zx
+     boundary = 'left right bottom top back front'
+     function = phi_31_fxn
+  [../]
   [./all_phi_yx]
-    type = FunctionDirichletBC
-    variable = phi_yx
-    boundary = 'left right bottom top back front'
-    function = phi_21_fxn
+     type = FunctionDirichletBC
+     variable = phi_yx
+     boundary = 'left right bottom top back front'
+     function = phi_21_fxn
   [../]
 []
 
@@ -425,9 +425,9 @@
     phi_33_fxn = 'phi_33_fxn'
     phi_23_fxn = 'phi_23_fxn'
     phi_13_fxn = 'phi_13_fxn'
-#    phi_12_fxn = 'phi_12_fxn'
-#    phi_32_fxn = 'phi_32_fxn'
-#    phi_31_fxn = 'phi_31_fxn'
+    phi_12_fxn = 'phi_12_fxn'
+    phi_32_fxn = 'phi_32_fxn'
+    phi_31_fxn = 'phi_31_fxn'
     phi_21_fxn = 'phi_21_fxn'
   [../]
 []
@@ -448,55 +448,64 @@
   [../]
   [./phi_11_fxn]
     type = ParsedFunction
-    value = -.2152
+#    value = -.2152
+    value = 0.054142
   [../]
   [./phi_22_fxn]
     type = ParsedFunction
-    value = 1.31
+#    value = 1.31
+    value = 0.07059678
   [../]
   [./phi_33_fxn]
     type = ParsedFunction
     #value = 2.142
-    value = -.521
+#    value = -.521
+    value = 0.04161017
   [../]
   [./phi_23_fxn]
     type = ParsedFunction
-    value = -0.177
+#    value = -0.177
+    value = -0.00516283
   [../]
   [./phi_13_fxn]
     type = ParsedFunction
-    value = 0.606
+#    value = 0.606
+    value = -0.0056683
   [../]
   [./phi_12_fxn]
     type = ParsedFunction
-    value = 3.72
+#    value = 3.72
+    value = 0.00955174
   [../]
   [./phi_32_fxn]
     type = ParsedFunction
-    value = .827
+#    value = .827
+    value = 0.01006055
   [../]
   [./phi_31_fxn]
     type = ParsedFunction
-    value = .718
+#    value = .718
+    value = 0.00635417
   [../]
   [./phi_21_fxn]
     type = ParsedFunction
-    value = 2.271
+#    value = 2.271
+    value = -0.00823092
   [../]
 []
 
 [Preconditioning]
   [./SMP]
-    #type = SMP
-    type = FDP
+    type = SMP
+    #type = FDP
     full = true
   [../]
 []
 
 [Executioner]
   type = Steady
-#  solve_type = 'PJFNK'
-  solve_type = 'NEWTON'
+  solve_type = 'PJFNK'
+#  solve_type = 'NEWTON'
 #  nl_rel_tol = 1e-8
 #  nl_abs_tol = 1e-8
 #  nl_max_its = 100
