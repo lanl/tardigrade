@@ -1,4 +1,4 @@
-tardigrade
+# tardigrade
 
 An implementation of micromorphic continuum mechanics that uses functions and 
 values defined in the micromorphic_element repository available using SSH 
