@@ -276,6 +276,26 @@ void MicromorphicMaterial::computeQpProperties(){
                              _DmDgrad_u[_qp],      _DmDphi[_qp],      _DmDgrad_phi[_qp],
                              _ADD_TERMS[_qp],      _ADD_JACOBIANS[_qp]);
 
+//    std::cout << "cauchy[_qp}: ";
+//    for (int i=0; i<9; i++){std::cout << _cauchy[_qp][i] << " ";}
+//    std::cout << "\n";
+//
+//    std::cout << "s[_qp}: ";
+//    for (int i=0; i<9; i++){std::cout << _s[_qp][i] << " ";}
+//    std::cout << "\n";
+//
+//    std::cout << "m[_qp}: ";
+//    for (int i=0; i<27; i++){std::cout << _m[_qp][i] << " ";}
+//    std::cout << "\n";
+//
+//    std::cout << "_DcauchyDgrad_u[_qp]:\n";
+//    for (int i=0; i<9; i++){
+//        for (int j=0; j<9; j++){
+//            std::cout << std::setw(8) << _DcauchyDgrad_u[_qp][i][j] << " ";
+//        }
+//        std::cout << std::endl;
+//    }
+
     //Evaluate method of manufactured solutions stresses
     if(_MMS){
 

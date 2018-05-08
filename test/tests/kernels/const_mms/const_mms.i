@@ -9,9 +9,9 @@
   type = GeneratedMesh
   displacements = 'disp_x disp_y disp_z'
   dim = 3
-  nx = 2
-  ny = 2
-  nz = 2
+  nx = 4
+  ny = 4
+  nz = 4
 #  file = unit_cube.e
 []
 
@@ -517,9 +517,9 @@
 #  petsc_options_value = 'hypre    boomeramg      100'
 #  petsc_options_iname = '-ksp_gmres_restart'
 #  petsc_options_value = '100'
-  petsc_options = '-snes_ksp_ew -snes_converged_reason -ksp_converged_reason'
+  petsc_options = '-snes_ksp_ew -snes_converged_reason -ksp_converged_reason -ksp_monitor_true_residual -ksp_compute_singular_values'
   petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart'
-  petsc_options_value = 'asm      lu           1               101'
+  petsc_options_value = 'asm      lu           1               101               '
 []
 
 [Outputs]
