@@ -9,9 +9,9 @@
   type = GeneratedMesh
   displacements = 'disp_x disp_y disp_z'
   dim = 3
-  nx = 1
-  ny = 1
-  nz = 1
+  nx = 8
+  ny = 8
+  nz = 8
 #  file = unit_cube.e
 []
 
@@ -414,11 +414,19 @@
   [../]
   [./top_y]
     #type = DirichletBC
-    type = PresetBC
+    #type = PresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 'top'
     #boundary = 'left right bottom top front back'
-    value = 0.1
+    function = top_bc
+  [../]
+[]
+
+[Functions]
+  [./top_bc]
+    type  = ParsedFunction
+    value = 0.1*t
   [../]
 []
 
@@ -457,7 +465,9 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  num_steps = 10
+  dt        = 0.1
 #  solve_type = 'PJFNK'
   solve_type = 'NEWTON'
 #  nl_rel_tol = 1e-8
@@ -471,9 +481,10 @@
 #  petsc_options_value = 'hypre    boomeramg      100'
 #  petsc_options_iname = '-ksp_gmres_restart'
 #  petsc_options_value = '100'
-  petsc_options = '-snes_ksp_ew -ksp_monitor_true_residual -ksp_compute_singularvalues -pc_svd_monitor'
-  petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart -ksp_view_mat'
-  petsc_options_value = 'svd      lu           1               101                binary'
+#  petsc_options = '-snes_ksp_ew -ksp_monitor_true_residual -ksp_compute_singularvalues'# -pc_svd_monitor'
+  petsc_options = '-ksp_monitor_true_residual -ksp_compute_singularvalues'# -pc_svd_monitor'
+  petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart -print_linear_residuals'# -ksp_view_mat'
+  petsc_options_value = 'asm      lu           1               101                false                  '# binary'
 []
 
 [Outputs]
