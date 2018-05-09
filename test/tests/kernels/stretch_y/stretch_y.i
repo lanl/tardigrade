@@ -9,9 +9,9 @@
   type = GeneratedMesh
   displacements = 'disp_x disp_y disp_z'
   dim = 3
-  nx = 8
-  ny = 8
-  nz = 8
+  nx = 1
+  ny = 1
+  nz = 1
 #  file = unit_cube.e
 []
 
@@ -22,7 +22,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e-5
+#    scaling = 1e-4
   [../]
   [./disp_y]
 #    [./InitialCondition]
@@ -30,7 +30,7 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e-5
+#    scaling = 1e-4
   [../]
   [./disp_z]
 #    [./InitialCondition]
@@ -38,9 +38,11 @@
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e-5
+#    scaling = 1e-4
   [../]
   [./phi_xx]
+#    order = CONSTANT
+#    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -1
@@ -49,6 +51,8 @@
 #    scaling = 1e-5
   [../]
   [./phi_yy]
+#    order = CONSTANT
+#    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -1
@@ -57,6 +61,8 @@
 #    scaling = 1e-5
   [../]
   [./phi_zz]
+#    order = CONSTANT
+#    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -1
@@ -65,52 +71,64 @@
 #    scaling = 1e-5
   [../]
   [./phi_yz]
+#    order = CONSTANT
+#    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e-5
+#    scaling = 1e-1
   [../]
   [./phi_xz]
+#    order = CONSTANT
+#    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e-5
+#    scaling = 1e-1
   [../]
   [./phi_xy]
+#    order = CONSTANT
+#    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e-5
+#    scaling = 1e-1
   [../]
   [./phi_zy]
+#    order = CONSTANT
+#    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e-5
+#    scaling = 1e-1
   [../]
   [./phi_zx]
+#    order = CONSTANT
+#    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e-5
+#    scaling = 1e-1
   [../]
   [./phi_yx]
+#    order = CONSTANT
+#    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -1
 #      max  =  1
 #    [../]
-#    scaling = 1e-5
+#    scaling = 1e-1
   [../]
 []
 
@@ -375,6 +393,7 @@
     type = PresetBC
     variable = disp_x
     boundary = 'left'
+    #boundary = 'left right bottom top front back'
     value = 0
   [../]
   [./back_z]
@@ -382,6 +401,7 @@
     type = PresetBC
     variable = disp_z
     boundary = 'back'
+    #boundary = 'left right bottom top front back'
     value = 0
   [../]
   [./bottom_y]
@@ -389,6 +409,7 @@
     type = PresetBC
     variable = disp_y
     boundary = 'bottom'
+    #boundary = 'left right bottom top front back'
     value = 0
   [../]
   [./top_y]
@@ -396,6 +417,7 @@
     type = PresetBC
     variable = disp_y
     boundary = 'top'
+    #boundary = 'left right bottom top front back'
     value = 0.1
   [../]
 []
@@ -404,8 +426,10 @@
   [./linear_elastic]
     type = MicromorphicMaterial
 #    material_fparameters = '0. 0. 0. 0. 0. 0. 0. 15.4 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.'
-    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0. 0. 0. 0. 0. 0. 0.769 0. 0. 0. 0.'
+#    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0. 0. 0. 0. 0. 0. 0.769 0. 0. 0. 0.'
 #    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0.12 0.51 0.72 0.84 0.443 0.62 0.769 0.945 0.47 0.63 0.58'
+#    material_fparameters = '29.48e3 25.48e3 1e3 0.4e3 -1.5e3 -1.4e3 -3e3 0 0 0 0 0 0 10e5 0. 0. 0. 0.'
+    material_fparameters = '29. 7. 60. 10. 10. 8. 5. 0. 0. 0. 0. 0. 0. 8. 0. 0. 0. 0.'
     model_name = "LinearElasticity"
 
     #Coupled variables
@@ -426,8 +450,8 @@
 
 [Preconditioning]
   [./SMP]
-    #type = SMP
-    type = FDP
+    type = SMP
+    #type = FDP
     full = true
   [../]
 []
@@ -447,9 +471,9 @@
 #  petsc_options_value = 'hypre    boomeramg      100'
 #  petsc_options_iname = '-ksp_gmres_restart'
 #  petsc_options_value = '100'
-  petsc_options = '-snes_ksp_ew -ksp_monitor_true_residual -ksp_compute_singularvalues'
-  petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart'
-  petsc_options_value = 'asm      lu           1               101               '
+  petsc_options = '-snes_ksp_ew -ksp_monitor_true_residual -ksp_compute_singularvalues -pc_svd_monitor'
+  petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart -ksp_view_mat'
+  petsc_options_value = 'svd      lu           1               101                binary'
 []
 
 [Outputs]
