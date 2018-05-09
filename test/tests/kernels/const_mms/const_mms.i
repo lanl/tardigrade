@@ -9,9 +9,9 @@
   type = GeneratedMesh
   displacements = 'disp_x disp_y disp_z'
   dim = 3
-  nx = 4
-  ny = 4
-  nz = 4
+  nx = 8
+  ny = 8
+  nz = 8
 #  file = unit_cube.e
 []
 
@@ -398,7 +398,8 @@
   [./linear_elastic]
     type = MicromorphicMaterial
 #    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0. 0. 0. 0. 0. 0. 0.769 0. 0. 0. 0.'
-    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0.12 0.51 0.72 0.84 0.443 0.62 0.769 0.945 0.47 0.63 0.58'
+#    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0.12 0.51 0.72 0.84 0.443 0.62 0.769 0.945 0.47 0.63 0.58'
+    material_fparameters = '29. 7. 60. 10. 10. 8. 5. 0. 0. 0. 0. 0. 0. 8. 0. 0. 0. 0.'
     model_name = "LinearElasticity"
     MMS       = true
 
