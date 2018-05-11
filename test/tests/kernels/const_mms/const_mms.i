@@ -9,9 +9,9 @@
   type = GeneratedMesh
   displacements = 'disp_x disp_y disp_z'
   dim = 3
-  nx = 8
-  ny = 8
-  nz = 8
+  nx = 2
+  ny = 2
+  nz = 2
 #  file = unit_cube.e
 []
 
