@@ -201,6 +201,94 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
 
 }
 
+double relative_norm(const double &v1, const double &v2){
+    /*!
+    =======================
+    |    relative_norm    |
+    =======================
+
+    Compute the relative norm between two values.
+    */
+
+    double tmp;
+    tmp = std::max(fabs(v1),fabs(v2));
+    if(tmp<1e-7){tmp=1;}
+
+    return (v1-v2)/tmp;
+    
+}
+
+void print_vector(const std::vector<double> &v){
+    /*!
+    ======================
+    |    print_vector    |
+    ======================
+
+    Print a std::vector to the terminal.
+
+    */
+
+    for (int i=0; i<v.size(); i++){
+        std::cout << v[i] << " ";
+    }
+    std::cout << std::endl;
+    return;
+}
+
+void print_matrix(const std::vector<std::vector<double>> &M){
+    /*!
+    ======================
+    |    print_matrix    |
+    ======================
+
+    Print a std::vector matrix to the terminal.
+
+    */
+
+    for (int i=0; i<M.size(); i++){
+        print_vector(M[i]);
+    }
+    return;
+}
+
+void compare_vectors(const std::vector<double> &V1, const std::vector<double> &V2, double &relative_error){
+    /*!
+    =========================
+    |    compare_vectors    |
+    =========================
+
+    Compare two std::vectors to determine the relative error between them.
+    */
+
+    if (V1.size() != V2.size()){mooseError("Vectors of different sizes cannot be compared!");}
+    for (int i=0; i<V1.size(); i++){
+        std::cout << relative_norm(V1[i],V2[i]) << " ";
+        relative_error += fabs(relative_norm(V1[i],V2[i]));
+    }
+    std::cout << "\n";
+    return;
+}
+
+void compare_matrices(const std::vector<std::vector<double>> &M1, const std::vector<std::vector<double>> &M2){
+    /*!
+    ==========================
+    |    compare_matrices    |
+    ==========================
+
+    Compare two matrices to determine the relative error between them.
+
+    */
+
+    double tmp = 0;
+
+    if (M1.size() != M2.size()){mooseError("Matricies of different sizes cannot be compared!");}
+    for (int i=0; i<M1.size(); i++){compare_vectors(M1[i],M2[i],tmp);}
+    if (tmp>1e-3){std::cout << "###################################################"
+                            << "#    WARNING: POOR QUALITY JACOBIAN DISCOVERED    #"
+                            << "###################################################\n";}
+    std::cout << "relative error: " << tmp << "\n";
+}
+
 void MicromorphicMaterial::computeQpProperties(){
     /*!
     =============================
@@ -285,26 +373,119 @@ void MicromorphicMaterial::computeQpProperties(){
                              _DmDgrad_u[_qp],      _DmDphi[_qp],      _DmDgrad_phi[_qp],
                              _ADD_TERMS[_qp],      _ADD_JACOBIANS[_qp]);
 
-//    std::cout << "cauchy[_qp}: ";
-//    for (int i=0; i<9; i++){std::cout << _cauchy[_qp][i] << " ";}
-//    std::cout << "\n";
-//
-//    std::cout << "s[_qp}: ";
-//    for (int i=0; i<9; i++){std::cout << _s[_qp][i] << " ";}
-//    std::cout << "\n";
-//
-//    std::cout << "m[_qp}: ";
-//    for (int i=0; i<27; i++){std::cout << _m[_qp][i] << " ";}
-//    std::cout << "\n";
-//
-//    std::cout << "_DcauchyDgrad_u[_qp]:\n";
-//    for (int i=0; i<9; i++){
-//        for (int j=0; j<9; j++){
-//            std::cout << std::setw(8) << _DcauchyDgrad_u[_qp][i][j] << " ";
-//        }
-//        std::cout << std::endl;
-//    }
+    //Jacobian debugging routines to follow uncomment only if absolutely necessary!
+/*    std::vector<double> __cauchy;
+    std::vector<double> __s;
+    std::vector<double> __m;
+    std::vector<std::vector<double>> __DcauchyDgrad_u;
+    std::vector<std::vector<double>> __DcauchyDphi;
+    std::vector<std::vector<double>> __DcauchyDgrad_phi;
+    std::vector<std::vector<double>> __DsDgrad_u;
+    std::vector<std::vector<double>> __DsDphi;
+    std::vector<std::vector<double>> __DsDgrad_phi;
+    std::vector<std::vector<double>> __DmDgrad_u;
+    std::vector<std::vector<double>> __DmDphi;
+    std::vector<std::vector<double>> __DmDgrad_phi;
+    std::vector<std::vector<double>> __ADD_TERMS;
+    std::vector<std::vector<std::vector<double>>> __ADD_JACOBIANS;
 
+    material->evaluate_model_numeric_gradients(time, _fparams, __grad_u, __phi, __grad_phi,
+                              SDVS,                ADD_DOF,           ADD_grad_DOF,
+                             __cauchy,         __s,           __m,
+                             __DcauchyDgrad_u, __DcauchyDphi, __DcauchyDgrad_phi,
+                             __DsDgrad_u,      __DsDphi,      __DsDgrad_phi,
+                             __DmDgrad_u,      __DmDphi,      __DmDgrad_phi,
+                             __ADD_TERMS,      __ADD_JACOBIANS);
+
+    //Check the returned values
+    std::cout << "_qp:          " << _qp << "\n";
+    std::cout << "__grad_u:\n";
+    for (int i=0; i<3; i++){
+        for (int j=0; j<3; j++){
+            std::cout << __grad_u[i][j] << " ";
+        }
+        std::cout << "\n";
+    }
+    std::cout << "Differences in stresses (must be zero or something is really wrong!)\n";
+    std::cout << "cauchy error: ";
+    for (int i=0; i<9; i++){std::cout << _cauchy[_qp][i] - __cauchy[i] << " ";}
+    std::cout << "\n";
+    std::cout << "s error: ";
+    for (int i=0; i<9; i++){std::cout << _s[_qp][i] - __s[i] << " ";}
+    std::cout << "\n";
+    std::cout << "m error: ";
+    for (int i=0; i<27; i++){std::cout << _m[_qp][i] - __m[i] << " ";}
+    std::cout << "\n";
+
+    std::cout << "Differences in stress gradients (should be close to zero!)\n";
+
+    std::cout << "DcauchyDgrad_u analytic:\n";
+    print_matrix(_DcauchyDgrad_u[_qp]);
+    std::cout << "DcauchyDgrad_u numeric:\n";
+    print_matrix(__DcauchyDgrad_u);
+    std::cout << "_DcauchyDgrad_u error:\n";
+    compare_matrices(_DcauchyDgrad_u[_qp],__DcauchyDgrad_u);
+
+    std::cout << "DcauchyDphi analytic:\n";
+    print_matrix(_DcauchyDphi[_qp]);
+    std::cout << "DcauchyDphi numeric:\n";
+    print_matrix(__DcauchyDphi);
+    std::cout << "_DcauchyDphi error:\n";
+    compare_matrices(_DcauchyDphi[_qp],__DcauchyDphi);
+
+    std::cout << "DcauchyDgrad_phi analytic:\n";
+    print_matrix(_DcauchyDgrad_phi[_qp]);
+    std::cout << "DcauchyDgrad_phi numeric:\n";
+    print_matrix(__DcauchyDgrad_phi);
+    std::cout << "_DcauchyDgrad_phi error:\n";
+    compare_matrices(_DcauchyDgrad_phi[_qp],__DcauchyDgrad_phi);
+
+    std::cout << "DsDgrad_u analytic:\n";
+    print_matrix(_DsDgrad_u[_qp]);
+    std::cout << "DsDgrad_u numeric:\n";
+    print_matrix(__DsDgrad_u);
+    std::cout << "_DsDgrad_u error:\n";
+    compare_matrices(_DsDgrad_u[_qp],__DsDgrad_u);
+
+    std::cout << "DsDphi analytic:\n";
+    print_matrix(_DsDphi[_qp]);
+    std::cout << "DsDphi numeric:\n";
+    print_matrix(__DsDphi);
+    std::cout << "_DsDphi error:\n";
+    compare_matrices(_DsDphi[_qp],__DsDphi);
+
+    std::cout << "DsDgrad_phi analytic:\n";
+    print_matrix(_DsDgrad_phi[_qp]);
+    std::cout << "DsDgrad_phi numeric:\n";
+    print_matrix(__DsDgrad_phi);
+    std::cout << "_DsDgrad_phi error:\n";
+    compare_matrices(_DsDgrad_phi[_qp],__DsDgrad_phi);
+
+    std::cout << "DmDgrad_u analytic:\n";
+    print_matrix(_DmDgrad_u[_qp]);
+    std::cout << "DmDgrad_u numeric:\n";
+    print_matrix(__DmDgrad_u);
+    std::cout << "_DmDgrad_u error:\n";
+    compare_matrices(_DmDgrad_u[_qp],__DmDgrad_u);
+
+    std::cout << "DmDphi analytic:\n";
+    print_matrix(_DmDphi[_qp]);
+    std::cout << "DmDphi numeric:\n";
+    print_matrix(__DmDphi);
+    std::cout << "_DmDphi error:\n";
+    compare_matrices(_DmDphi[_qp],__DmDphi);
+
+    std::cout << "DmDgrad_phi analytic:\n";
+    print_matrix(_DmDgrad_phi[_qp]);
+    std::cout << "DmDgrad_phi numeric:\n";
+    print_matrix(__DmDgrad_phi);
+    std::cout << "_DmDgrad_phi error:\n";
+    compare_matrices(_DmDgrad_phi[_qp],__DmDgrad_phi);
+
+    if(_qp>=7){    
+        mooseError("Expected error!");
+    }
+*/
     //Evaluate method of manufactured solutions stresses
     if(_MMS){
 
