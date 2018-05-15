@@ -146,7 +146,7 @@ Real InternalForce::computeQpJacobian(){
     }
 
     balance_equations::compute_internal_force_jacobian(_component,           _dof_num, 
-                                                       _test[_i][_qp],       dNdx, _phi[_j][_qp],          detadx,
+                                                       _test[_i][_qp],       dNdx,                _phi[_j][_qp],          detadx,
                                                        _DcauchyDgrad_u[_qp], _DcauchyDphi[_qp],   _DcauchyDgrad_phi[_qp], dfdUint);
     return dfdUint;
 }
@@ -163,8 +163,6 @@ Real InternalForce::computeQpOffDiagJacobian(unsigned int jvar){
 
     Real dfdUint;
     int  _off_diag_dof_num = -1;
-
-//    std::cout << "jvar: " << jvar << "\n";
 
     if(jvar == _u1_int){
         _off_diag_dof_num = 0;
