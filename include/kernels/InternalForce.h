@@ -82,7 +82,7 @@ class InternalForce : public Kernel{
         unsigned int _phi_21_int;
 
         const MaterialProperty<std::vector<double>>              &_cauchy;           //The cauchy stress
-        const MaterialProperty<std::vector<std::vector<double>>> &_DcauchyDgrad_u;   //The gradient of the cauchy stress w.r.t. u
+        const MaterialProperty<std::vector<std::vector<double>>> &_DcauchyDgrad_u;   //The gradient of the cauchy stress w.r.t. the gradient of u
         const MaterialProperty<std::vector<std::vector<double>>> &_DcauchyDphi;      //The gradient of the cauchy stress w.r.t. the micro-deformation tensor
         const MaterialProperty<std::vector<std::vector<double>>> &_DcauchyDgrad_phi; //The gradient of the cauchy stress w.r.t. the spatial gradient of the micro-deformation tensor
 
