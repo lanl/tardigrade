@@ -283,10 +283,13 @@ void compare_matrices(const std::vector<std::vector<double>> &M1, const std::vec
 
     if (M1.size() != M2.size()){mooseError("Matricies of different sizes cannot be compared!");}
     for (int i=0; i<M1.size(); i++){compare_vectors(M1[i],M2[i],tmp);}
-    if (tmp>1e-3){std::cout << "###################################################"
-                            << "#    WARNING: POOR QUALITY JACOBIAN DISCOVERED    #"
-                            << "###################################################\n";}
     std::cout << "relative error: " << tmp << "\n";
+    if (tmp>1e-3){
+                  std::cout << "###################################################"
+                            << "#    WARNING: POOR QUALITY JACOBIAN DISCOVERED    #"
+                            << "###################################################\n";
+                  mooseError("Poor quality stress jacobian discovered");
+                 }
 }
 
 void MicromorphicMaterial::computeQpProperties(){
