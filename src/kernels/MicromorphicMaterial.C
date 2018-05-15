@@ -23,6 +23,12 @@ InputParameters
 validParams<MicromorphicMaterial>(){
     InputParameters params = validParams<Material>();
 
+    params.set<bool>("use_displaced_mesh") = true; //TODO: Note that this is hard-coded such that we will always be using the
+                                                   //      gradient w.r.t. the current coordinates. We might want to add a 
+                                                   //      more general approach which allows the user to implement a 
+                                                   //      total-Lagrangian formulation if desired. This would make the 
+                                                   //      implementation faster but potentially could add confusion.
+
     // Vectors of material properties
     params.addRequiredParam<std::vector<Real>>(
         "material_fparameters", "The vector of floating point material parameters required for the stiffness matrices");
@@ -213,6 +219,9 @@ void MicromorphicMaterial::computeQpProperties(){
     double __grad_phi[9][3];
 
     RealVectorValue tmp_grad;
+
+    //std::cout << "coords: " << _q_point[_qp](0) << " " << _q_point[_qp](1) << " " << _q_point[_qp](2) << "\n";
+    //std::cout << "u:      " << _u1[_qp] << " " << _u2[_qp] << " " << _u3[_qp] << "\n";
 
     //Copy over the gradient of u
     for (int i=0; i<3; i++){__grad_u[0][i] = _grad_u1[_qp](i);}

@@ -24,6 +24,7 @@ template<>
 InputParameters
 validParams<InternalForce>(){
     InputParameters params = validParams<Kernel>();
+    params.set<bool>("use_displaced_mesh") = true; //TODO: See commments on this in MicromorphicMaterial.C
     params.addRequiredParam<int>("component", "The component of the internal force vector");
     params.addRequiredParam<int>("dof_num",   "The degree of freedom to use for the diagonal jacobian calculation");
     params.addParam<bool>("MMS", false,       "The flag for whether the run will be using the method of manufactured solutions");

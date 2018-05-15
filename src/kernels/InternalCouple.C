@@ -25,6 +25,7 @@ InputParameters
 validParams<InternalCouple>(){
 //    std::cout << "In InputParameters InternalCouple\n";
     InputParameters params = validParams<Kernel>();
+    params.set<bool>("use_displaced_mesh") = true;  //TODO: See comments on this in MicromorphicMaterial.C
     params.addRequiredParam<int>("component_i", "The i component of the internal couple tensor");
     params.addRequiredParam<int>("component_j", "The j component of the internal couple tensor");
     params.addRequiredParam<int>("dof_num",   "The degree of freedom to use for the diagonal jacobian calculation");
