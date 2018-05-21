@@ -25,7 +25,6 @@ InputParameters
 validParams<InternalCouple>(){
 //    std::cout << "In InputParameters InternalCouple\n";
     InputParameters params = validParams<Kernel>();
-    params.set<bool>("use_displaced_mesh") = true;  //TODO: See comments on this in MicromorphicMaterial.C
     params.addRequiredParam<int>("component_i", "The i component of the internal couple tensor");
     params.addRequiredParam<int>("component_j", "The j component of the internal couple tensor");
     params.addRequiredParam<int>("dof_num",   "The degree of freedom to use for the diagonal jacobian calculation");
@@ -76,12 +75,15 @@ InternalCouple::InternalCouple(const InputParameters & parameters)
                                         : 100),
         _phi_21_int(isCoupled("phi_21") ? coupled("phi_21")
                                         : 100),
-        _cauchy(getMaterialProperty<std::vector<double>>("cauchy")),
-        _s(getMaterialProperty<std::vector<double>>("s")),
-        _m(getMaterialProperty<std::vector<double>>("m")),
-        _DcauchyDgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DcauchyDgrad_u")),
-        _DcauchyDphi(getMaterialProperty<std::vector<std::vector<double>>>("DcauchyDphi")),
-        _DcauchyDgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DcauchyDgrad_phi")),
+        _deformation_gradient(getMaterialProperty<std::vector<std::vector<double>>>("deformation_gradient")),
+        _micro_displacement(getMaterialProperty<std::vector<double>>("micro_displacement")),
+        _gradient_micro_displacement(getMaterialProperty<std::vector<std::vector<double>>>("gradient_micro_displacement")),
+        _PK2(getMaterialProperty<std::vector<double>>("PK2")),
+        _SIGMA(getMaterialProperty<std::vector<double>>("SIGMA")),
+        _M(getMaterialProperty<std::vector<double>>("M")),
+        _DPK2Dgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DPK2Dgrad_u")),
+        _DPK2Dphi(getMaterialProperty<std::vector<std::vector<double>>>("DPK2Dphi")),
+        _DPK2Dgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DPK2Dgrad_phi")),
         _DsDgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DsDgrad_u")),
         _DsDphi(getMaterialProperty<std::vector<std::vector<double>>>("DsDphi")),
         _DsDgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DsDgrad_phi")),
@@ -160,10 +162,24 @@ Real InternalCouple::computeQpJacobian(){
         detadx[indx] = _grad_phi[_j][_qp](indx);
     }
 
+    //Extract the displacement gradient and gradient of micro-displacement
+    double __grad_u[3][3];
+    double __grad_phi[9][3];
+    for (int i=0; i<3; i++){
+        for (int j=0; j<3; j++){
+            __grad_u[i][j] = __grad_u_v[_qp][i][j];
+        }
+    }
+    for (int i=0; i<9; i++){
+        for (int j=0; j<3; j++){
+            __grad_phi[i][j] = __grad_phi_v[_qp][i][j];
+        }
+    }
 
     balance_equations::compute_internal_couple_jacobian(_component_i,         _component_j,      _dof_num, 
                                                         _test[_i][_qp],        dNdx,             _phi[_j][_qp],          detadx,
-                                                        _DcauchyDgrad_u[_qp], _DcauchyDphi[_qp], _DcauchyDgrad_phi[_qp],
+                                                        __grad_u,             __grad_phi,
+                                                        _DPK2Dgrad_u[_qp], _DPK2Dphi[_qp], _DPK2Dgrad_phi[_qp],
                                                         _DsDgrad_u[_qp],      _DsDphi[_qp],      _DsDgrad_phi[_qp],
                                                         _DmDgrad_u[_qp],      _DmDphi[_qp],      _DmDgrad_phi[_qp],
                                                         dcdUint);
@@ -227,10 +243,25 @@ Real InternalCouple::computeQpOffDiagJacobian(unsigned int jvar){
         detadx[indx] = _grad_phi[_j][_qp](indx);
     }
 
+    //Extract the displacement gradient and gradient of micro-displacement
+    double __grad_u[3][3];
+    double __grad_phi[9][3];
+    for (int i=0; i<3; i++){
+        for (int j=0; j<3; j++){
+            __grad_u[i][j] = __grad_u_v[_qp][i][j];
+        }
+    }
+    for (int i=0; i<9; i++){
+        for (int j=0; j<3; j++){
+            __grad_phi[i][j] = __grad_phi_v[_qp][i][j];
+        }
+    }
+
     if(_off_diag_dof_num >= 0){
         balance_equations::compute_internal_couple_jacobian(_component_i,         _component_j,      _off_diag_dof_num,
                                                             _test[_i][_qp],        dNdx,             _phi[_j][_qp],          detadx,
-                                                            _DcauchyDgrad_u[_qp], _DcauchyDphi[_qp], _DcauchyDgrad_phi[_qp],
+                                                            __grad_u,             __grad_phi,
+                                                            _DPK2Dgrad_u[_qp], _DPK2Dphi[_qp], _DPK2Dgrad_phi[_qp],
                                                             _DsDgrad_u[_qp],      _DsDphi[_qp],      _DsDgrad_phi[_qp],
                                                             _DmDgrad_u[_qp],      _DmDphi[_qp],      _DmDgrad_phi[_qp],
                                                             dcdUint);

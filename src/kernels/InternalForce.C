@@ -24,7 +24,6 @@ template<>
 InputParameters
 validParams<InternalForce>(){
     InputParameters params = validParams<Kernel>();
-    params.set<bool>("use_displaced_mesh") = true; //TODO: See commments on this in MicromorphicMaterial.C
     params.addRequiredParam<int>("component", "The component of the internal force vector");
     params.addRequiredParam<int>("dof_num",   "The degree of freedom to use for the diagonal jacobian calculation");
     params.addParam<bool>("MMS", false,       "The flag for whether the run will be using the method of manufactured solutions");
@@ -73,11 +72,14 @@ InternalForce::InternalForce(const InputParameters & parameters)
                                         : 100),
         _phi_21_int(isCoupled("phi_21") ? coupled("phi_21")
                                         : 100),
-        _cauchy(getMaterialProperty<std::vector<double>>("cauchy")),
-        _DcauchyDgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DcauchyDgrad_u")),
-        _DcauchyDphi(getMaterialProperty<std::vector<std::vector<double>>>("DcauchyDphi")),
-        _DcauchyDgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DcauchyDgrad_phi")),
-        _cauchy_MMS(getMaterialProperty<std::vector<double>>("cauchy_MMS"))
+        _deformation_gradient(getMaterialProperty<std::vector<std::vector<double>>>("deformation_gradient")),
+        _micro_displacement(getMaterialProperty<std::vector<double>>("micro_displacement")),
+        _grad_micro_displacement(getMaterialProperty<std::vector<std::vector<double>>>("gradient_micro_displacement")),
+        _PK2(getMaterialProperty<std::vector<double>>("PK2")),
+        _DPK2Dgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DPK2Dgrad_u")),
+        _DPK2Dphi(getMaterialProperty<std::vector<std::vector<double>>>("DPK2Dphi")),
+        _DPK2Dgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DPK2Dgrad_phi")),
+        _PK2_MMS(getMaterialProperty<std::vector<double>>("PK2_MMS"))
     {
     /*!
     =====================
@@ -111,14 +113,14 @@ Real InternalForce::computeQpResidual(){
     Real fint_MMS;
     
     //Copy the test function so that the balance equation function can read it
-    double dNdx[3];
-    for (int indx=0; indx<3; indx++){dNdx[indx] = _grad_test[_i][_qp](indx);}//p+i);}
+    double dNdX[3];
+    for (int indx=0; indx<3; indx++){dNdX[indx] = _grad_test[_i][_qp](indx);}//p+i);}
 
-    balance_equations::compute_internal_force(_component, dNdx, _cauchy[_qp], fint);
+    balance_equations::compute_internal_force(_component, dNdX, _deformation_gradient[_qp], _PK2[_qp], fint);
     //std::cout << "fint: " << fint << "\n";
 
     if(_MMS){
-        balance_equations::compute_internal_force(_component, dNdx, _cauchy_MMS[_qp], fint_MMS);
+        balance_equations::compute_internal_force(_component, dNdX, _PK2_MMS[_qp], fint_MMS);
         fint -= fint_MMS;
         //std::cout << "fint - fint_MMS: " << fint << "\n";
     }
@@ -138,16 +140,18 @@ Real InternalForce::computeQpJacobian(){
     Real dfdUint;
 
     //Copy the test and interpolation functions so that the balance equation function can read it
-    double dNdx[3];
-    double detadx[3];
+    double dNdX[3];
+    double detadX[3];
     for (int indx=0; indx<3; indx++){
-        dNdx[indx]   = _grad_test[_i][_qp](indx);
-        detadx[indx] = _grad_phi[_j][_qp](indx);
+        dNdX[indx]   = _grad_test[_i][_qp](indx);
+        detadX[indx] = _grad_phi[_j][_qp](indx);
     }
 
-    balance_equations::compute_internal_force_jacobian(_component,           _dof_num, 
-                                                       _test[_i][_qp],       dNdx,                _phi[_j][_qp],          detadx,
-                                                       _DcauchyDgrad_u[_qp], _DcauchyDphi[_qp],   _DcauchyDgrad_phi[_qp], dfdUint);
+    balance_equations::compute_internal_force_jacobian(                _component,                 _dof_num, 
+                                                                   _test[_i][_qp],                     dNdX,     _phi[_j][_qp],   detadX,
+                                                       _deformation_gradient[_qp], _micro_displacement[_qp],
+                                                                        _PK2[_qp],        _DPK2Dgrad_u[_qp],    _DPK2Dphi[_qp],   _DPK2Dgrad_phi[_qp],
+                                                                         dfdUint);
     return dfdUint;
 }
 
@@ -203,16 +207,19 @@ Real InternalForce::computeQpOffDiagJacobian(unsigned int jvar){
 
 
     //Copy the test and interpolation functions so that the balance equation function can read it
-    double dNdx[3];
-    double detadx[3];
+    double dNdX[3];
+    double detadX[3];
     for (int indx=0; indx<3; indx++){
-        dNdx[indx]   = _grad_test[_i][_qp](indx);
-        detadx[indx] = _grad_phi[_j][_qp](indx);
+        dNdX[indx]   = _grad_test[_i][_qp](indx);
+        detadX[indx] = _grad_phi[_j][_qp](indx);
     }
+
     if(_off_diag_dof_num>=0){
-        balance_equations::compute_internal_force_jacobian(_component,           _off_diag_dof_num, 
-                                                           _test[_i][_qp],       dNdx, _phi[_j][_qp],          detadx,
-                                                           _DcauchyDgrad_u[_qp], _DcauchyDphi[_qp],   _DcauchyDgrad_phi[_qp], dfdUint);
+        balance_equations::compute_internal_force_jacobian(                _component,        _off_diag_dof_num, 
+                                                                       _test[_i][_qp],                     dNdX,     _phi[_j][_qp],   detadX,
+                                                           _deformation_gradient[_qp], _micro_displacement[_qp],
+                                                                            _PK2[_qp],        _DPK2Dgrad_u[_qp],    _DPK2Dphi[_qp],   _DPK2Dgrad_phi[_qp],
+                                                                             dfdUint);
         return dfdUint;
     }
     else{

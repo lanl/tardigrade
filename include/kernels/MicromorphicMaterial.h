@@ -85,22 +85,31 @@ class MicromorphicMaterial : public Material{
         const VariableGradient & _grad_phi_31;
         const VariableGradient & _grad_phi_21;
 
+        //Fundamental deformation measures
+        MaterialProperty<std::vector<std::vector<double>>> & _deformation_gradient;
+        MaterialProperty<std::vector<std::vector<double>>> & _micro_displacement;
+        MaterialProperty<std::vector<std::vector<double>>> & _gradient_micro_displacement;
+
         //Stresses (Material Properties in MOOSE parlance)
         MaterialProperty<std::vector<double>>               & _cauchy;
         MaterialProperty<std::vector<double>>               & _s;
         MaterialProperty<std::vector<double>>               & _m;
 
-        MaterialProperty<std::vector<std::vector<double>>>  & _DcauchyDgrad_u;
-        MaterialProperty<std::vector<std::vector<double>>>  & _DcauchyDphi;
-        MaterialProperty<std::vector<std::vector<double>>>  & _DcauchyDgrad_phi;
+        MaterialProperty<std::vector<double>>               & _PK2;
+        MaterialProperty<std::vector<double>>               & _SIGMA;
+        MaterialProperty<std::vector<double>>               & _M;
 
-        MaterialProperty<std::vector<std::vector<double>>>  & _DsDgrad_u;
-        MaterialProperty<std::vector<std::vector<double>>>  & _DsDphi;
-        MaterialProperty<std::vector<std::vector<double>>>  & _DsDgrad_phi;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DPK2Dgrad_u;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DPK2Dphi;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DPK2Dgrad_phi;
 
-        MaterialProperty<std::vector<std::vector<double>>>  & _DmDgrad_u;
-        MaterialProperty<std::vector<std::vector<double>>>  & _DmDphi;
-        MaterialProperty<std::vector<std::vector<double>>>  & _DmDgrad_phi;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DSIGMADgrad_u;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DSIGMADphi;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DSIGMADgrad_phi;
+
+        MaterialProperty<std::vector<std::vector<double>>>  & _DMDgrad_u;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DMDphi;
+        MaterialProperty<std::vector<std::vector<double>>>  & _DMDgrad_phi;
 
         //TODO: Add additional values
         MaterialProperty<std::vector<std::vector<double>>>  & _ADD_TERMS;
@@ -121,9 +130,9 @@ class MicromorphicMaterial : public Material{
         Function & _phi_21_fxn;
 
         //MMS stress measures
-        MaterialProperty<std::vector<double>> & _cauchy_MMS;
-        MaterialProperty<std::vector<double>> & _s_MMS;
-        MaterialProperty<std::vector<double>> & _m_MMS;
+        MaterialProperty<std::vector<double>> & _PK2_MMS;
+        MaterialProperty<std::vector<double>> & _SIGMA_MMS;
+        MaterialProperty<std::vector<double>> & _M_MMS;
         MaterialProperty<std::vector<std::vector<double>>> & _ADD_TERMS_MMS;
 };
 

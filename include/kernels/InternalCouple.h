@@ -36,12 +36,12 @@ class InternalCouple : public Kernel{
 
     We define the kernel for the internal force to be
 
-    psi (sigma_{ij} - s_{ij}) - -psi_{,k} m_{kji}
+    -(psi (PK2_{ij} - SIGMA_{ij}) - psi_{,k} M_{kji})
 
-    where psi is the test function, sigma is the cauchy stress, s is the 
-    symmetric stress, and m is the higher order couple stress. Note that 
-    this is a vector definition so we will need to define multiple kernels 
-    each obtaining a specific component of the residual.
+    where psi is the test function, PK2 is the second piola-kirchoff stress,
+    SIGMA is the symmetric stress, and M is the higher order couple stress.
+    Note that this is a vector definition so we will need to define multiple 
+    kernels each obtaining a specific component of the residual.
     */
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -82,22 +82,28 @@ class InternalCouple : public Kernel{
         unsigned int _phi_31_int;
         unsigned int _phi_21_int;
 
-        const MaterialProperty<std::vector<double>>              &_cauchy;           //The cauchy stress
-        const MaterialProperty<std::vector<double>>              &_s;                //The symmetric stress
-        const MaterialProperty<std::vector<double>>              &_m;                //The higher order couple stress
-        const MaterialProperty<std::vector<std::vector<double>>> &_DcauchyDgrad_u;   //The gradient of the cauchy stress w.r.t. u
-        const MaterialProperty<std::vector<std::vector<double>>> &_DcauchyDphi;      //The gradient of the cauchy stress w.r.t. the micro-deformation tensor
-        const MaterialProperty<std::vector<std::vector<double>>> &_DcauchyDgrad_phi; //The gradient of the cauchy stress w.r.t. the spatial gradient of the micro-deformation tensor
-        const MaterialProperty<std::vector<std::vector<double>>> &_DsDgrad_u;        //The gradient of the symmetric stress w.r.t. u
-        const MaterialProperty<std::vector<std::vector<double>>> &_DsDphi;           //The gradient of the symmetric stress w.r.t. the micro-deformation tensor
-        const MaterialProperty<std::vector<std::vector<double>>> &_DsDgrad_phi;      //The gradient of the symmetric stress w.r.t. the spatial gradient of the micro-deformation tensor
-        const MaterialProperty<std::vector<std::vector<double>>> &_DmDgrad_u;        //The gradient of the higher order couple stress w.r.t. u
-        const MaterialProperty<std::vector<std::vector<double>>> &_DmDphi;           //The gradient of the higher order couple stress w.r.t. the micro-deformation tensor
-        const MaterialProperty<std::vector<std::vector<double>>> &_DmDgrad_phi;      //The gradient of the higher order couple stress w.r.t. the spatial gradient of the micro-deformation tensor
+        //Deformation measures
+        const MaterialProperty<std::vector<std::vector<double>>> &_deformation_gradient;        //The gradient of the displacement
+        const MaterialProperty<std::vector<double>>              &_micro_displacement;          //The micro-displacement
+        const MaterialProperty<std::vector<std::vector<double>>> &_gradient_micro_displacement; //The gradient of the micro-displacement
 
-        const MaterialProperty<std::vector<double>>              &_cauchy_MMS;       //The cauchy stress
-        const MaterialProperty<std::vector<double>>              &_s_MMS;            //The symmetric stress
-        const MaterialProperty<std::vector<double>>              &_m_MMS;            //The higher order couple stress
+        //Stress measures and their gradients
+        const MaterialProperty<std::vector<double>>              &_PK2;             //The PK2 stress
+        const MaterialProperty<std::vector<double>>              &_SIGMA;           //The symmetric stress
+        const MaterialProperty<std::vector<double>>              &_M;               //The higher order couple stress
+        const MaterialProperty<std::vector<std::vector<double>>> &_DPK2Dgrad_u;     //The gradient of the PK2 stress w.r.t. u
+        const MaterialProperty<std::vector<std::vector<double>>> &_DPK2Dphi;        //The gradient of the PK2 stress w.r.t. the micro-deformation tensor
+        const MaterialProperty<std::vector<std::vector<double>>> &_DPK2Dgrad_phi;   //The gradient of the PK2 stress w.r.t. the spatial gradient of the micro-deformation tensor
+        const MaterialProperty<std::vector<std::vector<double>>> &_DSIGMADgrad_u;   //The gradient of the symmetric stress w.r.t. u
+        const MaterialProperty<std::vector<std::vector<double>>> &_DSIGMADphi;      //The gradient of the symmetric stress w.r.t. the micro-deformation tensor
+        const MaterialProperty<std::vector<std::vector<double>>> &_DSIGMADgrad_phi; //The gradient of the symmetric stress w.r.t. the spatial gradient of the micro-deformation tensor
+        const MaterialProperty<std::vector<std::vector<double>>> &_DMDgrad_u;       //The gradient of the higher order couple stress w.r.t. u
+        const MaterialProperty<std::vector<std::vector<double>>> &_DMDphi;          //The gradient of the higher order couple stress w.r.t. the micro-deformation tensor
+        const MaterialProperty<std::vector<std::vector<double>>> &_DMDgrad_phi;     //The gradient of the higher order couple stress w.r.t. the spatial gradient of the micro-deformation tensor
+
+        const MaterialProperty<std::vector<double>>              &_PK2_MMS;         //The PK2 stress
+        const MaterialProperty<std::vector<double>>              &_SIGMA_MMS;       //The symmetric stress
+        const MaterialProperty<std::vector<double>>              &_M_MMS;           //The higher order couple stress
 };
 
 #endif

@@ -81,12 +81,15 @@ class InternalForce : public Kernel{
         unsigned int _phi_31_int;
         unsigned int _phi_21_int;
 
-        const MaterialProperty<std::vector<double>>              &_cauchy;           //The cauchy stress
-        const MaterialProperty<std::vector<std::vector<double>>> &_DcauchyDgrad_u;   //The gradient of the cauchy stress w.r.t. the gradient of u
-        const MaterialProperty<std::vector<std::vector<double>>> &_DcauchyDphi;      //The gradient of the cauchy stress w.r.t. the micro-deformation tensor
-        const MaterialProperty<std::vector<std::vector<double>>> &_DcauchyDgrad_phi; //The gradient of the cauchy stress w.r.t. the spatial gradient of the micro-deformation tensor
+        const MaterialProperty<std::vector<std::vector<double>>> &_deformation_gradient;        //The deformation gradient
+        const MaterialProperty<std::vector<double>>              &_micro_displacement;          //The terms of the micro-displacement tensor
+        const MaterialProperty<std::vector<std::vector<double>>> &_gradient_micro_displacement; //The gradient of the micro-displacement tensor
+        const MaterialProperty<std::vector<double>>              &_PK2;                         //The PK2 stress
+        const MaterialProperty<std::vector<std::vector<double>>> &_DPK2Dgrad_u;                 //The gradient of the PK2 stress w.r.t. the gradient of u
+        const MaterialProperty<std::vector<std::vector<double>>> &_DPK2Dphi;                    //The gradient of the PK2 stress w.r.t. the micro-deformation tensor
+        const MaterialProperty<std::vector<std::vector<double>>> &_DPK2Dgrad_phi;               //The gradient of the PK2 stress w.r.t. the spatial gradient of the micro-deformation tensor
 
-        const MaterialProperty<std::vector<double>>              &_cauchy_MMS;       //The manufactured solutions cauchy stress
+        const MaterialProperty<std::vector<double>>              &_PK2_MMS;                     //The manufactured solutions PK2 stress
 };
 
 #endif
