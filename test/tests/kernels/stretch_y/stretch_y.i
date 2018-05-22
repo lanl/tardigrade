@@ -485,7 +485,7 @@
 #  petsc_options = '-snes_ksp_ew -ksp_monitor_true_residual -ksp_compute_singularvalues'# -pc_svd_monitor'
   petsc_options = '-ksp_monitor_true_residual -ksp_compute_singularvalues'# -pc_svd_monitor'
   petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart -print_linear_residuals'# -ksp_view_mat'
-  petsc_options_value = 'ilu      lu           1               101                false                  '# binary'
+  petsc_options_value = 'asm      lu           1               101                false                  '# binary'
 []
 
 [Outputs]
