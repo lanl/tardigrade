@@ -90,9 +90,9 @@ InternalCouple::InternalCouple(const InputParameters & parameters)
         _DmDgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DmDgrad_u")),
         _DmDphi(getMaterialProperty<std::vector<std::vector<double>>>("DmDphi")),
         _DmDgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DmDgrad_phi")),
-        _cauchy_MMS(getMaterialProperty<std::vector<double>>("cauchy_MMS")),
-        _s_MMS(getMaterialProperty<std::vector<double>>("s_MMS")),
-        _m_MMS(getMaterialProperty<std::vector<double>>("m_MMS"))
+        _PK2_MMS(getMaterialProperty<std::vector<double>>("PK2_MMS")),
+        _SIGMA_MMS(getMaterialProperty<std::vector<double>>("SIGMA_MMS")),
+        _M_MMS(getMaterialProperty<std::vector<double>>("M_MMS"))
     {
     /*!
     =====================
@@ -115,7 +115,7 @@ Real InternalCouple::computeQpResidual(){
     Compute the residual at the quadrature point for 
     the indicated component.
 
-    cint_ij = -(psi (sigma_ij - s_ij) -psi_k m_kji)
+    cint_ij = psi (PK2_ij - SIGMA_ij) -psi_k M_kji
 
     where i = _component_i
           j = _component_j
@@ -125,17 +125,19 @@ Real InternalCouple::computeQpResidual(){
     Real cint_MMS;
     
     //Copy the test function so that the balance equation function can read it
-    double dNdx[3];
-    for (int indx=0; indx<3; indx++){dNdx[indx] = _grad_test[_i][_qp](indx);}
+    double dNdX[3];
+    for (int indx=0; indx<3; indx++){dNdX[indx] = _grad_test[_i][_qp](indx);}
     
-    balance_equations::compute_internal_couple(_component_i, _component_j, _test[_i][_qp], dNdx, 
-                                               _cauchy[_qp], _s[_qp],      _m[_qp],
+    balance_equations::compute_internal_couple(_component_i,               _component_j,             _test[_i][_qp], dNdX,
+                                               _deformation_gradient[_qp], _micro_displacement[_qp],   
+                                               _PK2[_qp],                  _SIGMA[_qp],              _M[_qp],
                                                cint);
 
     if(_MMS){
         
-        balance_equations::compute_internal_couple(_component_i,     _component_j,     _test[_i][_qp], dNdx, 
-                                                   _cauchy_MMS[_qp], _s_MMS[_qp],      _m_MMS[_qp],
+        balance_equations::compute_internal_couple(_component_i,               _component_j,             _test[_i][_qp], dNdX,
+                                                   _deformation_gradient[_qp], _micro_displacement[_qp],
+                                                   _PK2_MMS[_qp],              _SIGMA_MMS[_qp],          _M_MMS[_qp],
                                                    cint_MMS);
         cint -= cint_MMS;
 //        std::cout << "cint - cint_MMS: " << cint << "\n";
@@ -155,33 +157,20 @@ Real InternalCouple::computeQpJacobian(){
     Real dcdUint;
     //mooseError("fail");
     //Copy the test and interpolation functions so that the balance equation function can read it
-    double dNdx[3];
-    double detadx[3];
+    double dNdX[3];
+    double detadX[3];
     for (int indx=0; indx<3; indx++){
-        dNdx[indx]   = _grad_test[_i][_qp](indx);
-        detadx[indx] = _grad_phi[_j][_qp](indx);
+        dNdX[indx]   = _grad_test[_i][_qp](indx);
+        detadX[indx] = _grad_phi[_j][_qp](indx);
     }
 
-    //Extract the displacement gradient and gradient of micro-displacement
-    double __grad_u[3][3];
-    double __grad_phi[9][3];
-    for (int i=0; i<3; i++){
-        for (int j=0; j<3; j++){
-            __grad_u[i][j] = __grad_u_v[_qp][i][j];
-        }
-    }
-    for (int i=0; i<9; i++){
-        for (int j=0; j<3; j++){
-            __grad_phi[i][j] = __grad_phi_v[_qp][i][j];
-        }
-    }
-
-    balance_equations::compute_internal_couple_jacobian(_component_i,         _component_j,      _dof_num, 
-                                                        _test[_i][_qp],        dNdx,             _phi[_j][_qp],          detadx,
-                                                        __grad_u,             __grad_phi,
-                                                        _DPK2Dgrad_u[_qp], _DPK2Dphi[_qp], _DPK2Dgrad_phi[_qp],
-                                                        _DsDgrad_u[_qp],      _DsDphi[_qp],      _DsDgrad_phi[_qp],
-                                                        _DmDgrad_u[_qp],      _DmDphi[_qp],      _DmDgrad_phi[_qp],
+    balance_equations::compute_internal_couple_jacobian(_component_i,               _component_j,             _dof_num, 
+                                                        _test[_i][_qp],             dNdX,                     _phi[_j][_qp],          detadX,
+                                                        _deformation_gradient[_qp], _micro_displacement[_qp],
+                                                        _PK2[_qp],                  _SIGMA[_qp],              _M[_qp],
+                                                        _DPK2Dgrad_u[_qp],          _DPK2Dphi[_qp],           _DPK2Dgrad_phi[_qp],
+                                                        _DSIGMADgrad_u[_qp],        _DSIGMADphi[_qp],         _DSIGMADgrad_phi[_qp],
+                                                        _DMDgrad_u[_qp],            _DMDphi[_qp],             _DMDgrad_phi[_qp],
                                                         dcdUint);
     return dcdUint;
 }
@@ -239,31 +228,18 @@ Real InternalCouple::computeQpOffDiagJacobian(unsigned int jvar){
     double dNdx[3];
     double detadx[3];
     for (int indx=0; indx<3; indx++){
-        dNdx[indx]   = _grad_test[_i][_qp](indx);
-        detadx[indx] = _grad_phi[_j][_qp](indx);
-    }
-
-    //Extract the displacement gradient and gradient of micro-displacement
-    double __grad_u[3][3];
-    double __grad_phi[9][3];
-    for (int i=0; i<3; i++){
-        for (int j=0; j<3; j++){
-            __grad_u[i][j] = __grad_u_v[_qp][i][j];
-        }
-    }
-    for (int i=0; i<9; i++){
-        for (int j=0; j<3; j++){
-            __grad_phi[i][j] = __grad_phi_v[_qp][i][j];
-        }
+        dNdX[indx]   = _grad_test[_i][_qp](indx);
+        detadX[indx] = _grad_phi[_j][_qp](indx);
     }
 
     if(_off_diag_dof_num >= 0){
-        balance_equations::compute_internal_couple_jacobian(_component_i,         _component_j,      _off_diag_dof_num,
-                                                            _test[_i][_qp],        dNdx,             _phi[_j][_qp],          detadx,
-                                                            __grad_u,             __grad_phi,
-                                                            _DPK2Dgrad_u[_qp], _DPK2Dphi[_qp], _DPK2Dgrad_phi[_qp],
-                                                            _DsDgrad_u[_qp],      _DsDphi[_qp],      _DsDgrad_phi[_qp],
-                                                            _DmDgrad_u[_qp],      _DmDphi[_qp],      _DmDgrad_phi[_qp],
+        balance_equations::compute_internal_couple_jacobian(_component_i,               _component_j,         _off_diag_dof_num, 
+                                                            _test[_i][_qp],             dNdX,                     _phi[_j][_qp],          detadX,
+                                                            _deformation_gradient[_qp], _micro_displacement[_qp],
+                                                            _PK2[_qp],                  _SIGMA[_qp],              _M[_qp],
+                                                            _DPK2Dgrad_u[_qp],          _DPK2Dphi[_qp],           _DPK2Dgrad_phi[_qp],
+                                                            _DSIGMADgrad_u[_qp],        _DSIGMADphi[_qp],         _DSIGMADgrad_phi[_qp],
+                                                            _DMDgrad_u[_qp],            _DMDphi[_qp],             _DMDgrad_phi[_qp],
                                                             dcdUint);
         return dcdUint;
     }
