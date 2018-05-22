@@ -76,7 +76,7 @@ InternalCouple::InternalCouple(const InputParameters & parameters)
         _phi_21_int(isCoupled("phi_21") ? coupled("phi_21")
                                         : 100),
         _deformation_gradient(getMaterialProperty<std::vector<std::vector<double>>>("deformation_gradient")),
-        _micro_displacement(getMaterialProperty<std::vector<double>>("micro_displacement")),
+        _micro_displacement(getMaterialProperty<std::vector<std::vector<double>>>("micro_displacement")),
         _gradient_micro_displacement(getMaterialProperty<std::vector<std::vector<double>>>("gradient_micro_displacement")),
         _PK2(getMaterialProperty<std::vector<double>>("PK2")),
         _SIGMA(getMaterialProperty<std::vector<double>>("SIGMA")),
@@ -84,12 +84,12 @@ InternalCouple::InternalCouple(const InputParameters & parameters)
         _DPK2Dgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DPK2Dgrad_u")),
         _DPK2Dphi(getMaterialProperty<std::vector<std::vector<double>>>("DPK2Dphi")),
         _DPK2Dgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DPK2Dgrad_phi")),
-        _DsDgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DsDgrad_u")),
-        _DsDphi(getMaterialProperty<std::vector<std::vector<double>>>("DsDphi")),
-        _DsDgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DsDgrad_phi")),
-        _DmDgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DmDgrad_u")),
-        _DmDphi(getMaterialProperty<std::vector<std::vector<double>>>("DmDphi")),
-        _DmDgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DmDgrad_phi")),
+        _DSIGMADgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DSIGMADgrad_u")),
+        _DSIGMADphi(getMaterialProperty<std::vector<std::vector<double>>>("DSIGMADphi")),
+        _DSIGMADgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DSIGMADgrad_phi")),
+        _DMDgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DMDgrad_u")),
+        _DMDphi(getMaterialProperty<std::vector<std::vector<double>>>("DMDphi")),
+        _DMDgrad_phi(getMaterialProperty<std::vector<std::vector<double>>>("DMDgrad_phi")),
         _PK2_MMS(getMaterialProperty<std::vector<double>>("PK2_MMS")),
         _SIGMA_MMS(getMaterialProperty<std::vector<double>>("SIGMA_MMS")),
         _M_MMS(getMaterialProperty<std::vector<double>>("M_MMS"))
@@ -225,8 +225,8 @@ Real InternalCouple::computeQpOffDiagJacobian(unsigned int jvar){
         _off_diag_dof_num = 11;
     }
 
-    double dNdx[3];
-    double detadx[3];
+    double dNdX[3];
+    double detadX[3];
     for (int indx=0; indx<3; indx++){
         dNdX[indx]   = _grad_test[_i][_qp](indx);
         detadX[indx] = _grad_phi[_j][_qp](indx);

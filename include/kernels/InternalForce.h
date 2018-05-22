@@ -82,7 +82,7 @@ class InternalForce : public Kernel{
         unsigned int _phi_21_int;
 
         const MaterialProperty<std::vector<std::vector<double>>> &_deformation_gradient;        //The deformation gradient
-        const MaterialProperty<std::vector<double>>              &_micro_displacement;          //The terms of the micro-displacement tensor
+        const MaterialProperty<std::vector<std::vector<double>>> &_micro_displacement;          //The terms of the micro-displacement tensor
         const MaterialProperty<std::vector<std::vector<double>>> &_gradient_micro_displacement; //The gradient of the micro-displacement tensor
         const MaterialProperty<std::vector<double>>              &_PK2;                         //The PK2 stress
         const MaterialProperty<std::vector<std::vector<double>>> &_DPK2Dgrad_u;                 //The gradient of the PK2 stress w.r.t. the gradient of u

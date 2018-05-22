@@ -154,14 +154,14 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
     _grad_phi_31(coupledGradient("phi_31")),
     _grad_phi_21(coupledGradient("phi_21")),
     _deformation_gradient(declareProperty<std::vector<std::vector<double>>>("deformation_gradient")),
-    _micro_displacement(declareProperty<std::vector<double>>("micro_displacement")),
+    _micro_displacement(declareProperty<std::vector<std::vector<double>>>("micro_displacement")),
     _gradient_micro_displacement(declareProperty<std::vector<std::vector<double>>>("gradient_micro_displacement")),
-    _PK2(declareProperty<std::vector<double>>("PK2")),
-    _SIGMA(declareProperty<std::vector<double>>("SIGMA")),
-    _M(declareProperty<std::vector<double>>("M")),
     _cauchy(declareProperty<std::vector<double>>("cauchy")),
     _s(declareProperty<std::vector<double>>("s")),
     _m(declareProperty<std::vector<double>>("m")),
+    _PK2(declareProperty<std::vector<double>>("PK2")),
+    _SIGMA(declareProperty<std::vector<double>>("SIGMA")),
+    _M(declareProperty<std::vector<double>>("M")),
     _DPK2Dgrad_u(declareProperty<std::vector<std::vector<double>>>("DPK2Dgrad_u")),
     _DPK2Dphi(declareProperty<std::vector<std::vector<double>>>("DPK2Dphi")),
     _DPK2Dgrad_phi(declareProperty<std::vector<std::vector<double>>>("DPK2Dgrad_phi")),
@@ -186,8 +186,8 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
     _phi_31_fxn(getFunction("phi_31_fxn")),
     _phi_21_fxn(getFunction("phi_21_fxn")),
     _PK2_MMS(declareProperty<std::vector<double>>("PK2_MMS")),
-    _SIGMA_MMS(declareProperty<std::vector<double>>("s_MMS")),
-    _M_MMS(declareProperty<std::vector<double>>("m_MMS")),
+    _SIGMA_MMS(declareProperty<std::vector<double>>("SIGMA_MMS")),
+    _M_MMS(declareProperty<std::vector<double>>("M_MMS")),
     _ADD_TERMS_MMS(declareProperty<std::vector<std::vector<double>>>("ADD_TERMS_MMS"))
 
 {
@@ -344,9 +344,9 @@ void MicromorphicMaterial::computeQpProperties(){
     //Store deformation values for use by other kernels
 
     //Copy the deformation gradient
-    __grad_u_v[_qp].resize(3);
+    _deformation_gradient[_qp].resize(3);
     for (int i=0; i<3; i++){
-        __grad_u_v[_qp][i].resize(3);
+        _deformation_gradient[_qp][i].resize(3);
         for (int j=0; j<3; j++){
             _deformation_gradient[_qp][i][j] = __grad_u[i][j];
         }
@@ -359,7 +359,6 @@ void MicromorphicMaterial::computeQpProperties(){
                                   {8,1,3},
                                   {7,6,2}};
 
-    int Ihat;
     _micro_displacement[_qp].resize(3);
     for (int i=0; i<3; i++){
         _micro_displacement[_qp][i].resize(3);
@@ -371,9 +370,9 @@ void MicromorphicMaterial::computeQpProperties(){
     for (int i=0; i<3; i++){_micro_displacement[_qp][i][i] += 1.;}
 
     //Copy the gradient of the micro-displacement
-    __grad_phi_v[_qp].resize(9);
+    _gradient_micro_displacement[_qp].resize(9);
     for (int i=0; i<9; i++){
-        __grad_phi_v[_qp][i].resize(3);
+        _gradient_micro_displacement[_qp][i].resize(3);
         for (int j=0; j<3; j++){
             _gradient_micro_displacement[_qp][i][j] = __grad_phi[i][j];
         }

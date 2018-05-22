@@ -84,7 +84,7 @@ class InternalCouple : public Kernel{
 
         //Deformation measures
         const MaterialProperty<std::vector<std::vector<double>>> &_deformation_gradient;        //The gradient of the displacement
-        const MaterialProperty<std::vector<double>>              &_micro_displacement;          //The micro-displacement
+        const MaterialProperty<std::vector<std::vector<double>>> &_micro_displacement;          //The micro-displacement
         const MaterialProperty<std::vector<std::vector<double>>> &_gradient_micro_displacement; //The gradient of the micro-displacement
 
         //Stress measures and their gradients
