@@ -9,9 +9,9 @@
   type = GeneratedMesh
   displacements = 'disp_x disp_y disp_z'
   dim = 3
-  nx = 8
-  ny = 8
-  nz = 8
+  nx = 1
+  ny = 1
+  nz = 1
 #  file = unit_cube.e
 []
 
@@ -19,24 +19,24 @@
   [./disp_x]
 #    [./InitialCondition]
 #      type = RandomIC
-#      min  = -1
-#      max  =  1
+#      min  = -0.1
+#      max  =  0.1
 #    [../]
 #    scaling = 1e-4
   [../]
   [./disp_y]
 #    [./InitialCondition]
 #      type = RandomIC
-#      min  = -1
-#      max  =  1
+#      min  = -0.1
+#      max  =  0.1
 #    [../]
 #    scaling = 1e-4
   [../]
   [./disp_z]
 #    [./InitialCondition]
 #      type = RandomIC
-#      min  = -1
-#      max  =  1
+#      min  = -0.1
+#      max  =  0.1
 #    [../]
 #    scaling = 1e-4
   [../]
@@ -45,8 +45,8 @@
 #    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
-#      min  = -1
-#      max  =  1
+#      min  = -0.1
+#      max  =  0.1
 #    [../]
 #    scaling = 1e-5
   [../]
@@ -55,8 +55,8 @@
 #    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
-#      min  = -1
-#      max  =  1
+#      min  = -0.1
+#      max  =  0.1
 #    [../]
 #    scaling = 1e-5
   [../]
@@ -65,8 +65,8 @@
 #    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
-#      min  = -1
-#      max  =  1
+#      min  = -0.1
+#      max  =  0.1
 #    [../]
 #    scaling = 1e-5
   [../]
@@ -75,8 +75,8 @@
 #    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
-#      min  = -1
-#      max  =  1
+#      min  = -0.1
+#      max  =  0.1
 #    [../]
 #    scaling = 1e-1
   [../]
@@ -85,8 +85,8 @@
 #    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
-#      min  = -1
-#      max  =  1
+#      min  = -0.1
+#      max  =  0.1
 #    [../]
 #    scaling = 1e-1
   [../]
@@ -95,8 +95,8 @@
 #    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
-#      min  = -1
-#      max  =  1
+#      min  = -0.1
+#      max  =  0.1
 #    [../]
 #    scaling = 1e-1
   [../]
@@ -105,8 +105,8 @@
 #    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
-#      min  = -1
-#      max  =  1
+#      min  = -0.1
+#      max  =  0.1
 #    [../]
 #    scaling = 1e-1
   [../]
@@ -115,8 +115,8 @@
 #    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
-#      min  = -1
-#      max  =  1
+#      min  = -0.1
+#      max  =  0.1
 #    [../]
 #    scaling = 1e-1
   [../]
@@ -125,8 +125,8 @@
 #    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
-#      min  = -1
-#      max  =  1
+#      min  = -0.1
+#      max  =  0.1
 #    [../]
 #    scaling = 1e-1
   [../]
@@ -465,11 +465,12 @@
 []
 
 [Executioner]
+#  type = Steady
   type = Transient
   num_steps = 10
   dt        = 0.1
-#  solve_type = 'PJFNK'
-  solve_type = 'NEWTON'
+  solve_type = 'PJFNK'
+#  solve_type = 'NEWTON'
 #  nl_rel_tol = 1e-8
 #  nl_abs_tol = 1e-8
 #  nl_max_its = 100
@@ -484,7 +485,7 @@
 #  petsc_options = '-snes_ksp_ew -ksp_monitor_true_residual -ksp_compute_singularvalues'# -pc_svd_monitor'
   petsc_options = '-ksp_monitor_true_residual -ksp_compute_singularvalues'# -pc_svd_monitor'
   petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart -print_linear_residuals'# -ksp_view_mat'
-  petsc_options_value = 'asm      lu           1               101                false                  '# binary'
+  petsc_options_value = 'ilu      lu           1               101                false                  '# binary'
 []
 
 [Outputs]
