@@ -386,7 +386,7 @@
 []
 
 [BCs]
-#  active = 'left_x left_y back_z bottom_x bottom_y top_x top_y'
+  active = 'left_x left_y back_z bottom_x bottom_y top_x top_y'
   [./left_x]
     type     = FunctionDirichletBC
     variable = disp_x
@@ -460,11 +460,11 @@
   [../]
   [./moving_x]
     type  = ParsedFunction
-    value = 'x*(cos(pi*t)-1)-y*sin(pi*t)'
+    value = 'x*(cos(pi*t)-1)-(1+0.05*t)*y*sin(pi*t)'
   [../]
   [./moving_y]
     type  = ParsedFunction
-    value = 'x*sin(pi*t)+y*(cos(pi*t)-1)'
+    value = 'x*sin(pi*t)+(1+0.05*t)*y*(cos(pi*t)-1)'
   [../]
 []
 
@@ -511,8 +511,8 @@
   solve_type = 'PJFNK'
   [./TimeStepper]
     type = IterationAdaptiveDT
-#    dt   = 0.5
     dt   = 0.01
+#    dt   = 0.01
     cutback_factor     = 0.4
     growth_factor      = 1.2
     optimal_iterations = 5
