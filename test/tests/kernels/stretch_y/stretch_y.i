@@ -387,7 +387,7 @@
 []
 
 [BCs]
-  active = 'left_x back_z bottom_y top_y'
+  active = 'left_x back_z bottom_y bottom_x top_y top_x'
   [./left_x]
     #type = DirichletBC
     type = PresetBC
@@ -404,6 +404,14 @@
     #boundary = 'left right bottom top front back'
     value = 0
   [../]
+  [./bottom_x]
+    #type = DirichletBC
+    type = PresetBC
+    variable = disp_x
+    boundary = 'bottom'
+    #boundary = 'left right bottom top front back'
+    value = 0
+  [../]
   [./bottom_y]
     #type = DirichletBC
     type = PresetBC
@@ -411,6 +419,12 @@
     boundary = 'bottom'
     #boundary = 'left right bottom top front back'
     value = 0
+  [../]
+  [./top_x]
+    type     = PresetBC
+    variable = disp_x
+    boundary = 'top'
+    value    = 0
   [../]
   [./top_y]
     #type = DirichletBC
