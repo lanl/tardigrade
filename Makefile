@@ -47,7 +47,7 @@ include $(MOOSE_DIR)/modules/modules.mk
 
 # dep apps
 APPLICATION_DIR    := $(CURDIR)
-SUPPORT_DIR        := /home/nathan/research/micromorphic_uel/src/cpp
+SUPPORT_DIR        := /projects/nathanm/micromorphic/micromorphic_library/micromorphic_element/src/cpp
 APPLICATION_NAME   := tardigrade
 BUILD_EXEC         := yes
 GEN_REVISION       := no
