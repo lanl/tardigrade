@@ -34,7 +34,7 @@ class InternalCouple : public Kernel{
     |    InternalCouple kernel definition    |
     ------------------------------------------
 
-    We define the kernel for the internal force to be
+    We define the kernel for the internal couple to be
 
     -(psi (PK2_{ij} - SIGMA_{ij}) - psi_{,k} M_{kji})
 
