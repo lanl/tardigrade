@@ -228,7 +228,7 @@ void print_vector(const std::vector<double> &v){
 
     */
 
-    for (int i=0; i<v.size(); i++){
+    for (unsigned int i=0; i<v.size(); i++){
         std::cout << v[i] << " ";
     }
     std::cout << std::endl;
@@ -245,7 +245,7 @@ void print_matrix(const std::vector<std::vector<double>> &M){
 
     */
 
-    for (int i=0; i<M.size(); i++){
+    for (unsigned int i=0; i<M.size(); i++){
         print_vector(M[i]);
     }
     return;
@@ -261,7 +261,7 @@ void compare_vectors(const std::vector<double> &V1, const std::vector<double> &V
     */
 
     if (V1.size() != V2.size()){mooseError("Vectors of different sizes cannot be compared!");}
-    for (int i=0; i<V1.size(); i++){
+    for (unsigned int i=0; i<V1.size(); i++){
         std::cout << relative_norm(V1[i],V2[i]) << " ";
         relative_error += fabs(relative_norm(V1[i],V2[i]));
     }
@@ -282,7 +282,7 @@ void compare_matrices(const std::vector<std::vector<double>> &M1, const std::vec
     double tmp = 0;
 
     if (M1.size() != M2.size()){mooseError("Matricies of different sizes cannot be compared!");}
-    for (int i=0; i<M1.size(); i++){compare_vectors(M1[i],M2[i],tmp);}
+    for (unsigned int i=0; i<M1.size(); i++){compare_vectors(M1[i],M2[i],tmp);}
     std::cout << "relative error: " << tmp << "\n";
     if (tmp>1e-3){
                   std::cout << "###################################################\n"
