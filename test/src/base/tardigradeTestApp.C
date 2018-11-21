@@ -21,30 +21,50 @@ validParams<tardigradeTestApp>()
   return params;
 }
 
-tardigradeTestApp::tardigradeTestApp(InputParameters parameters) : MooseApp(parameters)
+tardigradeTestApp::tardigradeTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  ModulesApp::registerObjects(_factory);
-  tardigradeApp::registerObjectDepends(_factory);
-  tardigradeApp::registerObjects(_factory);
+  tardigradeTestApp::registerAll(
+     _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
+}
 
-  Moose::associateSyntax(_syntax, _action_factory);
-  ModulesApp::associateSyntax(_syntax, _action_factory);
-  tardigradeApp::associateSyntaxDepends(_syntax, _action_factory);
-  tardigradeApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  ModulesApp::registerExecFlags(_factory);
-  tardigradeApp::registerExecFlags(_factory);
-
-  bool use_test_objs = getParam<bool>("allow_test_objects");
+void
+tardigradeTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
+{
+  tardigradeApp::registerAll(f, af, s);
   if (use_test_objs)
   {
-    tardigradeTestApp::registerObjects(_factory);
-    tardigradeTestApp::associateSyntax(_syntax, _action_factory);
-    tardigradeTestApp::registerExecFlags(_factory);
+    Registry::registerObjectsTo(f, {"tardigradeTestApp"});
+    Registry::registerActionsTo(af, {"tardigradeTestApp"});
   }
 }
+
+
+//void
+//tardigradeTestApp::tardigradeTestApp(InputParameters parameters) : MooseApp(parameters)
+//{
+//
+//  Moose::registerObjects(_factory);
+//  ModulesApp::registerObjects(_factory);
+//  tardigradeApp::registerObjectDepends(_factory);
+//  tardigradeApp::registerObjects(_factory);
+//
+//  Moose::associateSyntax(_syntax, _action_factory);
+//  ModulesApp::associateSyntax(_syntax, _action_factory);
+//  tardigradeApp::associateSyntaxDepends(_syntax, _action_factory);
+//  tardigradeApp::associateSyntax(_syntax, _action_factory);
+//
+//  Moose::registerExecFlags(_factory);
+//  ModulesApp::registerExecFlags(_factory);
+//  tardigradeApp::registerExecFlags(_factory);
+//
+//  bool use_test_objs = getParam<bool>("allow_test_objects");
+//  if (use_test_objs)
+//  {
+//    tardigradeTestApp::registerObjects(_factory);
+//    tardigradeTestApp::associateSyntax(_syntax, _action_factory);
+//    tardigradeTestApp::registerExecFlags(_factory);
+//  }
+//}
 
 tardigradeTestApp::~tardigradeTestApp() {}
 
@@ -55,23 +75,23 @@ tardigradeTestApp::registerApps()
   registerApp(tardigradeTestApp);
 }
 
-void
-tardigradeTestApp::registerObjects(Factory & /*factory*/)
-{
-  /* Uncomment Factory parameter and register your new test objects here! */
-}
+//void
+//tardigradeTestApp::registerObjects(Factory & /*factory*/)
+//{
+//  /* Uncomment Factory parameter and register your new test objects here! */
+//}
 
-void
-tardigradeTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
-{
-  /* Uncomment Syntax and ActionFactory parameters and register your new test objects here! */
-}
+//void
+//tardigradeTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+//{
+//  /* Uncomment Syntax and ActionFactory parameters and register your new test objects here! */
+//}
 
-void
-tardigradeTestApp::registerExecFlags(Factory & /*factory*/)
-{
-  /* Uncomment Factory parameter and register your new execute flags here! */
-}
+//void
+//tardigradeTestApp::registerExecFlags(Factory & /*factory*/)
+//{
+//  /* Uncomment Factory parameter and register your new execute flags here! */
+//}
 
 /***************************************************************************************************
  *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
@@ -83,23 +103,29 @@ tardigradeTestApp__registerApps()
   tardigradeTestApp::registerApps();
 }
 
-// External entry point for dynamic object registration
 extern "C" void
-tardigradeTestApp__registerObjects(Factory & factory)
+tardigradeTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  tardigradeTestApp::registerObjects(factory);
+  tardigradeTestApp::registerAll(f, af, s, use_test_objs);
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-tardigradeTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  tardigradeTestApp::associateSyntax(syntax, action_factory);
-}
-
-// External entry point for dynamic execute flag loading
-extern "C" void
-tardigradeTestApp__registerExecFlags(Factory & factory)
-{
-  tardigradeTestApp::registerExecFlags(factory);
-}
+//// External entry point for dynamic object registration
+//extern "C" void
+//tardigradeTestApp__registerObjects(Factory & factory)
+//{
+//  tardigradeTestApp::registerObjects(factory);
+//}
+//
+//// External entry point for dynamic syntax association
+//extern "C" void
+//tardigradeTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+//{
+//  tardigradeTestApp::associateSyntax(syntax, action_factory);
+//}
+//
+//// External entry point for dynamic execute flag loading
+//extern "C" void
+//tardigradeTestApp__registerExecFlags(Factory & factory)
+//{
+//  tardigradeTestApp::registerExecFlags(factory);
+//}
