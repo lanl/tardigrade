@@ -23,7 +23,7 @@ in the micromorphic_element repository as the balance equations and other
 materials are located there.
 
 Questions should be addressed to Nathan Miller who can be reached at 
-nami2227@colorado.edu.
+nathanm@lanl.gov.
 
 =====
 
