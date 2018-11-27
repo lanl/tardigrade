@@ -22,11 +22,11 @@ tardigradeApp::~tardigradeApp() {}
 void
 tardigradeApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-    ModulesApp::registerAll(f, af, s);
-    Registry::registerObjectsTo(f, {"tardigradeApp"});
-    Registry::registerActionsTo(af, {"tardigradeApp"});
+  ModulesApp::registerAll(f, af, s);
+  Registry::registerObjectsTo(f, {"tardigradeApp"});
+  Registry::registerActionsTo(af, {"tardigradeApp"});
 
-    /* register custom execute flags, action syntax, etc. here */
+  /* register custom execute flags, action syntax, etc. here */
 }
 
 void
