@@ -348,24 +348,24 @@
     #Define the block
     block = 'micro'
   [../]
-#  [./Tensor_Mechanics]
-#    #Stress divergence kernels
-#    type = StressDivergenceTensors
-#    disp_x = disp_x
-#    disp_y = disp_y
-#    disp_z = disp_z
-##    displacements = 'disp_x disp_y disp_z'
-#    use_displaced_mesh = true
-#    block = 'DNS'
-#  [../]
-[]
-
-[Modules/TensorMechanics/Master]
-  [./block2]
-    strain = FINITE
+  [./TensorMechanics]
+    #Stress divergence kernels
+    type = StressDivergenceTensors
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+#    displacements = 'disp_x disp_y disp_z'
+    use_displaced_mesh = true
     block = 'DNS'
   [../]
 []
+
+#[Modules/TensorMechanics/Master]
+#  [./block2]
+#    strain = FINITE
+#    block = 'DNS'
+#  [../]
+#[]
 
 [BCs]
   active = 'left_x back_z bottom_y top_y'
@@ -433,17 +433,17 @@
 
     block = 'micro'
   [../]
-  [./elasticity_tensor]
+  [./TensorMechanics/elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 68e3
     poissons_ratio = 0.32
     block = 'DNS'
   [../]
-#  [./strain]
+#  [./TensorMechanics/strain]
 #    type = ComputeFiniteStrain
 #    block = 'DNS'
 #  [../]
-  [./stress]
+  [./TensorMechanics/stress]
     type = ComputeFiniteStrainElasticStress
     block = 'DNS'
   [../]

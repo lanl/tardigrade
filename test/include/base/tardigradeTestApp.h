@@ -19,14 +19,11 @@ InputParameters validParams<tardigradeTestApp>();
 class tardigradeTestApp : public MooseApp
 {
 public:
-  tardigradeTestApp(const InputParameters & parameters);
+  tardigradeTestApp(InputParameters parameters);
   virtual ~tardigradeTestApp();
 
   static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs);
-//  static void registerObjects(Factory & factory);
-//  static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
-//  static void registerExecFlags(Factory & factory);
+  static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);
 };
 
 #endif /* TARDIGRADETESTAPP_H */
