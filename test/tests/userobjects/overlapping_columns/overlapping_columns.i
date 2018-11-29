@@ -349,21 +349,19 @@
     block = 'micro'
   [../]
   [./TensorMechanics]
-    #Stress divergence kernels
-    type = StressDivergenceTensors
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-#    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
+    strain = FINITE
     block = 'DNS'
   [../]
 []
 
-#[Modules/TensorMechanics/Master]
-#  [./block2]
-#    strain = FINITE
-#    block = 'DNS'
+#[Modules]
+#  [./TensorMechanics]
+#    [./Master]
+#      [./block2]
+#        strain = FINITE
+#        block = 'DNS'
+#      [../]
+#    [../]
 #  [../]
 #[]
 
@@ -410,10 +408,6 @@
 [Materials]
   [./linear_elastic]
     type = MicromorphicMaterial
-#    material_fparameters = '0. 0. 0. 0. 0. 0. 0. 15.4 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.'
-#    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0. 0. 0. 0. 0. 0. 0.769 0. 0. 0. 0.'
-#    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0.12 0.51 0.72 0.84 0.443 0.62 0.769 0.945 0.47 0.63 0.58'
-#    material_fparameters = '29.48e3 25.48e3 1e3 0.4e3 -1.5e3 -1.4e3 -3e3 0 0 0 0 0 0 10e5 0. 0. 0. 0.'
     material_fparameters = '29. 7. 60. 10. 10. 8. 5. 0. 0. 0. 0. 0. 0. 8. 0. 0. 0. 0.'
     model_name = "LinearElasticity"
 
@@ -433,17 +427,17 @@
 
     block = 'micro'
   [../]
-  [./TensorMechanics/elasticity_tensor]
+  [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 68e3
     poissons_ratio = 0.32
     block = 'DNS'
   [../]
-#  [./TensorMechanics/strain]
-#    type = ComputeFiniteStrain
-#    block = 'DNS'
-#  [../]
-  [./TensorMechanics/stress]
+  [./strain]
+    type = ComputeFiniteStrain
+    block = 'DNS'
+  [../]
+  [./stress]
     type = ComputeFiniteStrainElasticStress
     block = 'DNS'
   [../]
@@ -483,5 +477,5 @@
 
 [Outputs]
   exodus = true
-  print_perf_log = true
+  perf_graph = true
 []
