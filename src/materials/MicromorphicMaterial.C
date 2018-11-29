@@ -153,7 +153,7 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
     _grad_phi_32(coupledGradient("phi_32")),
     _grad_phi_31(coupledGradient("phi_31")),
     _grad_phi_21(coupledGradient("phi_21")),
-    _deformation_gradient(declareProperty<std::vector<std::vector<double>>>("deformation_gradient")),
+    _deformation_gradient(declareProperty<std::vector<std::vector<double>>>("MM_deformation_gradient")),
     _micro_displacement(declareProperty<std::vector<std::vector<double>>>("micro_displacement")),
     _gradient_micro_displacement(declareProperty<std::vector<std::vector<double>>>("gradient_micro_displacement")),
     _cauchy(declareProperty<std::vector<double>>("cauchy")),
