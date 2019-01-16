@@ -443,6 +443,15 @@
   [../]
 []
 
+[UserObjects]
+  [./projection]
+    type = ProjectionUserObject
+    block = 'DNS'
+    execute_on = timestep_begin
+    macroscale_domain = 'micro'
+  [../]
+[]
+
 [Preconditioning]
   [./SMP]
     type = SMP
