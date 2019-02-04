@@ -444,11 +444,17 @@
 []
 
 [UserObjects]
-  [./projection]
-    type = ProjectionUserObject
+  [./nodal_overlap]
+    type = NodalOverlapUserObject
     block = 'DNS'
     execute_on = timestep_begin
     macroscale_domain = 'micro'
+    unique_node_execute = true
+  [../]
+  [./element_overlap]
+    type = ElementOverlapUserObject
+    block = 'DNS'
+    execute_on = timestep_begin
   [../]
 []
 
