@@ -7,29 +7,31 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PROJECTIONUSEROBJECT_H
-#define PROJECTIONUSEROBJECT_H
+#ifndef ELEMENTOVERLAPUSEROBJECT_H
+#define ELEMENTOVERLAPUSEROBJECT_H
 
 // MOOSE includes
 #include "ElementUserObject.h"
+#include "libmesh/mesh_base.h"
+#include "libmesh/mesh_tools.h"
+#include "libmesh/bounding_box.h"
+#include "libmesh/fe_interface.h"
 
 // Forward Declarations
-class ProjectionUserObject;
+class ElementOverlapUserObject;
 
 template <>
-InputParameters validParams<ProjectionUserObject>();
+InputParameters validParams<ElementOverlapUserObject>();
 
-class ProjectionUserObject : public ElementUserObject{
+class ElementOverlapUserObject : public ElementUserObject{
 public:
-  ProjectionUserObject(const InputParameters & parameters);
+  ElementOverlapUserObject(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
   virtual void threadJoin(const UserObject & y) override;
-  virtual void finalize() override {}
+  virtual void finalize() override;
 
-protected:
-    SubdomainName _macroscale_domain;
 };
 
 #endif
