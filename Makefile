@@ -46,7 +46,8 @@ include $(MOOSE_DIR)/modules/modules.mk
 
 # dep apps
 APPLICATION_DIR    := $(CURDIR)
-SUPPORT_DIR        := /projects/nathanm/micromorphic/micromorphic_library/micromorphic_element/src/cpp
+SUPPORT_DIR        := /projects/nathanm/micromorphic/micromorphic_library/lib
+INCLUDE_DIR        := /projects/nathanm/micromorphic/micromorphic_library/include
 APPLICATION_NAME   := tardigrade
 BUILD_EXEC         := yes
 GEN_REVISION       := no
@@ -55,9 +56,10 @@ include            $(FRAMEWORK_DIR)/app.mk
 ###############################################################################
 # Additional special case targets should be added here
 
-ADDITIONAL_INCLUDES += -I$(SUPPORT_DIR)
-ADDITIONAL_CPPFLAGS += -I$(SUPPORT_DIR)
-ADDITIONAL_LIBS     += -L$(SUPPORT_DIR) -lmicromat -lmicrobalance
+ADDITIONAL_INCLUDES += -I$(SUPPORT_DIR) -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/voro++ -I$(INCLUDE_DIR)/micro_element -I$(INCLUDE_DIR)/overlap -I$(INCLUDE_DIR)/quickhull
+ADDITIONAL_CPPFLAGS += -I$(SUPPORT_DIR) -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/voro++ -I$(INCLUDE_DIR)/micro_element -I$(INCLUDE_DIR)/overlap -I$(INCLUDE_DIR)/quickhull
+ADDITIONAL_LIBS     += -L$(SUPPORT_DIR) -L$(SUPPORT_DIR)/voro++ -L$(SUPPORT_DIR)/micro_element -L$(SUPPORT_DIR)/overlap
+ADDITIONAL_LIBS     += -lmicromat -lmicrobalance -lvoro++ -loverlap
 #
 #ADDITIONAL_CPPFLAGS := -lmicromat -lmicrobalance -fmax-errors=5
 #ADDITIONAL_CPPFLAGS += -I$(SUPPORT_DIR)

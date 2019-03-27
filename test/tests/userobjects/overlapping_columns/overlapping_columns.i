@@ -443,18 +443,37 @@
   [../]
 []
 
+[AuxVariables]
+  [./element_aux]
+   order = CONSTANT
+   family = MONOMIAL
+   block = 'micro'
+  [../]
+[]
+
+[AuxKernels]
+  [./compute_overlap]
+    type = ComputeProjectorAux
+    variable = element_aux
+    block = 'micro'
+    nodal_overlap_userobject = nodal_overlap
+    element_integrate_userobject = element_integrate
+  [../]
+[]
+
 [UserObjects]
   [./nodal_overlap]
     type = NodalOverlapUserObject
     block = 'DNS'
-    execute_on = timestep_begin
+    execute_on = initial
     macroscale_domain = 'micro'
     unique_node_execute = true
   [../]
-  [./element_overlap]
-    type = ElementOverlapUserObject
+  [./element_integrate]
+    type = ElementIntegrateUserObject
     block = 'DNS'
-    execute_on = timestep_begin
+    variable = 'disp_x'
+    execute_on = initial
   [../]
 []
 

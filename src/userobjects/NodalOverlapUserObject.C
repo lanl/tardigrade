@@ -58,8 +58,6 @@ NodalOverlapUserObject::execute()
 {
     //!Check if the current node is located within the macro-scale's bounding box
     const Point *_current_point = static_cast< const Point* >(_current_node);
-    std::map< dof_id_type, std::vector< dof_id_type > >::iterator it;
-    std::vector< dof_id_type >::iterator vec_it;
 
     //!Form the map from the micro-scale nodes to their elements. Note: Forming it will only be done once.
     const std::map< dof_id_type, std::vector< dof_id_type > > & micro_node_to_micro_elements = _mesh.nodeToElemMap(); //!A map from the micro-scale node id to the micro-scale element ids
@@ -73,21 +71,18 @@ NodalOverlapUserObject::execute()
 
             //!Check if the element contains the node
             if (_macro_element->contains_point(*_current_point)){
-                
-//                Point local_point = FEInterface::inverse_map(_macro_element->dim(),
-//                                                             libMesh::FEType(_macro_element->default_order()),
-//                                                             _macro_element,
-//                                                             *_current_point);
+               
+                //!Compute and store the local coordinates of the current node 
+                Point local_point = FEInterface::inverse_map(_macro_element->dim(),
+                                                             libMesh::FEType(_macro_element->default_order()),
+                                                             _macro_element,
+                                                             *_current_point);
+                std::vector< double > local_coords(LIBMESH_DIM, 0);
+//                for (unsigned int i=0; i<local_coords.size(); i++){local_coords[i] = local_point(i);}
+//                NodeLocalCoordinates.insert( std::pair< dof_id_type, Point >(_current_node->id(), local_point));
 
                 //!Associate the micro-node with a macro-scale element
-                it = macro_element_to_micro_nodes.find(_macro_element->id());
-                if (it != macro_element_to_micro_nodes.end()){
-                    it->second.push_back(_current_node->id());
-                }
-                else{
-                    macro_element_to_micro_nodes.insert( std::pair< dof_id_type, std::vector< dof_id_type > >(_macro_element->id(),
-                                                                                                              { _current_node->id()}));
-                }
+                updateMacroMicroMap(_macro_element->id(), _current_node->id(), local_point);
 
                 //!Find the micro-elements associated with a given micro-node
                 auto node_elements = micro_node_to_micro_elements.find(_current_node->id());
@@ -95,13 +90,9 @@ NodalOverlapUserObject::execute()
                      elem_id != node_elements->second.end();
                      elem_id++){
 
-                    //!Search for the element id 
-                    vec_it = std::find( micro_elements.begin(), micro_elements.end(), *elem_id);
-                    
-                    //!Store the ids of the elements which are attached to _current_node but haven't been identified yet
-                    if (vec_it == micro_elements.end()){
-                        micro_elements.push_back(*elem_id);
-                    }
+                    //!Update micro_elements if required
+                    updateMicroElements(_macro_element->id(), *elem_id);
+
                 }
             }
         }
@@ -129,11 +120,14 @@ NodalOverlapUserObject::threadJoin(const UserObject & y)
     }
 
     //Combine the micro_element vectors
-    for (auto elem_id = pps.micro_elements.begin(); elem_id != pps.micro_elements.end(); elem_id++){
+    for (auto const& micro_elem : pps.micro_elements){
 
-        auto elem_location = find(micro_elements.begin(), micro_elements.end(), *elem_id);
+        auto elem_location = micro_elements.find(micro_elem.first);
         if (elem_location == micro_elements.end()){
-            micro_elements.push_back(*elem_id);
+            micro_elements.insert(std::pair< dof_id_type, std::vector< dof_id_type > >(micro_elem.first, micro_elem.second));
+        }
+        else{
+            elem_location->second.insert( elem_location->second.end(), micro_elem.second.begin(), micro_elem.second.end());
         }
     }
 }
@@ -144,6 +138,117 @@ NodalOverlapUserObject::finalize()
 
     std::cout << "Finalizing Nodal Overlap\n";
     std::cout << "\tNumber of macro-scale elements overlapping microscale domain: " << macro_element_to_micro_nodes.size() << "\n";
+
+    std::map< dof_id_type, std::vector< dof_id_type > >::iterator it1;
+    for (it1=macro_element_to_micro_nodes.begin(); it1 != macro_element_to_micro_nodes.end(); it1++){
+        std::cout << "\t  Macro element id: " << it1->first << " Number of nodes: " << it1->second.size() << "\n";
+    }
+
     std::cout << "\tNumber of micro-elements associated with overlap:             " << micro_elements.size() << "\n";
+    std::map< dof_id_type, std::vector< double > >::iterator it;
+//    std::cout << "Node local coordinates\n";
+//    for (it=NodeLocalCoordinates.begin(); it != NodeLocalCoordinates.end(); it++){
+//        std::cout << it->first << ": " << it->second[0] << " " << it->second[1] << " " << it->second[2] << "\n";
+//    }
 
 }
+
+void
+NodalOverlapUserObject::updateMacroMicroMap(dof_id_type macro_elem_id, dof_id_type node_id, Point local_position)
+{
+    /*!
+    Add an element-node pair to the macro_element_to_micro_node map
+    */
+
+    std::map< dof_id_type, std::vector< dof_id_type > >::iterator it = macro_element_to_micro_nodes.find(macro_elem_id);
+    if (it != macro_element_to_micro_nodes.end()){
+        it->second.push_back(_current_node->id());
+        macro_element_to_micro_positions[it->first].push_back(local_position);
+    }
+    else{
+        macro_element_to_micro_nodes.insert( std::pair< dof_id_type, std::vector< dof_id_type > >(macro_elem_id, {node_id}));
+        macro_element_to_micro_positions.insert( std::pair< dof_id_type, std::vector< Point > >(macro_elem_id, {local_position}));
+    }
+}
+
+void
+NodalOverlapUserObject::updateMicroElements(dof_id_type macro_elem_id, dof_id_type micro_elem_id)
+{
+    /*!
+    Update micro_elements with the provided elem_id if it is new.
+    */
+
+    //!Search for the element id 
+    std::map< dof_id_type, std::vector< dof_id_type> >::iterator it = micro_elements.find(micro_elem_id);
+    
+    //!Store the element id if it hasn't been identified yet
+    if (it == micro_elements.end()){
+        micro_elements.insert(std::pair< dof_id_type, std::vector< dof_id_type > >(micro_elem_id, {macro_elem_id}));
+    }
+    else{
+        it->second.push_back(macro_elem_id);
+    }
+}
+
+const std::vector< dof_id_type >*
+NodalOverlapUserObject::get_relevant_micro_nodes(dof_id_type macro_elem_id) const
+{
+    /*!
+
+    Return the macro elements which contain nodes associated with the micro element
+
+    :param dof_id_type micro_elem_id: The id of the micro element
+    :param std::vector< dof_id_type >: The returned vector of macro-element associated with the micro-element
+
+    */
+
+    auto it = macro_element_to_micro_nodes.find(macro_elem_id);
+    if (it == macro_element_to_micro_nodes.end()){
+        return NULL;
+    }
+    else{
+        return &it->second;
+    }
+
+    return NULL;
+}
+
+const std::vector< Point >*
+NodalOverlapUserObject::get_local_node_positions(dof_id_type macro_element_id) const
+{
+    auto it = macro_element_to_micro_positions.find(macro_element_id);
+    if (it == macro_element_to_micro_positions.end()){
+        return NULL;
+    }
+    else{
+        return &it->second;
+    }
+    return NULL;
+}
+
+//void
+//NodalOverlapUserObject::updateMicroElementGPCoords(dof_id_type macro_elem_id, dof_id_type micro_elem_id)
+//{
+//    /*!
+//    Update the positions of the gauss points of a micro element in the local coordinates of the macro element
+//    */
+//
+//    auto _macro_elem = _mesh.elemPtr( macro_elem_id);
+//    auto _micro_elem = _mesh.elemPtr( micro_elem_id);
+//
+//    std::map< dof_id_type, std::vector< Point > > inner;
+//    inner.insert(std::make_pair( micro_elem_id, {}));
+//
+//    //!Compute the local coordinates of the gauss points 
+//    std::cout << _assembly << "\n";
+//
+//    //!Add the macro element to the map if it isn't there
+//    std::map< dof_id_type, std::map< dof_id_type, std::vector< Point > > >::iterator it;
+//    it = local_micro_gps.find(macro_elem_id);
+//    if (it == local_micro_gps.end()){
+//        local_micro_gps.insert( std::make_pair(macro_elem_id, inner ));
+//    }
+//    else {
+//        local_micro_gps[macro_elem_id].insert( inner );
+//    }
+//}
