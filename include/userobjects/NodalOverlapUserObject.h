@@ -39,6 +39,13 @@ public:
     //!Get the local position of the micro-node in the macro element
     const std::vector< Point >* get_local_node_positions(dof_id_type macro_element_id) const;
 
+    //!Get the map from the micro nodes to the column index
+    const std::map< dof_id_type, unsigned int >* get_micro_node_to_col() const;
+
+    //!Get the map from the macro nodes to the column index
+    const std::map< dof_id_type, unsigned int >* get_macro_node_to_row() const;
+    
+
 protected:
 
     //!Parameters
@@ -60,6 +67,12 @@ protected:
      //! A map from the micro-elements which are connected to the contained nodes to the macro-elements they are associated with.
     std::map< dof_id_type, std::vector< dof_id_type > > micro_elements;
 
+    //! A map from the micro-scale node to its column index in the shape-function matrix
+    std::map< dof_id_type, unsigned int > micro_node_to_col;
+
+    //! A map from the macro-scale node to its row index in the shape-function matrix
+    std::map< dof_id_type, unsigned int > macro_node_to_row;
+
     //!Methods
 
      //!Add an element-node pair to the macro_element_to_micro_nodes map
@@ -68,6 +81,11 @@ protected:
     //!Add micro-elements which haven't been identified to the micro_elements vector
     void updateMicroElements(dof_id_type macro_elem_id, dof_id_type elem_id);
 
+    //!Add the id number of the micro-node to the micro_node_to_col map
+    void updateMicroNodeColMap(const dof_id_type micro_node_id);
+
+    //!Add the id numbers of the macro-element's nodes to the macro_node_to_row map
+    void updateMacroNodeRowMap(const Elem* macro_element);
 };
 
 class ContainedNode{
@@ -78,17 +96,16 @@ class ContainedNode{
 
     public:
 
-    libMesh::Node* node;
-    libMesh::Point local_coordinates;
+        libMesh::Node* node;
+        libMesh::Point local_coordinates;
 
-    ContainedNode(){}
+        ContainedNode(){}
 
-    ContainedNode(libMesh::Node* _node, libMesh::Point _local_coordinates)
-    {
-        node = _node;
-        local_coordinates = _local_coordinates;
-    }
-
+        ContainedNode(libMesh::Node* _node, libMesh::Point _local_coordinates)
+        {
+            node = _node;
+            local_coordinates = _local_coordinates;
+        }
 };
 
 #endif

@@ -444,21 +444,41 @@
 []
 
 [AuxVariables]
-  [./element_aux]
-   order = CONSTANT
-   family = MONOMIAL
-   block = 'micro'
+  [./av1] #Dummy AuxVariable for ordering
   [../]
+  [./av2] #Dummy AuxVariable for ordering
+  [../]
+#  [./element_aux]
+#   order = CONSTANT
+#   family = MONOMIAL
+#   block = 'micro'
+#  [../]
 []
 
 [AuxKernels]
-  [./compute_overlap]
-    type = ComputeProjectorAux
-    variable = element_aux
-    block = 'micro'
+  [./eval_nodaloverlap]
+    type = NodalUOAux
+    variable = av1
+#    priorvar = av2
+    block = 'DNS'
+    execute_on = initial
     nodal_overlap_userobject = nodal_overlap
+  [../]
+  [./eval_elementintegrate]
+    type = ElementUOAux
+    variable = av2
+#    priorvar = av1
+    block = 'micro'
+    execute_on = initial
     element_integrate_userobject = element_integrate
   [../]
+#  [./compute_overlap]
+#    type = ComputeProjectorAux
+#    variable = element_aux
+#    block = 'micro'
+#    nodal_overlap_userobject = nodal_overlap
+#    element_integrate_userobject = element_integrate
+#  [../]
 []
 
 [UserObjects]
@@ -474,6 +494,13 @@
     block = 'DNS'
     variable = 'disp_x'
     execute_on = initial
+  [../]
+  [./projector]
+    type = ProjectorUserObject
+    block = 'micro'
+    execute_on = initial
+    nodal_overlap_userobject = nodal_overlap
+    element_integrate_userobject = element_integrate
   [../]
 []
 

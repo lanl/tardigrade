@@ -77,12 +77,18 @@ NodalOverlapUserObject::execute()
                                                              libMesh::FEType(_macro_element->default_order()),
                                                              _macro_element,
                                                              *_current_point);
-                std::vector< double > local_coords(LIBMESH_DIM, 0);
+//                std::vector< double > local_coords(LIBMESH_DIM, 0);
 //                for (unsigned int i=0; i<local_coords.size(); i++){local_coords[i] = local_point(i);}
 //                NodeLocalCoordinates.insert( std::pair< dof_id_type, Point >(_current_node->id(), local_point));
 
                 //!Associate the micro-node with a macro-scale element
                 updateMacroMicroMap(_macro_element->id(), _current_node->id(), local_point);
+
+                //!Store the node in the id to shape-function col index map
+                updateMicroNodeColMap(_current_node->id());                
+
+                //!Store the macro-element's nodes in the id to shape-function row map
+                updateMacroNodeRowMap(_macro_element);
 
                 //!Find the micro-elements associated with a given micro-node
                 auto node_elements = micro_node_to_micro_elements.find(_current_node->id());
@@ -145,7 +151,24 @@ NodalOverlapUserObject::finalize()
     }
 
     std::cout << "\tNumber of micro-elements associated with overlap:             " << micro_elements.size() << "\n";
-    std::map< dof_id_type, std::vector< double > >::iterator it;
+
+    //!Update the micro node to column map
+    std::map< dof_id_type, unsigned int >::iterator it;
+    unsigned int index=0;
+
+    for (it=micro_node_to_col.begin(); it!=micro_node_to_col.end(); it++){
+        it->second = index;
+        index++;
+    }
+
+    //!Update the macro node to row map
+    index = 0;
+    for (it=macro_node_to_row.begin(); it!=macro_node_to_row.end(); it++){
+        it->second = index;
+        index++;
+    }
+
+//    std::map< dof_id_type, std::vector< double > >::iterator it;
 //    std::cout << "Node local coordinates\n";
 //    for (it=NodeLocalCoordinates.begin(); it != NodeLocalCoordinates.end(); it++){
 //        std::cout << it->first << ": " << it->second[0] << " " << it->second[1] << " " << it->second[2] << "\n";
@@ -216,6 +239,12 @@ NodalOverlapUserObject::get_relevant_micro_nodes(dof_id_type macro_elem_id) cons
 const std::vector< Point >*
 NodalOverlapUserObject::get_local_node_positions(dof_id_type macro_element_id) const
 {
+    /*!
+    Return the local positions of the nodes contained by the indicated macro element
+
+    :param dof_id_type macro_element_id: The id number of the macro element
+    */
+
     auto it = macro_element_to_micro_positions.find(macro_element_id);
     if (it == macro_element_to_micro_positions.end()){
         return NULL;
@@ -224,6 +253,57 @@ NodalOverlapUserObject::get_local_node_positions(dof_id_type macro_element_id) c
         return &it->second;
     }
     return NULL;
+}
+
+void NodalOverlapUserObject::updateMicroNodeColMap(const dof_id_type micro_node_id){
+    /*!
+    Add the indicated node id to the id to shape-function matrix column map. The column number will be 
+    determined at finalize. Note that the number is the order. There will be a scale factor applied due to 
+    the number of degrees of freedom to be mapped from the micro to macro scales.
+
+    Note: Because micro-nodes can only be within a single element we don't need to check if it is already stored
+
+    :param dof_id_type micro_node_id: The node id to add
+    */
+
+    micro_node_to_col.insert( std::pair< dof_id_type, unsigned int>(micro_node_id, 0));
+    return;
+}
+
+void NodalOverlapUserObject::updateMacroNodeRowMap(const Elem* macro_element){
+    /*!
+    Add the nodes of the macro element to the id to shape-function matrix column map. The row number will 
+    be determined at finalize. Note that the number is the order. There will be a scale factor applied due to 
+    the number of degrees of freedom to be mapped from the micro to macro scales.
+
+    :param Elem* macro_element: The pointer to the macro-scale element.
+    */
+
+    std::map< dof_id_type, unsigned int >::iterator it;
+
+    for (unsigned int n=0; n<macro_element->n_nodes(); n++){
+        it = macro_node_to_row.find(macro_element->node_id(n));
+        if (it == macro_node_to_row.end()){
+            macro_node_to_row.insert( std::pair< dof_id_type, unsigned int >(macro_element->node_id(n), 0));
+        }
+    }
+    return;
+}
+
+const std::map< dof_id_type, unsigned int >* NodalOverlapUserObject::get_micro_node_to_col() const {
+    /*!
+    Get the pointer to the micro node to unscaled shape-function matrix column
+    */
+
+    return &micro_node_to_col;
+}
+
+const std::map< dof_id_type, unsigned int >* NodalOverlapUserObject::get_macro_node_to_row() const {
+    /*!
+    Get the pointer to the macro node to unscaled shape-function matrix row
+    */
+
+    return &macro_node_to_row;
 }
 
 //void
