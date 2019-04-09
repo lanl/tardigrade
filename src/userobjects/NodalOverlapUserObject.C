@@ -100,6 +100,7 @@ NodalOverlapUserObject::execute()
                     updateMicroElements(_macro_element->id(), *elem_id);
 
                 }
+                break; //A node can only appear in a single element
             }
         }
     }
@@ -146,6 +147,7 @@ NodalOverlapUserObject::finalize()
     std::cout << "\tNumber of macro-scale elements overlapping microscale domain: " << macro_element_to_micro_nodes.size() << "\n";
 
     std::map< dof_id_type, std::vector< dof_id_type > >::iterator it1;
+    std::map< dof_id_type, unsigned int>::iterator it2;
     for (it1=macro_element_to_micro_nodes.begin(); it1 != macro_element_to_micro_nodes.end(); it1++){
         std::cout << "\t  Macro element id: " << it1->first << " Number of nodes: " << it1->second.size() << "\n";
     }
@@ -261,10 +263,15 @@ void NodalOverlapUserObject::updateMicroNodeColMap(const dof_id_type micro_node_
     determined at finalize. Note that the number is the order. There will be a scale factor applied due to 
     the number of degrees of freedom to be mapped from the micro to macro scales.
 
-    Note: Because micro-nodes can only be within a single element we don't need to check if it is already stored
 
     :param dof_id_type micro_node_id: The node id to add
     */
+
+//    std::map< dof_id_type, unsigned int >::iterator it;
+//    it = micro_node_to_col.find(micro_node_id);
+//    if (it == micro_node_to_col.end()){
+//        micro_node_to_col.insert( std::pair< dof_id_type, unsigned int>(micro_node_id, 0));
+//    }
 
     micro_node_to_col.insert( std::pair< dof_id_type, unsigned int>(micro_node_id, 0));
     return;
