@@ -166,4 +166,5 @@ ElementIntegrateUserObject::finalize()
 //        std::cout << integrated_weights[i] << ", " << integrated_weighted_densities[i] << ", " << integrated_weighted_densities[i]/integrated_weights[i]  << "\n";
 //    }
 //    mooseError("derp");
+    std::cout << "End of Element Overlap\n\n";
 }

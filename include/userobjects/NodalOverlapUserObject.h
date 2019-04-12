@@ -25,67 +25,104 @@ template <>
 InputParameters validParams<NodalOverlapUserObject>();
 
 class NodalOverlapUserObject : public NodalUserObject{
-public:
-    NodalOverlapUserObject(const InputParameters & parameters);
+    public:
+        NodalOverlapUserObject(const InputParameters & parameters);
 
-    virtual void initialize() override;
-    virtual void execute() override;
-    virtual void threadJoin(const UserObject & y) override;
-    virtual void finalize() override;
+        virtual void initialize() override;
+        virtual void execute() override;
+        virtual void threadJoin(const UserObject & y) override;
+        virtual void finalize() override;
 
-    //!Get the list of micro-nodes contained in the current macro element
-    const std::vector< dof_id_type>* get_relevant_micro_nodes(dof_id_type macro_elem_id) const;
+        //!Get the list of micro-nodes contained in the current macro element
+        const std::vector< dof_id_type>* get_relevant_micro_nodes(dof_id_type macro_elem_id) const;
 
-    //!Get the local position of the micro-node in the macro element
-    const std::vector< Point >* get_local_node_positions(dof_id_type macro_element_id) const;
+        //!Get the local position of the micro-node in the macro element
+        const std::vector< Point >* get_local_node_positions(dof_id_type macro_element_id) const;
 
-    //!Get the map from the micro nodes to the column index
-    const std::map< dof_id_type, unsigned int >* get_micro_node_to_col() const;
+        //!Get the map from the micro nodes to the column index
+        const std::map< dof_id_type, unsigned int >* get_micro_node_to_row() const;
 
-    //!Get the map from the macro nodes to the column index
-    const std::map< dof_id_type, unsigned int >* get_macro_node_to_row() const;
-    
+        //!Get the map from the macro nodes to the row index
+        const std::map< dof_id_type, unsigned int >* get_macro_node_to_col() const;
 
-protected:
+        //!Return quantities of interest about the nodes contained in the overlap domain
+        void get_node_info(unsigned int &_num_macro_ghost, unsigned int &_num_macro_free,
+                           unsigned int &_num_micro_ghost, unsigned int &_num_micro_free) const;    
 
-    //!Parameters
-    SubdomainName _macroscale_domain; //! The name of the macro-scale subdomain
+    protected:
+
+        //!Settings
+        bool restrict_nodes_to_one_element = true; //! If true a micro-node can only appear in one macro-element. This case only occurs when nodes are exactly on the boundary between two elements.
+        int ghost_depth = 1; //! The depth at which the macro-scale element (and all its nodes) will be identified as ghost. Note that ghost will supersede free for macro-scale nodes and free will supersede ghost for micro-scale nodes. This is done so that no free micro-scale nodes will be located within the support of a free macro-scale node.
+
+        //!Parameters
+        SubdomainName _macroscale_domain; //! The name of the macro-scale subdomain
 
 //    MooseMesh _projection_mesh; //! The mesh to be used in the projection
-    //! The id of the macro-scale subdomain
-    SubdomainID _macro_id;
+        //! The id of the macro-scale subdomain
+        SubdomainID _macro_id;
 
-     //! The bounding box of the macro-scale subdomain
-    BoundingBox _macro_bounding_box;
+        //! The bounding box of the macro-scale subdomain
+        BoundingBox _macro_bounding_box;
 
-    //! A map from the macro-scale element id to the contained micro-scale node ids
-    std::map<dof_id_type, std::vector< dof_id_type > > macro_element_to_micro_nodes;
+        //! A map from the macro-scale element id to the contained micro-scale node ids
+        std::map<dof_id_type, std::vector< dof_id_type > > macro_element_to_micro_nodes;
 
-    //! A map from the macro-scale element id to the local positions of the contained micro-scale nodes
-    std::map<dof_id_type, std::vector< Point > > macro_element_to_micro_positions;
+        //! A map from the macro-scale element to its neighbors
+        std::map< dof_id_type, std::vector< dof_id_type > > macro_element_neighbors;
 
-     //! A map from the micro-elements which are connected to the contained nodes to the macro-elements they are associated with.
-    std::map< dof_id_type, std::vector< dof_id_type > > micro_elements;
+        //! A map from the macro-scale element to the id's of its nodes
+        std::map< dof_id_type, std::vector< dof_id_type > > macro_element_nodes;
 
-    //! A map from the micro-scale node to its column index in the shape-function matrix
-    std::map< dof_id_type, unsigned int > micro_node_to_col;
+        //! A map from the macro-scale element id to the local positions of the contained micro-scale nodes
+        std::map<dof_id_type, std::vector< Point > > macro_element_to_micro_positions;
 
-    //! A map from the macro-scale node to its row index in the shape-function matrix
-    std::map< dof_id_type, unsigned int > macro_node_to_row;
+        //! A map from the micro-elements which are connected to the contained nodes to the macro-elements they are associated with.
+        std::map< dof_id_type, std::vector< dof_id_type > > micro_elements;
 
-    //!Methods
+        //! A map from the micro-scale node to its column index in the shape-function matrix
+        std::map< dof_id_type, unsigned int > micro_node_to_row;
 
-     //!Add an element-node pair to the macro_element_to_micro_nodes map
-    void updateMacroMicroMap(dof_id_type macro_elem_id, dof_id_type node_id, Point local_position);
+        //! A map from the macro-scale node to its column index in the shape-function matrix
+        std::map< dof_id_type, unsigned int > macro_node_to_col;
 
-    //!Add micro-elements which haven't been identified to the micro_elements vector
-    void updateMicroElements(dof_id_type macro_elem_id, dof_id_type elem_id);
+        //! The dimensions required of the shape-function matrix
+        unsigned int num_macro_ghost = 0;
+        unsigned int num_micro_ghost = 0;
+        unsigned int num_macro_free = 0;
+        unsigned int num_micro_free = 0;
 
-    //!Add the id number of the micro-node to the micro_node_to_col map
-    void updateMicroNodeColMap(const dof_id_type micro_node_id);
+        //!Methods
 
-    //!Add the id numbers of the macro-element's nodes to the macro_node_to_row map
-    void updateMacroNodeRowMap(const Elem* macro_element);
+        //!Add an element-node pair to the macro_element_to_micro_nodes map
+        void updateMacroMicroMap(dof_id_type macro_elem_id, dof_id_type node_id, Point local_position);
+
+        //!Add the neighbors of the macro-element to the macro_element_neighbors map
+        void updateMacroNeighborMap( const Elem* macro_element);
+
+        //!Add micro-elements which haven't been identified to the micro_elements vector
+        void updateMicroElements(dof_id_type macro_elem_id, dof_id_type elem_id);
+
+        //!Add the number of nodes in the macro element to the count map
+        void updateMacroNodeIds(const Elem* macro_element);
+
+        //!Add the id number of the micro-node to the micro_node_to_row map
+        void updateMicroNodeRowMap(const dof_id_type micro_node_id);
+
+        //!Add the id numbers of the macro-element's nodes to the macro_node_to_col map
+        void updateMacroNodeColMap(const Elem* macro_element);
+
+        //!Check element depth
+        void checkElementDepth(const dof_id_type &macro_element, std::map< dof_id_type, int > &element_depths);
+
+        //!Print a vector (debugging)
+        template< class myType >
+        void print_vector(std::vector< myType > &v);
+
+        //!Print a matrix (debugging)
+        template< class myType >
+        void print_matrix(std::vector< std::vector< myType > > &m);
+
 };
 
 class ContainedNode{

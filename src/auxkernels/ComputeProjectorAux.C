@@ -74,13 +74,13 @@ ComputeProjectorAux::computeValue()
     std::vector< dof_id_type > macro_node_ids;
 
     //Get the macro to row and micro to col maps
-    const std::map< dof_id_type, unsigned int >* macro_node_to_row = _nodal_overlap.get_macro_node_to_row();
-    const std::map< dof_id_type, unsigned int >* micro_node_to_col = _nodal_overlap.get_micro_node_to_col();
+    const std::map< dof_id_type, unsigned int >* macro_node_to_col = _nodal_overlap.get_macro_node_to_col();
+    const std::map< dof_id_type, unsigned int >* micro_node_to_row = _nodal_overlap.get_micro_node_to_row();
 
     //Initialize the sparse matrix
     std::cout << "initializing the sparse matrix...\n";
-    overlap::SpMat shapefunction(12*macro_node_to_row->size(), 3*micro_node_to_col->size());
-    overlap::SpMat sub_shapefunction(12*macro_node_to_row->size(), 3*micro_node_to_col->size());
+    overlap::SpMat shapefunction(3*micro_node_to_row->size(), 12*macro_node_to_col->size());
+    overlap::SpMat sub_shapefunction(3*micro_node_to_row->size(), 12*macro_node_to_col->size());
     std::cout << "we did it!\n";
 
     //!Get the micro-nodes from the nodal overlap object
@@ -251,7 +251,7 @@ ComputeProjectorAux::computeValue()
                 std::vector< overlap::T > tripletList;
 
                 //construct the triplet list to populate the sub shape-function matrix
-                overlap::construct_triplet_list(macro_node_to_row, micro_node_to_col, macro_node_ids,
+                overlap::construct_triplet_list(macro_node_to_col, micro_node_to_row, macro_node_ids,
                                                 cgs[i], phis, dns_weights[i], tripletList);
                 std::cout << "tripletList.size(): " << tripletList.size() << "\n";
                 sub_shapefunction.setFromTriplets(tripletList.begin(), tripletList.end());

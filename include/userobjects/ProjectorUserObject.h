@@ -22,11 +22,6 @@ class ProjectorUserObject;
 template <>
 InputParameters validParams<ProjectorUserObject>();
 
-template< class myType >
-void print_vector(const std::vector< myType > &);
-template< class myType >
-void print_matrix(const std::vector< std::vector< myType > > &);
-
 class ProjectorUserObject : public ElementUserObject{
     public:
         ProjectorUserObject(const InputParameters & parameters);
@@ -37,6 +32,10 @@ class ProjectorUserObject : public ElementUserObject{
         virtual void finalize() override;
 
     protected:
+        //Settings
+        unsigned int n_macro_dof = 12; //!The number of degrees of freedom for each macro node
+        unsigned int n_micro_dof = 3; //!The number of degrees of freedom for each micro node
+
         //Required user objects
         const NodalOverlapUserObject & _nodal_overlap;
         const ElementIntegrateUserObject & _element_integrate;
@@ -47,8 +46,8 @@ class ProjectorUserObject : public ElementUserObject{
         std::map< dof_id_type, overlap::vecOfvec > cgs; //! The centers of gravity of the DNS in each gauss domain (reference config)
 
         //Projections from the macro space to the micro space
-        const std::map< dof_id_type, unsigned int >* macro_node_to_row;
-        const std::map< dof_id_type, unsigned int >* micro_node_to_col;
+        const std::map< dof_id_type, unsigned int >* macro_node_to_col;
+        const std::map< dof_id_type, unsigned int >* micro_node_to_row;
 
         //Define the dns weights objects
         std::map < dof_id_type, std::vector< overlap::integrateMap > > dns_weights;
@@ -58,7 +57,12 @@ class ProjectorUserObject : public ElementUserObject{
 
         //Define the shapefunction matrix
         overlap::SpMat shapefunction;
-        
+
+        //Define the projectors
+        overlap::SpMat BDhQ;
+        overlap::SpMat BDhD;
+        overlap::SpMat BQhQ;
+        overlap::SpMat BQhD;
 
         //!Utility Methods
         void collect_local_nodes(overlap::vecOfvec &local_nodes, std::vector< dof_id_type > &macro_node_ids);
@@ -70,6 +74,13 @@ class ProjectorUserObject : public ElementUserObject{
         void get_cg_local_coordinates(unsigned int gpt, Point &local_cg);
         void get_cg_phi(unsigned int gpt, overlap::vecOfvec &phi);
         void compute_shapefunction_matrix_contributions(const std::vector< dof_id_type > &macro_node_ids);
+
+        template< class myType >
+        void print_vector(const std::vector< myType > &);
+        template< class myType >
+        void print_matrix(const std::vector< std::vector< myType > > &);
+//        void solve_for_projector(const overlap::SpMat &A, const overlap::SpMat &B, overlap::SpMat &X);
+
 };
 
 #endif

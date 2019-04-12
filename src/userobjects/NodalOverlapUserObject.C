@@ -84,11 +84,17 @@ NodalOverlapUserObject::execute()
                 //!Associate the micro-node with a macro-scale element
                 updateMacroMicroMap(_macro_element->id(), _current_node->id(), local_point);
 
+                //!Associate the macro-element with its neighbors
+                updateMacroNeighborMap(_macro_element);
+
+                //!Store the macro-scale node ids associated with the macro-element
+                updateMacroNodeIds(_macro_element);
+
                 //!Store the node in the id to shape-function col index map
-                updateMicroNodeColMap(_current_node->id());                
+                updateMicroNodeRowMap(_current_node->id());                
 
                 //!Store the macro-element's nodes in the id to shape-function row map
-                updateMacroNodeRowMap(_macro_element);
+                updateMacroNodeColMap(_macro_element);
 
                 //!Find the micro-elements associated with a given micro-node
                 auto node_elements = micro_node_to_micro_elements.find(_current_node->id());
@@ -100,7 +106,9 @@ NodalOverlapUserObject::execute()
                     updateMicroElements(_macro_element->id(), *elem_id);
 
                 }
-                break; //A node can only appear in a single element
+                if (restrict_nodes_to_one_element){
+                    break; //A node can only appear in a single element
+                }
             }
         }
     }
@@ -148,34 +156,116 @@ NodalOverlapUserObject::finalize()
 
     std::map< dof_id_type, std::vector< dof_id_type > >::iterator it1;
     std::map< dof_id_type, unsigned int>::iterator it2;
+
+    std::map< dof_id_type, int > element_depth;
+//    unsigned int num_macro_ghost=0;
+//    unsigned int num_micro_free=0;
+    unsigned int total_macro_nodes = macro_node_to_col.size();
+    unsigned int total_micro_nodes = micro_node_to_row.size();
+//    unsigned int num_micro_ghost;
+
     for (it1=macro_element_to_micro_nodes.begin(); it1 != macro_element_to_micro_nodes.end(); it1++){
-        std::cout << "\t  Macro element id: " << it1->first << " Number of nodes: " << it1->second.size() << "\n";
+        std::cout << "\t  Macro element id: " << it1->first << "\n";
+        std::cout << "\t    Number of nodes: " << it1->second.size() << "\n";
+//        std::cout << "\t    Nodes: "; print_vector(macro_element_nodes[it1->first]);
+        std::cout << "\t    Neighbors: "; print_vector(macro_element_neighbors[it1->first]);
+        //!Check the macro-element depths i.e. how many recursive sets of their neighbors deep into the DNS are they
+        checkElementDepth(it1->first, element_depth);
+        std::cout << "\t    Element Depth: " << element_depth[it1->first] << "\n";
+
+        //Add to the total number of ghost macro-nodes and free micro-nodes
+        if (element_depth[it1->first] >= ghost_depth){
+            num_macro_ghost += macro_element_nodes[it1->first].size();//Define the macro-nodes contained within this element as ghost
+            num_micro_free += it1->second.size(); //Define the micro-nodes contained within this element as free
+        }
     }
+    num_macro_free = total_macro_nodes - num_macro_ghost;
+    num_micro_ghost = total_micro_nodes - num_micro_free;
 
     std::cout << "\tNumber of micro-elements associated with overlap:             " << micro_elements.size() << "\n";
 
-    //!Update the micro node to column map
-    std::map< dof_id_type, unsigned int >::iterator it;
-    unsigned int index=0;
+//    std::cout << "num_macro_ghost: " << num_macro_ghost << "\n";
+//    std::cout << "num_micro_free: " << num_micro_free << "\n";
 
-    for (it=micro_node_to_col.begin(); it!=micro_node_to_col.end(); it++){
-        it->second = index;
-        index++;
+    //!Define the ordering of the macro-node to the row in the shape-function matrix
+    //!The matrix is ordered: | (macro ghost, micro ghost) : (macro ghost, micro free) |
+    //!                       ----------------------------------------------------------
+    //!                       | (macro free, micro ghost)  : (macro free, micro free)  |
+
+    //Assign the ghost macro-nodes and free-micro nodes
+    unsigned int ghost_macro_index = num_macro_free;
+    unsigned int free_micro_index = 0;
+
+    unsigned int macro_index_true_zero;
+
+    for (it1 = macro_element_to_micro_nodes.begin(); it1 != macro_element_to_micro_nodes.end(); it1++){
+
+        if (element_depth[it1->first] >= ghost_depth){
+        
+            //!Assign the macro-ghost index
+            for (unsigned int n=0; n<macro_element_nodes[it1->first].size(); n++){
+                macro_node_to_col[macro_element_nodes[it1->first][n]] = ghost_macro_index;
+                if (ghost_macro_index == 0){macro_index_true_zero = macro_element_nodes[it1->first][n];} //Store the true first index of the matrix
+                ghost_macro_index++;
+            }
+
+            //!Assign the micro-free index
+            for (unsigned int n=0; n<it1->second.size(); n++){
+                micro_node_to_row[it1->second[n]] = free_micro_index;
+                free_micro_index++;
+            }
+        }
     }
 
-    //!Update the macro node to row map
-    index = 0;
-    for (it=macro_node_to_row.begin(); it!=macro_node_to_row.end(); it++){
-        it->second = index;
-        index++;
+    //Assign the free macro-nodes and ghost-micro nodes
+    unsigned int free_macro_index = 0;
+    unsigned int ghost_micro_index = num_micro_free;
+
+    for (it1 = macro_element_to_micro_nodes.begin(); it1 != macro_element_to_micro_nodes.end(); it1++){
+        
+        if (element_depth[it1->first] < ghost_depth){
+
+            //!Assign the macro-free index
+            for (unsigned int n=0; n<macro_element_nodes[it1->first].size(); n++){
+                if ((macro_node_to_col[macro_element_nodes[it1->first][n]] == 0) &&
+                    (macro_element_nodes[it1->first][n] != macro_index_true_zero)){
+                    macro_node_to_col[macro_element_nodes[it1->first][n]] = free_macro_index;
+                    free_macro_index++;
+                }
+            }
+
+            //!Assign the micro ghost index
+            for (unsigned int n=0; n<it1->second.size(); n++){
+                if (micro_node_to_row[it1->second[n]] == 0){
+                    micro_node_to_row[it1->second[n]] = ghost_micro_index;
+                    ghost_micro_index++;
+                }
+            }
+        }
     }
 
-//    std::map< dof_id_type, std::vector< double > >::iterator it;
-//    std::cout << "Node local coordinates\n";
-//    for (it=NodeLocalCoordinates.begin(); it != NodeLocalCoordinates.end(); it++){
-//        std::cout << it->first << ": " << it->second[0] << " " << it->second[1] << " " << it->second[2] << "\n";
-//    }
+    //Check that the indices are sensible to make sure nothing has gone horribly wrong
+    if (ghost_macro_index != total_macro_nodes){
+        std::cout << "Error: The final macro ghost index is not equal to the number of macro nodes\n";
+        assert(1==0);
+    }
 
+    if (free_macro_index != num_macro_free){
+        std::cout << "Error: The final macro free index is not equal to the number of macro free nodes\n";
+        assert(1==0);
+    }
+
+    if (ghost_micro_index != total_micro_nodes){
+        std::cout << "Error: The final micro ghost index is not equal to the number of micro nodes\n";
+        assert(1==0);
+    }
+
+    if (free_micro_index != num_micro_free){
+        std::cout << "Error: The final micro free index is not equal to the number of micro free nodes\n";
+        assert(1==0);
+    }
+
+    std::cout << "End of Nodal Overlap\n\n";
 }
 
 void
@@ -193,6 +283,32 @@ NodalOverlapUserObject::updateMacroMicroMap(dof_id_type macro_elem_id, dof_id_ty
     else{
         macro_element_to_micro_nodes.insert( std::pair< dof_id_type, std::vector< dof_id_type > >(macro_elem_id, {node_id}));
         macro_element_to_micro_positions.insert( std::pair< dof_id_type, std::vector< Point > >(macro_elem_id, {local_position}));
+    }
+}
+
+void
+NodalOverlapUserObject::updateMacroNeighborMap(const Elem* macro_elem){
+    /*!
+    Update the macro-element to neighbors map
+
+    :param Elem* macro_elem: The pointer to the macro element in question.
+    */
+
+    const Elem* neighbor;
+    std::vector< dof_id_type > neighbors;
+    std::map< dof_id_type, std::vector< dof_id_type > >::const_iterator it = macro_element_neighbors.find(macro_elem->id());
+    if (it == macro_element_neighbors.end()){
+//        std::cout << "new element\n";
+        neighbors.reserve(macro_elem->n_neighbors());
+        for (unsigned int i=0; i<macro_elem->n_neighbors(); i++){
+//            std::cout << "i: " << i << "\n";
+            neighbor = macro_elem->neighbor_ptr(i);
+            if (neighbor != NULL){
+                neighbors.push_back(neighbor->id());
+            }
+        }
+//        std::cout << "neighbors: "; print_vector(neighbors);
+        macro_element_neighbors.insert( std::pair< dof_id_type, std::vector< dof_id_type > >(macro_elem->id(), neighbors));
     }
 }
 
@@ -257,9 +373,9 @@ NodalOverlapUserObject::get_local_node_positions(dof_id_type macro_element_id) c
     return NULL;
 }
 
-void NodalOverlapUserObject::updateMicroNodeColMap(const dof_id_type micro_node_id){
+void NodalOverlapUserObject::updateMicroNodeRowMap(const dof_id_type micro_node_id){
     /*!
-    Add the indicated node id to the id to shape-function matrix column map. The column number will be 
+    Add the indicated node id to the id to shape-function matrix row map. The row number will be 
     determined at finalize. Note that the number is the order. There will be a scale factor applied due to 
     the number of degrees of freedom to be mapped from the micro to macro scales.
 
@@ -268,18 +384,40 @@ void NodalOverlapUserObject::updateMicroNodeColMap(const dof_id_type micro_node_
     */
 
 //    std::map< dof_id_type, unsigned int >::iterator it;
-//    it = micro_node_to_col.find(micro_node_id);
-//    if (it == micro_node_to_col.end()){
-//        micro_node_to_col.insert( std::pair< dof_id_type, unsigned int>(micro_node_id, 0));
+//    it = micro_node_to_row.find(micro_node_id);
+//    if (it == micro_node_to_row.end()){
+//        micro_node_to_row.insert( std::pair< dof_id_type, unsigned int>(micro_node_id, 0));
 //    }
 
-    micro_node_to_col.insert( std::pair< dof_id_type, unsigned int>(micro_node_id, 0));
+    micro_node_to_row.insert( std::pair< dof_id_type, unsigned int>(micro_node_id, 0));
     return;
 }
 
-void NodalOverlapUserObject::updateMacroNodeRowMap(const Elem* macro_element){
+void NodalOverlapUserObject::updateMacroNodeIds(const Elem* macro_element){
     /*!
-    Add the nodes of the macro element to the id to shape-function matrix column map. The row number will 
+    Add a count of the number of nodes associated with a given element to the node count map
+
+    :param Elem* macro_element: The pointer to the macro-scale element
+    */
+
+    std::vector< dof_id_type > nodes;
+
+    //Add the number of nodes for this macro element to the map if required
+    std::map< dof_id_type, std::vector< unsigned int> >::iterator it = macro_element_nodes.find(macro_element->id());
+    if (it == macro_element_nodes.end()){
+        
+        nodes.reserve(macro_element->n_nodes());
+
+        for (unsigned int n=0; n<macro_element->n_nodes(); n++){
+            nodes.push_back(macro_element->node_id(n));
+        }
+        macro_element_nodes.insert( std::pair< dof_id_type, std::vector< unsigned int > >(macro_element->id(), nodes));
+    }
+}
+
+void NodalOverlapUserObject::updateMacroNodeColMap(const Elem* macro_element){
+    /*!
+    Add the nodes of the macro element to the id to shape-function matrix column map. The column number will 
     be determined at finalize. Note that the number is the order. There will be a scale factor applied due to 
     the number of degrees of freedom to be mapped from the micro to macro scales.
 
@@ -288,29 +426,155 @@ void NodalOverlapUserObject::updateMacroNodeRowMap(const Elem* macro_element){
 
     std::map< dof_id_type, unsigned int >::iterator it;
 
+
     for (unsigned int n=0; n<macro_element->n_nodes(); n++){
-        it = macro_node_to_row.find(macro_element->node_id(n));
-        if (it == macro_node_to_row.end()){
-            macro_node_to_row.insert( std::pair< dof_id_type, unsigned int >(macro_element->node_id(n), 0));
+        it = macro_node_to_col.find(macro_element->node_id(n));
+        if (it == macro_node_to_col.end()){
+            macro_node_to_col.insert( std::pair< dof_id_type, unsigned int >(macro_element->node_id(n), 0));
         }
     }
     return;
 }
 
-const std::map< dof_id_type, unsigned int >* NodalOverlapUserObject::get_micro_node_to_col() const {
+const std::map< dof_id_type, unsigned int >* NodalOverlapUserObject::get_micro_node_to_row() const {
     /*!
     Get the pointer to the micro node to unscaled shape-function matrix column
     */
 
-    return &micro_node_to_col;
+    return &micro_node_to_row;
 }
 
-const std::map< dof_id_type, unsigned int >* NodalOverlapUserObject::get_macro_node_to_row() const {
+const std::map< dof_id_type, unsigned int >* NodalOverlapUserObject::get_macro_node_to_col() const {
     /*!
     Get the pointer to the macro node to unscaled shape-function matrix row
     */
 
-    return &macro_node_to_row;
+    return &macro_node_to_col;
+}
+
+void NodalOverlapUserObject::checkElementDepth( const dof_id_type &macro_element, std::map< dof_id_type, int > &element_depths){
+    /*!
+    Check the depth that the element is in the overlap coupling domain
+
+    Note: This may not be a totally general approach and may give unexpected results for totally submerged macro-scale 
+    meshes among others.
+
+    :param dof_id_type macro_element: The id number of the element to check
+    :param std::map< dof_id_type, unsigned int >: The depth of the elements explored
+    */
+
+    std::map<dof_id_type, std::vector< dof_id_type > >::iterator it;
+    std::map<dof_id_type, std::vector< dof_id_type > >::iterator it1;
+    std::map< dof_id_type, int >::iterator it2;
+    std::vector< int > neighbor_depths;
+    int min_pos_depth = 0;
+//    std::cout << "macro_element: " << macro_element << "\n";
+
+    it2 = element_depths.find(macro_element); //Check if the macro-element is in the element_depths map
+    if (it2 == element_depths.end()){
+
+        element_depths.insert(std::pair< dof_id_type, unsigned int>(macro_element, -1));
+
+        //Get the element's neighbors
+        it = macro_element_neighbors.find(macro_element);
+        if (it == macro_element_neighbors.end()){
+            std::cout << "Error: Element not found in neighbor map\n";
+            assert(1==0);
+        }
+
+        neighbor_depths.reserve(it->second.size());
+
+        //Iterate through the macro element's neighbors
+        for (unsigned int i=0; i<it->second.size(); i++){
+//            std::cout << "i: " << i << "\n";
+            //Check if the neighbor is not in the overlapped elements (macro_element is on the boundary)
+            it1 = macro_element_to_micro_nodes.find(it->second[i]);
+            if (it1 == macro_element_to_micro_nodes.end()){
+                element_depths[macro_element] = 0; //The macro_element is on the border
+                return;
+            }
+        }
+
+        //Iterate through the macro-element's neighbors now knowing that it isn't on the border.
+        for (unsigned int i=0; i<it->second.size(); i++){
+            //Because the neighbor is overlapped, check if it has been explored
+            it2 = element_depths.find(it->second[i]);
+//            std::cout << "neighbor[" << i << "]: " << it->second[i] << "\n";
+            if (it2 == element_depths.end()){
+//                std::cout << "Exploring neighbor\n";
+                checkElementDepth(it2->first, element_depths); //Explore the neighbor
+            }
+
+            //Check for any elements which have a depth greater than or equal to zero
+            if (element_depths[it2->first] > -0.5){
+//                std::cout << "Neighbor depth: " << element_depths[it2->first] << "\n";
+                neighbor_depths.push_back(element_depths[it2->first]);
+                min_pos_depth = std::min(min_pos_depth, element_depths[it2->first]);
+            }
+        }
+
+//        std::cout << "neighbor_depths: "; print_vector(neighbor_depths);
+//        std::cout << "min_pos_depth: " << min_pos_depth << "\n";
+        if (neighbor_depths.size() == 0){ //If all surrounding elements are unknown set the current element to two (not general)
+            element_depths[macro_element] = 2;
+        }
+        else{ //Increment the element depth
+            element_depths[macro_element] = min_pos_depth + 1;
+        }
+//        std::cout << "Element depth: " << element_depths[macro_element] << "\n";
+    }
+    else if (it2->second < 0){
+        std::cout << "Error: Element has a negative depth.\n";
+        assert(1==0);
+    }
+    return;
+}
+
+template< class myType >
+void
+NodalOverlapUserObject::print_vector(std::vector< myType > &v){
+    /*!
+    print a vector to the terminal
+
+    :param std::vector< myType > v: The vector to be printed.
+    */
+
+    for (unsigned int i=0; i<v.size(); i++){
+        std::cout << v[i] << " ";
+    }
+    std::cout << "\n";
+}
+
+template< class myType >
+void
+NodalOverlapUserObject::print_matrix(std::vector< std::vector< myType > > &m){
+    /*!
+    print a matrix to the terminal
+
+    :param std::vector< std::vector< myType > > m: The matrix to be printed
+    */
+
+    for (unsigned int i=0; i<m.size(); i++){
+        print_vector(m[i]);
+    }
+}
+
+void
+NodalOverlapUserObject::get_node_info(unsigned int &_num_macro_ghost, unsigned int &_num_macro_free,
+                                      unsigned int &_num_micro_ghost, unsigned int &_num_micro_free) const{
+    /*!
+    Return quantities of interest about the nodes contained in the overlap domain.
+
+    :param unsigned int _num_macro_ghost: The number of ghost nodes in the macro-domain
+    :param unsigned int _num_macro_free: The number of free nodes in the macro-domain
+    :param unsigned int _num_micro_ghost: The number of ghost nodes in the micro-domain
+    :param unsigned int _num_micro_free: The number of free nodes in the micro-domain
+    */
+    _num_macro_ghost = num_macro_ghost;
+    _num_macro_free = num_macro_free;
+    _num_micro_ghost = num_micro_ghost;
+    _num_micro_free = num_micro_free;
+    
 }
 
 //void

@@ -38,8 +38,8 @@ ProjectorUserObject::initialize()
     tripletList.resize(0);
 
     //Get the macro to row and micro to col maps
-    macro_node_to_row = _nodal_overlap.get_macro_node_to_row();
-    micro_node_to_col = _nodal_overlap.get_micro_node_to_col();
+    macro_node_to_col = _nodal_overlap.get_macro_node_to_col();
+    micro_node_to_row = _nodal_overlap.get_micro_node_to_row();
 }
 
 void
@@ -60,12 +60,9 @@ ProjectorUserObject::execute()
 
         //Collect the local coordinates of the element's nodes
         collect_local_nodes(local_nodes, macro_node_ids);
-        std::cout << "local_nodes:\n"; print_matrix(local_nodes);
-        std::cout << "macro_node_ids: "; print_vector(macro_node_ids);        
 
         //Collect the locations of the quadrature points
         collect_quadrature_points(local_gpts);
-        std::cout << "local_gpts:\n"; print_matrix(local_gpts);
 
         //Collect the coordinates of the micro-nodes in the element's local coordinates
         collect_local_micronode_positions(local_micronode_positions);
@@ -76,6 +73,7 @@ ProjectorUserObject::execute()
 
         //Add contributions to the shapefunction matrix
         compute_shapefunction_matrix_contributions(macro_node_ids);
+
     }
 }
 
@@ -88,11 +86,68 @@ ProjectorUserObject::threadJoin(const UserObject & y)
 void
 ProjectorUserObject::finalize()
 {
-    std::cout << "Finalizing Element Overlap\n";
+    std::cout << "Finalizing Projector UserObject\n";
 //    for (unsigned int i=0; i<integrated_weights.size(); i++){
 //        std::cout << integrated_weights[i] << ", " << integrated_weighted_densities[i] << ", " << integrated_weighted_densities[i]/integrated_weights[i]  << "\n";
 //    }
 //    mooseError("derp");
+    std::cout << "\tConstructing the shape-function matrix\n";
+    shapefunction = overlap::SpMat(n_micro_dof*micro_node_to_row->size(), n_macro_dof*macro_node_to_col->size()); //Size the sparse matrix
+    shapefunction.setFromTriplets(tripletList.begin(), tripletList.end()); //Fill the sparse matrix
+
+    //Get the micro-information
+    unsigned int num_macro_free, num_macro_ghost, num_micro_free, num_micro_ghost;
+    _nodal_overlap.get_node_info(num_macro_ghost, num_macro_free, num_micro_ghost, num_micro_free);
+
+    std::cout << "num_macro_free:  " << num_macro_free << "\n";
+    std::cout << "num_macro_ghost: " << num_macro_ghost << "\n";
+    std::cout << "num_micro_free:  " << num_micro_free << "\n";
+    std::cout << "num_micro_ghost: " << num_micro_ghost << "\n";
+
+    //Extract the shape-function matrix sub-blocks
+    overlap::SpMat NQD   = shapefunction.block( 0, 0, n_micro_dof*num_micro_free, n_macro_dof*num_macro_free);
+    overlap::SpMat NQDh  = shapefunction.block( 0, n_macro_dof*num_macro_free, n_micro_dof*num_micro_free, n_macro_dof*num_macro_ghost);
+    overlap::SpMat NQhD  = shapefunction.block( n_micro_dof*num_micro_free, 0, n_micro_dof*num_micro_ghost,  n_macro_dof*num_macro_free);
+    overlap::SpMat NQhDh = shapefunction.block( n_micro_dof*num_micro_free, n_macro_dof*num_macro_free, n_micro_dof*num_micro_ghost, n_macro_dof*num_macro_ghost);
+
+    //Compute the Projection Matrices
+
+    //Solve for BDhQ
+    std::cout << "Solving for BDhQ\n";
+    overlap::SpMat Imicro(n_micro_dof*num_micro_free, n_micro_dof*num_micro_free); //Set the right-hand side
+    Imicro.setIdentity();
+    overlap::solve_for_projector(NQDh, Imicro, BDhQ); //Run the QR solver
+
+    //Solve for BDhD (don't need to do this. Just for generality)
+    std::cout << "Solving for BDhD\n";
+//    overlap::solve_for_projector(NQDh, NQD, BDhD);
+    BDhD = overlap::SpMat(n_macro_dof*num_macro_ghost, n_macro_dof*num_macro_free);
+
+    //Solve for BQhD
+    std::cout << "Solving for BQhD\n";
+    BQhD = NQhD;// + NQhDh*BDhD;
+
+    //Solve for BQhQ
+    std::cout << "Solving for BQhQ\n";
+    BQhQ = NQhDh*BDhQ;
+
+
+
+//    std::cout << "NQD:\n";
+//    std::cout << NQD << "\n\n";
+//
+//    std::cout << "NQDh:\n";
+//    std::cout << NQDh << "\n\n";
+//
+//    std::cout << "NQhD:\n";
+//    std::cout << NQhD << "\n\n";
+//
+//    std::cout << "NQhDh:\n";
+//    std::cout << NQhDh << "\n\n";
+//
+//    std::cout << "tripletList.size(): " << tripletList.size() << "\n";
+//    std::cout << "Exiting Projector UserObject\n\n";
+//    assert(1==0);
 }
 
 void
@@ -383,13 +438,13 @@ ProjectorUserObject::compute_shapefunction_matrix_contributions(const std::vecto
 
     overlap::vecOfvec phis; //!The shape-function values
 
-    std::cout << "macro_node_to_row->size(): " << macro_node_to_row->size() << "\n";
-    std::cout << "micro_node_to_col->size(): " << micro_node_to_col->size() << "\n";
+//    std::cout << "macro_node_to_col->size(): " << macro_node_to_col->size() << "\n";
+//    std::cout << "micro_node_to_row->size(): " << micro_node_to_row->size() << "\n";
 
     for (unsigned int gpt=0; gpt<dns_weights[elnum].size(); gpt++){
         if (dns_weights[elnum][gpt].size()>0){
             get_cg_phi(gpt, phis);
-            overlap::construct_triplet_list(macro_node_to_row, micro_node_to_col, macro_node_ids,
+            overlap::construct_triplet_list(macro_node_to_col, micro_node_to_row, macro_node_ids,
                                             cgs[_current_elem->id()][gpt], phis, dns_weights[elnum][gpt],
                                             tripletList);
         }
@@ -398,7 +453,7 @@ ProjectorUserObject::compute_shapefunction_matrix_contributions(const std::vecto
 
 template< class myType >
 void
-print_vector(const std::vector< myType > &v){
+ProjectorUserObject::print_vector(const std::vector< myType > &v){
     /*!
     Print a vector to the terminal
 
@@ -413,7 +468,7 @@ print_vector(const std::vector< myType > &v){
 
 template< class myType >
 void
-print_matrix(const std::vector< std::vector< myType > > &m){
+ProjectorUserObject::print_matrix(const std::vector< std::vector< myType > > &m){
     /*!
     Print a matrix to the terminal
 
@@ -424,3 +479,27 @@ print_matrix(const std::vector< std::vector< myType > > &m){
         print_vector(m[i]);
     }
 }
+
+//void
+//ProjectorUserObject::solve_for_projector(const overlap::SpMat &A, const overlap::SpMat &B, overlap::SpMat &X){
+//    /*!
+//    Solve for the projector by solving the sparse matrix linear algebra problem using QR decomposition.
+//
+//    AX = B
+//
+//    :param overlap::SpMat A: The left-hand-side matrix
+//    :param overlap::SpMat B: The right-hand-side matrix
+//    :param overlap::SpMat X: The solution matrix.
+//    */
+//
+//    //Define the solver
+//    overlap::QRsolver solver;
+//
+//    //Perform the decomposition
+//    solver.compute(A);
+//    if( solver.info() != Eigen::Success){
+//        std::cout << "Error: Least squares solution to solving for the projector failed\n";
+//        assert(1==0);
+//    }
+//    X = solver.solve(B);
+//}
