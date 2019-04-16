@@ -31,6 +31,11 @@ class ProjectorUserObject : public ElementUserObject{
         virtual void threadJoin(const UserObject & y) override;
         virtual void finalize() override;
 
+        const overlap::SpMat* get_BDhQ() const;
+        const overlap::SpMat* get_BDhD() const;
+        const overlap::SpMat* get_BQhQ() const;
+        const overlap::SpMat* get_BQhD() const;
+
     protected:
         //Settings
         unsigned int n_macro_dof = 12; //!The number of degrees of freedom for each macro node
@@ -79,7 +84,7 @@ class ProjectorUserObject : public ElementUserObject{
         void print_vector(const std::vector< myType > &);
         template< class myType >
         void print_matrix(const std::vector< std::vector< myType > > &);
-//        void solve_for_projector(const overlap::SpMat &A, const overlap::SpMat &B, overlap::SpMat &X);
+        void solve_for_projector(const overlap::SpMat &A, const overlap::SpMat &B, overlap::SpMat &X);
 
 };
 

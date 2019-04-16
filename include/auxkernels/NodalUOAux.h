@@ -11,7 +11,8 @@
 #define NODALUOAUX_H
 
 #include "AuxKernel.h"
-#include "NodalOverlapUserObject.h"
+//#include "NodalOverlapUserObject.h"
+#include "NodalUserObject.h"
 
 // Forward Declarations
 class NodalUOAux;
@@ -36,8 +37,8 @@ protected:
 
   const VariableValue & _priorvar;
 
-  const NodalOverlapUserObject & _nodal_overlap;
-//  const ElementIntegrateUserObject & _element_integrate;
+  const NodalUserObject & _nodal_userobject;
+//  const NodalOverlapUserObject & _nodal_overlap;
 
 };
 

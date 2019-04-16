@@ -94,6 +94,7 @@ ProjectorUserObject::finalize()
     std::cout << "\tConstructing the shape-function matrix\n";
     shapefunction = overlap::SpMat(n_micro_dof*micro_node_to_row->size(), n_macro_dof*macro_node_to_col->size()); //Size the sparse matrix
     shapefunction.setFromTriplets(tripletList.begin(), tripletList.end()); //Fill the sparse matrix
+    shapefunction.makeCompressed(); //Compress the shapefunction matrix
 
     //Get the micro-information
     unsigned int num_macro_free, num_macro_ghost, num_micro_free, num_micro_ghost;
@@ -110,13 +111,15 @@ ProjectorUserObject::finalize()
     overlap::SpMat NQhD  = shapefunction.block( n_micro_dof*num_micro_free, 0, n_micro_dof*num_micro_ghost,  n_macro_dof*num_macro_free);
     overlap::SpMat NQhDh = shapefunction.block( n_micro_dof*num_micro_free, n_macro_dof*num_macro_free, n_micro_dof*num_micro_ghost, n_macro_dof*num_macro_ghost);
 
+//    NQDh.makeCompressed();
+
     //Compute the Projection Matrices
 
     //Solve for BDhQ
     std::cout << "Solving for BDhQ\n";
     overlap::SpMat Imicro(n_micro_dof*num_micro_free, n_micro_dof*num_micro_free); //Set the right-hand side
     Imicro.setIdentity();
-    overlap::solve_for_projector(NQDh, Imicro, BDhQ); //Run the QR solver
+    solve_for_projector(NQDh, Imicro, BDhQ); //Run the QR solver
 
     //Solve for BDhD (don't need to do this. Just for generality)
     std::cout << "Solving for BDhD\n";
@@ -130,8 +133,6 @@ ProjectorUserObject::finalize()
     //Solve for BQhQ
     std::cout << "Solving for BQhQ\n";
     BQhQ = NQhDh*BDhQ;
-
-
 
 //    std::cout << "NQD:\n";
 //    std::cout << NQD << "\n\n";
@@ -480,26 +481,58 @@ ProjectorUserObject::print_matrix(const std::vector< std::vector< myType > > &m)
     }
 }
 
-//void
-//ProjectorUserObject::solve_for_projector(const overlap::SpMat &A, const overlap::SpMat &B, overlap::SpMat &X){
-//    /*!
-//    Solve for the projector by solving the sparse matrix linear algebra problem using QR decomposition.
-//
-//    AX = B
-//
-//    :param overlap::SpMat A: The left-hand-side matrix
-//    :param overlap::SpMat B: The right-hand-side matrix
-//    :param overlap::SpMat X: The solution matrix.
-//    */
-//
-//    //Define the solver
-//    overlap::QRsolver solver;
-//
-//    //Perform the decomposition
-//    solver.compute(A);
-//    if( solver.info() != Eigen::Success){
-//        std::cout << "Error: Least squares solution to solving for the projector failed\n";
-//        assert(1==0);
-//    }
-//    X = solver.solve(B);
-//}
+void
+ProjectorUserObject::solve_for_projector(const overlap::SpMat &A, const overlap::SpMat &B, overlap::SpMat &X){
+    /*!
+    Solve for the projector by solving the sparse matrix linear algebra problem using QR decomposition.
+
+    AX = B
+
+    :param overlap::SpMat A: The left-hand-side matrix
+    :param overlap::SpMat B: The right-hand-side matrix
+    :param overlap::SpMat X: The solution matrix.
+    */
+
+    //Define the solver
+    overlap::QRsolver solver;
+
+    //Perform the decomposition
+    solver.compute(A);
+    if( solver.info() != Eigen::Success){
+        std::cout << "Error: Least squares solution to solving for the projector failed\n";
+        assert(1==0);
+    }
+    X = solver.solve(B);
+}
+
+const overlap::SpMat* ProjectorUserObject::get_BDhD() const{
+    /*!
+    Return a pointer to the BDhD matrix
+    */
+
+    return &BDhD;
+}
+
+const overlap::SpMat* ProjectorUserObject::get_BDhQ() const{
+    /*!
+    Return a pointer to the BDhQ matrix
+    */
+
+    return &BDhQ;
+}
+
+const overlap::SpMat* ProjectorUserObject::get_BQhD() const{
+    /*!
+    Return a pointer to the BQhD matrix
+    */
+
+    return &BQhD;
+}
+
+const overlap::SpMat* ProjectorUserObject::get_BQhQ() const{
+    /*!
+    Return a pointer to the BQhQ matrix
+    */
+
+    return &BQhQ;
+}

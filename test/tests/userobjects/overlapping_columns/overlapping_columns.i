@@ -352,6 +352,171 @@
     strain = FINITE
     block = 'DNS'
   [../]
+  [./DNS_coupling_u1]
+    type = ProjectedDOF
+    variable = disp_x
+    block = 'DNS'
+    nodal_overlap_userobject = nodal_overlap
+    DNS_dof_userobject = DNS_dof
+    macro_dof_userobject = micromorphic_dof
+    dof_num = 0
+    is_DNS = true
+    scale_factor = 1
+  [../]
+  [./DNS_coupling_u3]
+    type = ProjectedDOF
+    variable = disp_y
+    block = 'DNS'
+    nodal_overlap_userobject = nodal_overlap
+    DNS_dof_userobject = DNS_dof
+    macro_dof_userobject = micromorphic_dof
+    dof_num = 1
+    is_DNS = true
+    scale_factor = 1
+  [../]
+  [./DNS_coupling_u3]
+    type = ProjectedDOF
+    variable = disp_z
+    block = 'DNS'
+    nodal_overlap_userobject = nodal_overlap
+    DNS_dof_userobject = DNS_dof
+    macro_dof_userobject = micromorphic_dof
+    dof_num = 2
+    is_DNS = true
+    scale_factor = 1
+  [../]
+  [./micromorphic_coupling_u1]
+    type = ProjectedDOF
+    variable = disp_x
+    block = 'micro'
+    nodal_overlap_userobject = nodal_overlap
+    DNS_dof_userobject = DNS_dof
+    macro_dof_userobject = micromorphic_dof
+    dof_num = 0
+    is_DNS = false
+    scale_factor = 1
+  [../]
+  [./micromorphic_coupling_u3]
+    type = ProjectedDOF
+    variable = disp_y
+    block = 'micro'
+    nodal_overlap_userobject = nodal_overlap
+    DNS_dof_userobject = DNS_dof
+    macro_dof_userobject = micromorphic_dof
+    dof_num = 1
+    is_DNS = false
+    scale_factor = 1
+  [../]
+  [./micromorphic_coupling_u3]
+    type = ProjectedDOF
+    variable = disp_z
+    block = 'micro'
+    nodal_overlap_userobject = nodal_overlap
+    DNS_dof_userobject = DNS_dof
+    macro_dof_userobject = micromorphic_dof
+    dof_num = 2
+    is_DNS = false
+    scale_factor = 1
+  [../]
+  [./micromorphic_coupling_phi11]
+    type = ProjectedDOF
+    variable = phi_xx
+    block = 'micro'
+    nodal_overlap_userobject = nodal_overlap
+    DNS_dof_userobject = DNS_dof
+    macro_dof_userobject = micromorphic_dof
+    dof_num = 3
+    is_DNS = false
+    scale_factor = 1
+  [../]
+  [./micromorphic_coupling_phi22]
+    type = ProjectedDOF
+    variable = phi_yy
+    block = 'micro'
+    nodal_overlap_userobject = nodal_overlap
+    DNS_dof_userobject = DNS_dof
+    macro_dof_userobject = micromorphic_dof
+    dof_num = 4
+    is_DNS = false
+    scale_factor = 1
+  [../]
+  [./micromorphic_coupling_phi33]
+    type = ProjectedDOF
+    variable = phi_zz
+    block = 'micro'
+    nodal_overlap_userobject = nodal_overlap
+    DNS_dof_userobject = DNS_dof
+    macro_dof_userobject = micromorphic_dof
+    dof_num = 5
+    is_DNS = false
+    scale_factor = 1
+  [../]
+  [./micromorphic_coupling_phi23]
+    type = ProjectedDOF
+    variable = phi_yz
+    block = 'micro'
+    nodal_overlap_userobject = nodal_overlap
+    DNS_dof_userobject = DNS_dof
+    macro_dof_userobject = micromorphic_dof
+    dof_num = 6
+    is_DNS = false
+    scale_factor = 1
+  [../]
+  [./micromorphic_coupling_phi13]
+    type = ProjectedDOF
+    variable = phi_xz
+    block = 'micro'
+    nodal_overlap_userobject = nodal_overlap
+    DNS_dof_userobject = DNS_dof
+    macro_dof_userobject = micromorphic_dof
+    dof_num = 7
+    is_DNS = false
+    scale_factor = 1
+  [../]
+  [./micromorphic_coupling_phi12]
+    type = ProjectedDOF
+    variable = phi_xy
+    block = 'micro'
+    nodal_overlap_userobject = nodal_overlap
+    DNS_dof_userobject = DNS_dof
+    macro_dof_userobject = micromorphic_dof
+    dof_num = 8
+    is_DNS = false
+    scale_factor = 1
+  [../]
+  [./micromorphic_coupling_phi32]
+    type = ProjectedDOF
+    variable = phi_zy
+    block = 'micro'
+    nodal_overlap_userobject = nodal_overlap
+    DNS_dof_userobject = DNS_dof
+    macro_dof_userobject = micromorphic_dof
+    dof_num = 9
+    is_DNS = false
+    scale_factor = 1
+  [../]
+  [./micromorphic_coupling_phi31]
+    type = ProjectedDOF
+    variable = phi_zx
+    block = 'micro'
+    nodal_overlap_userobject = nodal_overlap
+    DNS_dof_userobject = DNS_dof
+    macro_dof_userobject = micromorphic_dof
+    dof_num = 10
+    is_DNS = false
+    scale_factor = 1
+  [../]
+  [./micromorphic_coupling_phi21]
+    type = ProjectedDOF
+    variable = phi_yx
+    block = 'micro'
+    nodal_overlap_userobject = nodal_overlap
+    DNS_dof_userobject = DNS_dof
+    macro_dof_userobject = micromorphic_dof
+    dof_num = 11
+    is_DNS = false
+    scale_factor = 1
+  [../]
 []
 
 #[Modules]
@@ -462,7 +627,8 @@
 #    priorvar = av2
     block = 'DNS'
     execute_on = initial
-    nodal_overlap_userobject = nodal_overlap
+#    nodal_overlap_userobject = nodal_overlap
+    nodal_userobject = nodal_overlap
   [../]
   [./eval_elementintegrate]
     type = ElementUOAux
@@ -471,6 +637,13 @@
     block = 'micro'
     execute_on = initial
     element_integrate_userobject = element_integrate
+  [../]
+  [./eval_nodaldof]
+    type = NodalUOAux
+    variable = av1
+    block = 'DNS'
+    execute_on = nonlinear
+    nodal_userobject = DNS_dof
   [../]
 #  [./compute_overlap]
 #    type = ComputeProjectorAux
@@ -501,6 +674,37 @@
     execute_on = initial
     nodal_overlap_userobject = nodal_overlap
     element_integrate_userobject = element_integrate
+  [../]
+  [./DNS_dof]
+    type = NodalDOFUserObject
+    block = 'DNS'
+    execute_on = linear
+    nodal_overlap_userobject = nodal_overlap
+    projector_userobject = projector
+    u1 = disp_x
+    u2 = disp_y
+    u3 = disp_z
+    is_DNS=true
+  [../]
+  [./micromorphic_dof]
+    type = NodalDOFUserObject
+    block = 'micro'
+    execute_on = linear
+    nodal_overlap_userobject = nodal_overlap
+    projector_userobject = projector
+    u1 = disp_x
+    u2 = disp_y
+    u3 = disp_z
+    phi11 = phi_xx
+    phi22 = phi_yy
+    phi33 = phi_zz
+    phi23 = phi_yz
+    phi13 = phi_xz
+    phi12 = phi_xy
+    phi32 = phi_zy
+    phi31 = phi_zx
+    phi21 = phi_yx
+    is_DNS=false
   [../]
 []
 
