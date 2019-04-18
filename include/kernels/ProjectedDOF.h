@@ -12,7 +12,7 @@
 
 #include "NodalKernel.h"
 #include "NodalOverlapUserObject.h"
-#include "NodalDOFUserObject.h"
+#include "DNSDOFUserObject.h"
 
 class ProjectedDOF;
 
@@ -26,6 +26,7 @@ public:
 
     //Compute the residual function
     virtual Real computeQpResidual() override;
+    virtual Real computeQpJacobian() override;
 
 protected:
 
@@ -35,11 +36,8 @@ protected:
     //A user object which contains the map between node number and order in the DOF vector
     const NodalOverlapUserObject& _nodal_overlap;
 
-    //A user object which contains the DOF vectors from the DNS
-    const NodalDOFUserObject& _DNS_dof;
-
-    //A user object which contains the DOF vectors from the macro-scale
-    const NodalDOFUserObject& _macro_dof;
+    //A user object which contains the DOF vectors
+    const DNSDOFUserObject& _dof_object;
     
     //The degree of freedom the kernel applies to
     unsigned int _dof_num;
@@ -54,10 +52,8 @@ protected:
     const std::map< dof_id_type, unsigned int >* macro_node_to_col;
     const std::map< dof_id_type, unsigned int >* micro_node_to_row;
 
-    const overlap::EigVec* Dh_micro; //The macro-scale ghost dof vector obtained from DNS dof projection
-    //const overlap::EigVec* Dh_macro; //The macro-scale ghost dof vector obtained from macro dof projection //All zero so ignored for now
-    const overlap::EigVec* Qh_micro; //The DNS ghost dof vector obtained from DNS dof projection
-    const overlap::EigVec* Qh_macro; //The macro-scale ghost dof vector obtained from DNS dof projection
+    const overlap::EigVec* Dh; //The macro-scale ghost dof vector
+    const overlap::EigVec* Qh; //The DNS ghost dof vector
 };
 
 #endif /* PROJECTEDDOF_H */

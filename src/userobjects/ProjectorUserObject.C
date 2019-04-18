@@ -117,9 +117,10 @@ ProjectorUserObject::finalize()
 
     //Solve for BDhQ
     std::cout << "Solving for BDhQ\n";
-    overlap::SpMat Imicro(n_micro_dof*num_micro_free, n_micro_dof*num_micro_free); //Set the right-hand side
-    Imicro.setIdentity();
-    solve_for_projector(NQDh, Imicro, BDhQ); //Run the QR solver
+    BDhQsolver.compute(NQDh);
+//    overlap::SpMat Imicro(n_micro_dof*num_micro_free, n_micro_dof*num_micro_free); //Set the right-hand side
+//    Imicro.setIdentity();
+//    solve_for_projector(NQDh, Imicro, BDhQ); //Run the QR solver
 
     //Solve for BDhD (don't need to do this. Just for generality)
     std::cout << "Solving for BDhD\n";
@@ -527,6 +528,14 @@ const overlap::SpMat* ProjectorUserObject::get_BQhD() const{
     */
 
     return &BQhD;
+}
+
+const overlap::QRsolver* ProjectorUserObject::get_BDhQsolver() const{
+    /*!
+    Return a pointer to the BDhQ solver object
+    */
+
+    return &BDhQsolver;
 }
 
 const overlap::SpMat* ProjectorUserObject::get_BQhQ() const{

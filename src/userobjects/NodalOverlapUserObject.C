@@ -182,6 +182,12 @@ NodalOverlapUserObject::finalize()
     num_macro_free = total_macro_nodes - num_macro_ghost;
     num_micro_ghost = total_micro_nodes - num_micro_free;
 
+    std::cout << "Nodal status (counts):\n";
+    std::cout << "  Macro (micromorphic) free nodes:  " << num_macro_free << "\n";
+    std::cout << "  Macro (micromorphic) ghost nodes: " << num_macro_ghost << "\n";
+    std::cout << "  Micro (DNS) free nodes:           " << num_micro_free << "\n";
+    std::cout << "  Micro (DNS) ghost nodes:          " << num_micro_ghost << "\n";
+
     std::cout << "\tNumber of micro-elements associated with overlap:             " << micro_elements.size() << "\n";
 
 //    std::cout << "num_macro_ghost: " << num_macro_ghost << "\n";

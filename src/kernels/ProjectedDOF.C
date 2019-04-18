@@ -34,15 +34,6 @@ ProjectedDOF::ProjectedDOF(const InputParameters & parameters)
     Note that for this kernel no attempt is (currently) made to implement the Jacobian.
     */
 
-    //Get the degree of freedom maps
-    macro_node_to_col = _nodal_overlap.get_macro_node_to_col();
-    micro_node_to_row = _nodal_overlap.get_micro_node_to_row();
-
-    //Get the degrees of freedom
-    Dh_micro = _DNS_dof.get_Dh();
-//    Dh_macro = _macro_dof.get_Dh(); //will always be zero for now
-    Qh_micro = _DNS_dof.get_Qh();
-    Qh_macro = _macro_dof.get_Qh();
 }
 
 Real ProjectedDOF::computeQpResidual(){
@@ -51,15 +42,80 @@ Real ProjectedDOF::computeQpResidual(){
     */
 
     //Flag for if the result is a DNS
-    unsigned int index = _current_node->id();
+    std::map< dof_id_type, unsigned int>::const_iterator it;
+    unsigned int index, num_macro_ghost, num_macro_free, num_micro_ghost, num_micro_free;
+
+    //Get the degree of freedom maps
+    macro_node_to_col = _nodal_overlap.get_macro_node_to_col();
+    micro_node_to_row = _nodal_overlap.get_micro_node_to_row();
+
+    //Get the information about the number of free and ghost nodes
+    _nodal_overlap.get_node_info(num_macro_ghost, num_macro_free, num_micro_ghost, num_micro_free);
+
+    //Get the degrees of freedom
+    Dh = _DNS_dof.get_Dh();
+//    Dh_macro = _macro_dof.get_Dh(); //will always be zero for now
+    Qh = _DNS_dof.get_Qh();
+
+//    std::cout << "Dh_micro.size(): " << Dh_micro->size() << "\n";
+//    std::cout << "Qh_micro.size(): " << Qh_micro->size() << "\n";
+//    std::cout << "Qh_macro.size(): " << Qh_macro->size() << "\n";
+
+
     if (_is_DNS){
-        index *= n_DNS_dof;
-        index += _dof_num;
-        return _scale_factor*((*Qh_micro)[index] + (*Qh_macro)[index]);
+        
+        it = micro_node_to_row->find(_current_node->id());
+
+        //Check if the node is a ghost DNS node in the overlap domain
+        if ((it != micro_node_to_row->end()) && (it->second >= num_micro_free)){
+
+            index = it->second - num_micro_free;
+            index *= n_DNS_dof;
+            index += _dof_num;
+//            if (_dof_num == 2){mooseError("A micro dof of 2 has been observed\n");}
+            if (index >= Qh->size(){
+                mooseError("Error: index " + std::to_string(index) + " is larger than allowed\n" +
+                           "Check your inputs for dof_num (currently " + std::to_string(_dof_num) + ")\n" +
+                           "to ensure that they are between 0-2 for the DNS terms\n" + 
+                           "  Kernel name: " + name() + "\n" +
+                           "  node id: " + std::to_string(_current_node->id()) + "\n" + 
+                           "  node order: " + std::to_string(it->second) + "\n" + 
+                           "  # of DOF associated with DNS node: " + std::to_string(n_DNS_dof) + "\n" + 
+                           "  Qh.size(): " + std::to_string(Qh->size()) + "\n")
+            }
+//            std::cout << "dof_num, Qh_micro, Qh_macro, Qh_micro + Qh_macro: " << _dof_num << ", " << (*Qh_micro)[index] << ", " << (*Qh_macro)[index] << ", " <<_scale_factor*((*Qh_micro)[index] + (*Qh_macro)[index]) << "\n";
+            return _scale_factor*(_u[_qp]-(*Qh)[index]);
+        }
+        return 0;
     }
     else{
-        index *= n_macro_dof;
-        index += _dof_num;
-        return _scale_factor*(*Dh_micro)[index];
+
+        it = macro_node_to_col->find(_current_node->id());
+
+        //Check if the node is a ghost micromorphic node in the overlap domain
+        if ((it != macro_node_to_col->end()) && (it->second >= num_macro_free)){
+
+            index = it->second - num_macro_free;
+            index *= n_macro_dof;
+            index += _dof_num;
+//            if (_dof_num == 2){mooseError("A macro dof of 2 has been observed\n");}
+            if (index >= Dh->size()){
+                mooseError("Error: index " + std::to_string(index) + " is larger than allowed\n" +
+                           "Check your inputs for dof_num (currently " + std::to_string(_dof_num) + ")\n" +
+                           "to ensure that they are between 0-11 for the micromorphic terms\n" + 
+                           "  Kernel name: " + name() + "\n" +
+                           "  node id: " + std::to_string(_current_node->id()) + "\n" +
+                           "  node order: " + std::to_string(it->second) + "\n" +  
+                           "  # of DOF associated with micromorphic node: " + std::to_string(n_macro_dof) + "\n" + 
+                           "  Dh.size(): " + std::to_string(Dh->size()) + "\n");
+            }
+            std::cout << "dof_num, _u.size(), _u[_qp], Dh_micro: " << _dof_num << ", " << _u.size() << ", " << _u[_qp] << ", " << (*Dh_micro)[index] << "\n";
+            return _scale_factor*(_u[_qp]-(*Dh)[index]);
+        }
+        return 0;
     }
+
+    return 0;
 }
+
+Real ProjectedDOF::computeQpJacobian(){return 1;}

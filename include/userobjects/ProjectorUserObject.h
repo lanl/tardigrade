@@ -32,6 +32,7 @@ class ProjectorUserObject : public ElementUserObject{
         virtual void finalize() override;
 
         const overlap::SpMat* get_BDhQ() const;
+        const overlap::QRsolver* get_BDhQsolver() const;
         const overlap::SpMat* get_BDhD() const;
         const overlap::SpMat* get_BQhQ() const;
         const overlap::SpMat* get_BQhD() const;
@@ -65,6 +66,7 @@ class ProjectorUserObject : public ElementUserObject{
 
         //Define the projectors
         overlap::SpMat BDhQ;
+        overlap::QRsolver BDhQsolver;
         overlap::SpMat BDhD;
         overlap::SpMat BQhQ;
         overlap::SpMat BQhD;
