@@ -37,8 +37,8 @@ validParams<NodalDOFUserObject>()
 NodalDOFUserObject::NodalDOFUserObject(const InputParameters & parameters)
     : NodalUserObject(parameters),
     _u1(coupledValue("u1")),
-    _u2(coupledValue("u1")),
-    _u3(coupledValue("u1")),
+    _u2(coupledValue("u2")),
+    _u3(coupledValue("u3")),
     _phi11(coupledValue("phi11")),
     _phi22(coupledValue("phi22")),
     _phi33(coupledValue("phi33")),
@@ -97,9 +97,13 @@ NodalDOFUserObject::execute()
                 Qp.insert(num_micro_dof*it->second + 1) = _u2[0];
                 Qp.insert(num_micro_dof*it->second + 2) = _u3[0];
 
+//                std::cout << BQhD->row(num_micro_dof*it->second + 1) << "\n";
+//                mooseError("NARF!");
+
                 //Add the contributions to the DOF vectors
                 overlap::SpEigVec res = (*BDhQ)*Qp;
                 Dh += res;
+                std::cout << "_u2: " << _u2[0] << "\n";
                 res = (*BQhQ)*Qp;
                 Qh += res;
 //                Dh += (*BDhQ)*Qp;
@@ -129,16 +133,29 @@ NodalDOFUserObject::execute()
                 Dp.insert(num_macro_dof*it->second + 10) = _phi31[0];
                 Dp.insert(num_macro_dof*it->second + 11) = _phi21[0];
 
+
                 //Add the contributions to the DOF vectors (Ignore BDhatD for now)
                 overlap::SpEigVec res = (*BQhD)*Dp;
                 Qh += res;
 //                Qh = (*BQhD)*Dp;
+//                if (fabs(_u3[0])>1e-5){
+//                    std::cout << "Dp:\n" << Dp << "\n";
+//                    std::cout << "Qh:\n" << Qh << "\n";
+//                    mooseError("Narf!");
+//                }
             }
     
             return;
         }
     }
-    return;
+/*    if (fabs(_u2[0]) > 0.005){
+        std::cout << "_u1: "; for (unsigned int i=0; i<_u1.size(); i++){std::cout << _u1[i] << " ";} std::cout << "\n";
+        std::cout << "_u2: "; for (unsigned int i=0; i<_u2.size(); i++){std::cout << _u2[i] << " ";} std::cout << "\n";
+        std::cout << "_u3: "; for (unsigned int i=0; i<_u3.size(); i++){std::cout << _u3[i] << " ";} std::cout << "\n";
+        std::cout << "Qh:\n" << Qh << "\n";
+        mooseError("Narf!");
+    }
+*/    return;
 }
 
 void
