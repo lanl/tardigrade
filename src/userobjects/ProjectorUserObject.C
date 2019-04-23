@@ -106,10 +106,10 @@ ProjectorUserObject::finalize()
     std::cout << "num_micro_ghost: " << num_micro_ghost << "\n";
 
     //Extract the shape-function matrix sub-blocks
-    overlap::SpMat NQD   = shapefunction.block( 0, 0, n_micro_dof*num_micro_free, n_macro_dof*num_macro_free);
+//    overlap::SpMat NQD   = shapefunction.block( 0, 0, n_micro_dof*num_micro_free, n_macro_dof*num_macro_free);
     overlap::SpMat NQDh  = shapefunction.block( 0, n_macro_dof*num_macro_free, n_micro_dof*num_micro_free, n_macro_dof*num_macro_ghost);
-    overlap::SpMat NQhD  = shapefunction.block( n_micro_dof*num_micro_free, 0, n_micro_dof*num_micro_ghost,  n_macro_dof*num_macro_free);
-    overlap::SpMat NQhDh = shapefunction.block( n_micro_dof*num_micro_free, n_macro_dof*num_macro_free, n_micro_dof*num_micro_ghost, n_macro_dof*num_macro_ghost);
+//    overlap::SpMat NQhD  = shapefunction.block( n_micro_dof*num_micro_free, 0, n_micro_dof*num_micro_ghost,  n_macro_dof*num_macro_free);
+//    overlap::SpMat NQhDh = shapefunction.block( n_micro_dof*num_micro_free, n_macro_dof*num_macro_free, n_micro_dof*num_micro_ghost, n_macro_dof*num_macro_ghost);
 
 //    NQDh.makeCompressed();
 
@@ -122,18 +122,18 @@ ProjectorUserObject::finalize()
 //    Imicro.setIdentity();
 //    solve_for_projector(NQDh, Imicro, BDhQ); //Run the QR solver
 
-    //Solve for BDhD (don't need to do this. Just for generality)
-    std::cout << "Solving for BDhD\n";
-//    overlap::solve_for_projector(NQDh, NQD, BDhD);
-    BDhD = overlap::SpMat(n_macro_dof*num_macro_ghost, n_macro_dof*num_macro_free);
-
-    //Solve for BQhD
-    std::cout << "Solving for BQhD\n";
-    BQhD = NQhD;// + NQhDh*BDhD;
-
-    //Solve for BQhQ
-    std::cout << "Solving for BQhQ\n";
-    BQhQ = NQhDh*BDhQ;
+//    //Solve for BDhD (don't need to do this. Just for generality)
+//    std::cout << "Solving for BDhD\n";
+////    overlap::solve_for_projector(NQDh, NQD, BDhD);
+//    BDhD = overlap::SpMat(n_macro_dof*num_macro_ghost, n_macro_dof*num_macro_free);
+//
+//    //Solve for BQhD
+//    std::cout << "Solving for BQhD\n";
+//    BQhD = NQhD;// + NQhDh*BDhD;
+//
+//    //Solve for BQhQ
+//    std::cout << "Solving for BQhQ\n";
+//    BQhQ = NQhDh*BDhQ;
 
 //    std::cout << "NQD:\n";
 //    std::cout << NQD << "\n\n";
@@ -506,30 +506,38 @@ ProjectorUserObject::solve_for_projector(const overlap::SpMat &A, const overlap:
     X = solver.solve(B);
 }
 
-const overlap::SpMat* ProjectorUserObject::get_BDhD() const{
+const overlap::SpMat* ProjectorUserObject::get_shapefunction() const{
     /*!
-    Return a pointer to the BDhD matrix
+    Return a pointer to the shapefunction matrix
     */
 
-    return &BDhD;
+    return &shapefunction;
 }
 
-const overlap::SpMat* ProjectorUserObject::get_BDhQ() const{
-    /*!
-    Return a pointer to the BDhQ matrix
-    */
-
-    return &BDhQ;
-}
-
-const overlap::SpMat* ProjectorUserObject::get_BQhD() const{
-    /*!
-    Return a pointer to the BQhD matrix
-    */
-
-    return &BQhD;
-}
-
+//const overlap::SpMat* ProjectorUserObject::get_BDhD() const{
+//    /*!
+//    Return a pointer to the BDhD matrix
+//    */
+//
+//    return &BDhD;
+//}
+//
+//const overlap::SpMat* ProjectorUserObject::get_BDhQ() const{
+//    /*!
+//    Return a pointer to the BDhQ matrix
+//    */
+//
+//    return &BDhQ;
+//}
+//
+//const overlap::SpMat* ProjectorUserObject::get_BQhD() const{
+//    /*!
+//    Return a pointer to the BQhD matrix
+//    */
+//
+//    return &BQhD;
+//}
+//
 const overlap::QRsolver* ProjectorUserObject::get_BDhQsolver() const{
     /*!
     Return a pointer to the BDhQ solver object
@@ -537,11 +545,12 @@ const overlap::QRsolver* ProjectorUserObject::get_BDhQsolver() const{
 
     return &BDhQsolver;
 }
+//
+//const overlap::SpMat* ProjectorUserObject::get_BQhQ() const{
+//    /*!
+//    Return a pointer to the BQhQ matrix
+//    */
+//
+//    return &BQhQ;
+//`}
 
-const overlap::SpMat* ProjectorUserObject::get_BQhQ() const{
-    /*!
-    Return a pointer to the BQhQ matrix
-    */
-
-    return &BQhQ;
-}

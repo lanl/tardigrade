@@ -194,15 +194,15 @@ NodalOverlapUserObject::finalize()
 //    std::cout << "num_micro_free: " << num_micro_free << "\n";
 
     //!Define the ordering of the macro-node to the row in the shape-function matrix
-    //!The matrix is ordered: | (macro ghost, micro ghost) : (macro ghost, micro free) |
+    //!The matrix is ordered: | (macro free, micro free)  : (macro free, micro ghost)  |
     //!                       ----------------------------------------------------------
-    //!                       | (macro free, micro ghost)  : (macro free, micro free)  |
+    //!                       | (macro ghost, micro free) : (macro ghost, micro ghost) |
 
     //Assign the ghost macro-nodes and free-micro nodes
     unsigned int ghost_macro_index = num_macro_free;
     unsigned int free_micro_index = 0;
 
-    unsigned int macro_index_true_zero;
+    unsigned int micro_index_true_zero;
 
     for (it1 = macro_element_to_micro_nodes.begin(); it1 != macro_element_to_micro_nodes.end(); it1++){
 
@@ -211,17 +211,19 @@ NodalOverlapUserObject::finalize()
             //!Assign the macro-ghost index
             for (unsigned int n=0; n<macro_element_nodes[it1->first].size(); n++){
                 macro_node_to_col[macro_element_nodes[it1->first][n]] = ghost_macro_index;
-                if (ghost_macro_index == 0){macro_index_true_zero = macro_element_nodes[it1->first][n];} //Store the true first index of the matrix
                 ghost_macro_index++;
             }
 
             //!Assign the micro-free index
             for (unsigned int n=0; n<it1->second.size(); n++){
                 micro_node_to_row[it1->second[n]] = free_micro_index;
+                if (free_micro_index == 0){micro_index_true_zero = it1->second[n];} //Store the true first index of the matrix
                 free_micro_index++;
             }
         }
     }
+
+//    std::cout << "micro_index_true_zero: " << micro_index_true_zero << "\n";
 
     //Assign the free macro-nodes and ghost-micro nodes
     unsigned int free_macro_index = 0;
@@ -233,8 +235,7 @@ NodalOverlapUserObject::finalize()
 
             //!Assign the macro-free index
             for (unsigned int n=0; n<macro_element_nodes[it1->first].size(); n++){
-                if ((macro_node_to_col[macro_element_nodes[it1->first][n]] == 0) &&
-                    (macro_element_nodes[it1->first][n] != macro_index_true_zero)){
+                if (macro_node_to_col[macro_element_nodes[it1->first][n]] == 0){
                     macro_node_to_col[macro_element_nodes[it1->first][n]] = free_macro_index;
                     free_macro_index++;
                 }
@@ -242,13 +243,84 @@ NodalOverlapUserObject::finalize()
 
             //!Assign the micro ghost index
             for (unsigned int n=0; n<it1->second.size(); n++){
-                if (micro_node_to_row[it1->second[n]] == 0){
+                if ((micro_node_to_row[it1->second[n]] == 0) && (it1->second[n] != micro_index_true_zero)){
                     micro_node_to_row[it1->second[n]] = ghost_micro_index;
                     ghost_micro_index++;
                 }
             }
         }
     }
+
+    //Data check
+    bool run_data_check = false;
+    if (run_data_check){
+        //Check that all indices are accounted for
+        bool found_index = false;
+        for (unsigned int i=0; i<micro_node_to_row.size(); i++){
+            found_index = false;
+            for (it2 = micro_node_to_row.begin(); it2 != micro_node_to_row.end(); it2++){
+                if (it2->second == i){
+                    found_index = true;
+                    break;
+                }
+            }
+            if (!found_index){
+                mooseError("Error: index not found in micro_node_to_row map");
+            }
+        }
+
+        for (unsigned int i=0; i<macro_node_to_col.size(); i++){
+            found_index = false;
+            for (it2 = macro_node_to_col.begin(); it2 != macro_node_to_col.end(); it2++){
+                if (it2->second == i){
+                    found_index = true;
+                    break;
+                }
+            }
+            if (!found_index){
+                mooseError("Error: index not found in macro_node_to_cow map");
+            }
+        }
+
+        //Check that all nodes in the ghost micromorphic elements are ghost
+        for (it1 = macro_element_nodes.begin(); it1 != macro_element_nodes.end(); it1++){
+            std::cout << "element depth: " << element_depth[it1->first] << "\n";
+            if (element_depth[it1->first] >= ghost_depth){
+                std::cout << "Macro-element " << it1->first << " has " << it1->second.size() << " ghost nodes.\n";
+                for (unsigned int n=0; n<it1->second.size(); n++){
+                    if (macro_node_to_col[it1->second[n]] < num_macro_free){
+                        mooseError("Error: node in ghost macro nodes is free");
+                    }
+                }
+            }
+        }
+
+        //Check that all of the nodes in the free DNS elements are free
+        for (it1= macro_element_to_micro_nodes.begin(); it1 != macro_element_to_micro_nodes.end(); it1++){
+            std::cout << "element depth: " << element_depth[it1->first] << "\n";
+            if (element_depth[it1->first] >= ghost_depth){
+                std::cout << "Macro-element " << it1->first << " contains " << it1->second.size() << " free DNS nodes.\n";
+                for (unsigned int n=0; n<it1->second.size(); n++){
+                    if (micro_node_to_row[it1->second[n]] >= num_micro_free){
+                        mooseError("Error: node in free DNS nodes is ghost");
+                    }
+                }
+            }
+        }
+
+        mooseError("Ending datacheck: All tests successful");
+    }
+
+//    std::cout << "micro_node_to_row:\n";
+//    for (it2 = micro_node_to_row.begin(); it2!=micro_node_to_row.end(); it2++){
+//        std::cout << it2->first << ", " << it2->second << "\n";
+//    }
+//
+//    std::cout << "macro_node_to_col:\n";
+//    for (it2 = macro_node_to_col.begin(); it2!=macro_node_to_col.end(); it2++){
+//        std::cout << it2->first << ", " << it2->second << "\n";
+//    }
+//    mooseError("Narf!");
 
     //Check that the indices are sensible to make sure nothing has gone horribly wrong
     if (ghost_macro_index != total_macro_nodes){

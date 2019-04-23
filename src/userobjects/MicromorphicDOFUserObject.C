@@ -48,7 +48,7 @@ MicromorphicDOFUserObject::MicromorphicDOFUserObject(const InputParameters & par
     _phi31(coupledValue("phi31")),
     _phi21(coupledValue("phi21")),
     _nodal_overlap(getUserObject<NodalOverlapUserObject>("nodal_overlap_userobject")),
-    _projector(getUserObject<ProjectorUserObject>("projector_userobject")),
+    _projector(getUserObject<ProjectorUserObject>("projector_userobject"))
 {
 }
 
@@ -78,7 +78,7 @@ MicromorphicDOFUserObject::execute()
     it = macro_node_to_col->find(_current_node->id());
     if (it != macro_node_to_col->end()){
 
-        // If the node is ``free'' perform projection
+        // If the node is ``free'' the dof values will be used to perform projection
         if (it->second<num_macro_free){
 
             D[num_macro_dof*it->second +  0] = _u1[0];

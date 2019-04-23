@@ -31,11 +31,8 @@ class ProjectorUserObject : public ElementUserObject{
         virtual void threadJoin(const UserObject & y) override;
         virtual void finalize() override;
 
-        const overlap::SpMat* get_BDhQ() const;
+        const overlap::SpMat* get_shapefunction() const;
         const overlap::QRsolver* get_BDhQsolver() const;
-        const overlap::SpMat* get_BDhD() const;
-        const overlap::SpMat* get_BQhQ() const;
-        const overlap::SpMat* get_BQhD() const;
 
     protected:
         //Settings
@@ -65,11 +62,11 @@ class ProjectorUserObject : public ElementUserObject{
         overlap::SpMat shapefunction;
 
         //Define the projectors
-        overlap::SpMat BDhQ;
+//        overlap::SpMat BDhQ;
         overlap::QRsolver BDhQsolver;
-        overlap::SpMat BDhD;
-        overlap::SpMat BQhQ;
-        overlap::SpMat BQhD;
+//        overlap::SpMat BDhD;
+//        overlap::SpMat BQhQ;
+//        overlap::SpMat BQhD;
 
         //!Utility Methods
         void collect_local_nodes(overlap::vecOfvec &local_nodes, std::vector< dof_id_type > &macro_node_ids);

@@ -352,27 +352,30 @@
     strain = FINITE
     block = 'DNS'
   [../]
+[]
+
+[NodalKernels]
   [./DNS_coupling_u1]
     type = ProjectedDOF
     variable = disp_x
     block = 'DNS'
     nodal_overlap_userobject = nodal_overlap
     DNS_dof_userobject = DNS_dof
-    macro_dof_userobject = micromorphic_dof
+#    macro_dof_userobject = micromorphic_dof
     dof_num = 0
     is_DNS = true
-    scale_factor = 1
+    scale_factor = 1000
   [../]
-  [./DNS_coupling_u3]
+  [./DNS_coupling_u2]
     type = ProjectedDOF
     variable = disp_y
     block = 'DNS'
     nodal_overlap_userobject = nodal_overlap
     DNS_dof_userobject = DNS_dof
-    macro_dof_userobject = micromorphic_dof
+#    macro_dof_userobject = micromorphic_dof
     dof_num = 1
     is_DNS = true
-    scale_factor = 1
+    scale_factor = 1000
   [../]
   [./DNS_coupling_u3]
     type = ProjectedDOF
@@ -380,10 +383,10 @@
     block = 'DNS'
     nodal_overlap_userobject = nodal_overlap
     DNS_dof_userobject = DNS_dof
-    macro_dof_userobject = micromorphic_dof
+#    macro_dof_userobject = micromorphic_dof
     dof_num = 2
     is_DNS = true
-    scale_factor = 1
+    scale_factor = 1000
   [../]
   [./micromorphic_coupling_u1]
     type = ProjectedDOF
@@ -391,21 +394,21 @@
     block = 'micro'
     nodal_overlap_userobject = nodal_overlap
     DNS_dof_userobject = DNS_dof
-    macro_dof_userobject = micromorphic_dof
+#    macro_dof_userobject = micromorphic_dof
     dof_num = 0
     is_DNS = false
-    scale_factor = 1
+    scale_factor = 1000
   [../]
-  [./micromorphic_coupling_u3]
+  [./micromorphic_coupling_u2]
     type = ProjectedDOF
     variable = disp_y
     block = 'micro'
     nodal_overlap_userobject = nodal_overlap
     DNS_dof_userobject = DNS_dof
-    macro_dof_userobject = micromorphic_dof
+#    macro_dof_userobject = micromorphic_dof
     dof_num = 1
     is_DNS = false
-    scale_factor = 1
+    scale_factor = 1000
   [../]
   [./micromorphic_coupling_u3]
     type = ProjectedDOF
@@ -413,10 +416,10 @@
     block = 'micro'
     nodal_overlap_userobject = nodal_overlap
     DNS_dof_userobject = DNS_dof
-    macro_dof_userobject = micromorphic_dof
+#    macro_dof_userobject = micromorphic_dof
     dof_num = 2
     is_DNS = false
-    scale_factor = 1
+    scale_factor = 1000
   [../]
   [./micromorphic_coupling_phi11]
     type = ProjectedDOF
@@ -424,10 +427,10 @@
     block = 'micro'
     nodal_overlap_userobject = nodal_overlap
     DNS_dof_userobject = DNS_dof
-    macro_dof_userobject = micromorphic_dof
+#    macro_dof_userobject = micromorphic_dof
     dof_num = 3
     is_DNS = false
-    scale_factor = 1
+    scale_factor = 1000
   [../]
   [./micromorphic_coupling_phi22]
     type = ProjectedDOF
@@ -435,10 +438,10 @@
     block = 'micro'
     nodal_overlap_userobject = nodal_overlap
     DNS_dof_userobject = DNS_dof
-    macro_dof_userobject = micromorphic_dof
+#    macro_dof_userobject = micromorphic_dof
     dof_num = 4
     is_DNS = false
-    scale_factor = 1
+    scale_factor = 1000
   [../]
   [./micromorphic_coupling_phi33]
     type = ProjectedDOF
@@ -446,10 +449,10 @@
     block = 'micro'
     nodal_overlap_userobject = nodal_overlap
     DNS_dof_userobject = DNS_dof
-    macro_dof_userobject = micromorphic_dof
+#    macro_dof_userobject = micromorphic_dof
     dof_num = 5
     is_DNS = false
-    scale_factor = 1
+    scale_factor = 1000
   [../]
   [./micromorphic_coupling_phi23]
     type = ProjectedDOF
@@ -457,10 +460,10 @@
     block = 'micro'
     nodal_overlap_userobject = nodal_overlap
     DNS_dof_userobject = DNS_dof
-    macro_dof_userobject = micromorphic_dof
+#    macro_dof_userobject = micromorphic_dof
     dof_num = 6
     is_DNS = false
-    scale_factor = 1
+    scale_factor = 1000
   [../]
   [./micromorphic_coupling_phi13]
     type = ProjectedDOF
@@ -468,10 +471,10 @@
     block = 'micro'
     nodal_overlap_userobject = nodal_overlap
     DNS_dof_userobject = DNS_dof
-    macro_dof_userobject = micromorphic_dof
+#    macro_dof_userobject = micromorphic_dof
     dof_num = 7
     is_DNS = false
-    scale_factor = 1
+    scale_factor = 1000
   [../]
   [./micromorphic_coupling_phi12]
     type = ProjectedDOF
@@ -479,10 +482,10 @@
     block = 'micro'
     nodal_overlap_userobject = nodal_overlap
     DNS_dof_userobject = DNS_dof
-    macro_dof_userobject = micromorphic_dof
+#    macro_dof_userobject = micromorphic_dof
     dof_num = 8
     is_DNS = false
-    scale_factor = 1
+    scale_factor = 1000
   [../]
   [./micromorphic_coupling_phi32]
     type = ProjectedDOF
@@ -490,10 +493,10 @@
     block = 'micro'
     nodal_overlap_userobject = nodal_overlap
     DNS_dof_userobject = DNS_dof
-    macro_dof_userobject = micromorphic_dof
+#    macro_dof_userobject = micromorphic_dof
     dof_num = 9
     is_DNS = false
-    scale_factor = 1
+    scale_factor = 1000
   [../]
   [./micromorphic_coupling_phi31]
     type = ProjectedDOF
@@ -501,10 +504,10 @@
     block = 'micro'
     nodal_overlap_userobject = nodal_overlap
     DNS_dof_userobject = DNS_dof
-    macro_dof_userobject = micromorphic_dof
+#    macro_dof_userobject = micromorphic_dof
     dof_num = 10
     is_DNS = false
-    scale_factor = 1
+    scale_factor = 1000
   [../]
   [./micromorphic_coupling_phi21]
     type = ProjectedDOF
@@ -512,10 +515,10 @@
     block = 'micro'
     nodal_overlap_userobject = nodal_overlap
     DNS_dof_userobject = DNS_dof
-    macro_dof_userobject = micromorphic_dof
+#    macro_dof_userobject = micromorphic_dof
     dof_num = 11
     is_DNS = false
-    scale_factor = 1
+    scale_factor = 1000
   [../]
 []
 
@@ -594,7 +597,7 @@
   [../]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 68e3
+    youngs_modulus = 68
     poissons_ratio = 0.32
     block = 'DNS'
   [../]
@@ -638,12 +641,19 @@
     execute_on = initial
     element_integrate_userobject = element_integrate
   [../]
-  [./eval_nodaldof]
+  [./eval_DNS_dof]
     type = NodalUOAux
     variable = av1
     block = 'DNS'
-    execute_on = nonlinear
+    execute_on = linear
     nodal_userobject = DNS_dof
+  [../]
+  [./eval_micromorphic_dof]
+    type = NodalUOAux
+    variable = av1
+    block = 'micro'
+    execute_on = linear
+    nodal_userobject = micromorphic_dof
   [../]
 #  [./compute_overlap]
 #    type = ComputeProjectorAux
@@ -675,19 +685,8 @@
     nodal_overlap_userobject = nodal_overlap
     element_integrate_userobject = element_integrate
   [../]
-  [./DNS_dof]
-    type = NodalDOFUserObject
-    block = 'DNS'
-    execute_on = linear
-    nodal_overlap_userobject = nodal_overlap
-    projector_userobject = projector
-    u1 = disp_x
-    u2 = disp_y
-    u3 = disp_z
-    is_DNS=true
-  [../]
   [./micromorphic_dof]
-    type = NodalDOFUserObject
+    type = MicromorphicDOFUserObject
     block = 'micro'
     execute_on = linear
     nodal_overlap_userobject = nodal_overlap
@@ -704,7 +703,17 @@
     phi32 = phi_zy
     phi31 = phi_zx
     phi21 = phi_yx
-    is_DNS=false
+  [../]
+  [./DNS_dof]
+    type = DNSDOFUserObject
+    block = 'DNS'
+    execute_on = linear
+    nodal_overlap_userobject = nodal_overlap
+    projector_userobject = projector
+    micromorphic_DOF_userobject = micromorphic_dof
+    u1 = disp_x
+    u2 = disp_y
+    u3 = disp_z
   [../]
 []
 
@@ -729,7 +738,8 @@
   #Terms for debugging
 #  petsc_options = '-ksp_monitor_true_residual -ksp_compute_singularvalues' 
 #  petsc_options = '-snes_converged_reason -ksp_converged_reason'
-#  l_max_its  = 10
+  nl_max_its = 20
+  l_max_its  = 5
 #  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
 #  petsc_options_value = 'hypre    boomeramg      100'
 #  petsc_options_iname = '-ksp_gmres_restart'
