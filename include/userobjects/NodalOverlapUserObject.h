@@ -55,7 +55,6 @@ class NodalOverlapUserObject : public NodalUserObject{
         //!These settings may (eventually) be opened up for the user to modify. For now, they are held fixed in code.
         bool restrict_nodes_to_one_element = false; //! If true a micro-node can only appear in one macro-element. This case only occurs when nodes are exactly on the boundary between two elements.
         int ghost_depth = 1; //! The depth at which the macro-scale element (and all its nodes) will be identified as ghost. Note that ghost will supersede free for macro-scale nodes and free will supersede ghost for micro-scale nodes. This is done so that no free micro-scale nodes will be located within the support of a free macro-scale node.
-        double _tolr = libMesh::TOLERANCE; //! The relative tolerance for detecting if points are located inside of an element
 
         //!Parameters
         SubdomainName _macroscale_domain; //! The name of the macro-scale subdomain

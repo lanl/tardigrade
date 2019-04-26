@@ -70,7 +70,7 @@ NodalOverlapUserObject::execute()
                      _mesh.getMesh().active_subdomain_elements_end(_macro_id))){
 
             //!Check if the element contains the node
-            if (_macro_element->contains_point(*_current_point, _tolr*pow(_macro_element->volume(), 1./_macro_element->dim()) + libMesh::TOLERANCE)){
+            if (_macro_element->contains_point(*_current_point)){
                
                 //!Compute and store the local coordinates of the current node 
                 Point local_point = FEInterface::inverse_map(_macro_element->dim(),

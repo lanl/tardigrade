@@ -122,17 +122,11 @@ ProjectorUserObject::finalize()
 //    mooseError("derp");
     std::cout << "\tConstructing the shape-function matrix\n";
     shapefunction = overlap::SpMat(n_micro_dof*micro_node_to_row->size(), n_macro_dof*macro_node_to_col->size()); //Size the sparse matrix
-    shapefunction.setFromTriplets(tripletList.begin(), tripletList.end()); //Fill the sparse matrix
-    shapefunction.makeCompressed(); //Compress the shapefunction matrix
+    overlap::form_sparsematrix(tripletList, true, shapefunction);//Fill the sparse matrix removing duplicates
 
     //Get the micro-information
     unsigned int num_macro_free, num_macro_ghost, num_micro_free, num_micro_ghost;
     _nodal_overlap.get_node_info(num_macro_ghost, num_macro_free, num_micro_ghost, num_micro_free);
-
-    std::cout << "num_macro_free:  " << num_macro_free << "\n";
-    std::cout << "num_macro_ghost: " << num_macro_ghost << "\n";
-    std::cout << "num_micro_free:  " << num_micro_free << "\n";
-    std::cout << "num_micro_ghost: " << num_micro_ghost << "\n";
 
     //Extract the shape-function matrix sub-blocks
 //    overlap::SpMat NQD   = shapefunction.block( 0, 0, n_micro_dof*num_micro_free, n_macro_dof*num_macro_free);
@@ -148,9 +142,43 @@ ProjectorUserObject::finalize()
     std::cout << "Solving for BDhQ\n";
     BDhQsolver.compute(NQDh);
 
-    bool _run_tests = false;
+    bool _run_tests = true;
     if (_run_tests){
-        overlap::SpMat Dhtmp(n_macro_dof*num_macro_ghost, 1);
+        overlap::EigVec Dhtmp = overlap::EigVec::Zero(n_macro_dof*num_macro_ghost, 1);
+        for (unsigned int i=0; i<num_macro_ghost; i++){
+            Dhtmp(n_macro_dof*i + 0) =  0.32;
+            Dhtmp(n_macro_dof*i + 1) =  1.00;
+            Dhtmp(n_macro_dof*i + 2) = -3.42;
+        }
+//        std::cout << "Dhtmp:\n" << Dhtmp << "\n";
+
+        //Test if the macro-scale values are interpolated correctly
+
+        overlap::EigVec Qtmp = NQDh*Dhtmp;
+
+        std::cout << "Qtmp:\n" << Qtmp << "\n";
+
+        bool xtest, ytest, ztest;
+
+        for (unsigned int i=0; i<num_micro_free; i++){
+
+            xtest = overlap::fuzzy_equals(Qtmp(n_micro_dof*i + 0),  0.32);
+            ytest = overlap::fuzzy_equals(Qtmp(n_micro_dof*i + 1),  1.00);
+            ztest = overlap::fuzzy_equals(Qtmp(n_micro_dof*i + 2), -3.42);
+            if (!(xtest && ytest && ztest)){
+                mooseError("Test 1 failed: Micro-dof not expected value");
+            }
+        }
+
+        //Test if the solver solves correctly
+        overlap::EigVec Dhans = BDhQsolver.solve(Qtmp);
+        
+//        std::cout << "Dh:\n" << Dhans << "\n";
+        if (!overlap::fuzzy_equals((Dhans - Dhtmp).norm(), 0)){
+            mooseError("Test 2 failed");
+        }
+
+        mooseError("All tests passed");
     }
 //    overlap::SpMat Imicro(n_micro_dof*num_micro_free, n_micro_dof*num_micro_free); //Set the right-hand side
 //    Imicro.setIdentity();
@@ -452,8 +480,6 @@ ProjectorUserObject::get_cg_phi(unsigned int gpt, overlap::vecOfvec &phis){
     //Get the local coordinates of the center of gravity
     Point local_cg;
     get_cg_local_coordinates(gpt, local_cg);
-
-//    std::cout << "  local_cg: "; std::cout << local_cg(0) << " " << local_cg(1) << " " << local_cg(2) << "\n";
 
     //Add the point to the points vector
     std::vector< Point > points;
