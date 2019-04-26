@@ -112,9 +112,13 @@ DNSDOFUserObject::finalize()
     //Solve for Dh
     Dh = BDhQsolver->solve(Q);
 
+//    std::cout << "Dh:\n" << Dh << "\n";
+
     //Solve for Qh
     const overlap::EigVec* D_macro = _micromorphic_DOF.get_D();
     Qh = NQhD*(*D_macro) + NQhDh*Dh;
+
+//    std::cout << "Qh:\n" << Qh << "\n";
 
     std::cout << "End of Nodal DOF\n\n";
 }

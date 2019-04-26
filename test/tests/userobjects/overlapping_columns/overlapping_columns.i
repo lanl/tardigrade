@@ -63,7 +63,8 @@
 [Kernels]
   #Define the internal force balance equations for micromorphic
   [./force_1]
-    type = InternalForce
+    type = InternalForceOverlap
+    nodal_overlap_userobject = nodal_overlap
     component = 0
     dof_num   = 0
     variable  = disp_x
@@ -86,7 +87,8 @@
     block = 'micro'
   [../]
   [./force_2]
-    type = InternalForce
+    type = InternalForceOverlap
+    nodal_overlap_userobject = nodal_overlap
     component = 1
     dof_num   = 1
     variable  = disp_y
@@ -109,7 +111,8 @@
     block = 'micro'
   [../]
   [./force_3]
-    type = InternalForce
+    type = InternalForceOverlap
+    nodal_overlap_userobject = nodal_overlap
     component = 2
     dof_num   = 2
     variable  = disp_z
@@ -133,7 +136,8 @@
   [../]
   #Define the internal couple balance equations for micromorphic
   [./couple_11]
-    type = InternalCouple
+    type = InternalCoupleOverlap
+    nodal_overlap_userobject = nodal_overlap
     component_i = 0
     component_j = 0
     dof_num     = 3
@@ -157,7 +161,8 @@
     block = 'micro'
   [../]
   [./couple_22]
-    type = InternalCouple
+    type = InternalCoupleOverlap
+    nodal_overlap_userobject = nodal_overlap
     component_i = 1
     component_j = 1
     dof_num     = 4
@@ -181,7 +186,8 @@
     block = 'micro'
   [../]
   [./couple_33]
-    type = InternalCouple
+    type = InternalCoupleOverlap
+    nodal_overlap_userobject = nodal_overlap
     component_i = 2
     component_j = 2
     dof_num     = 5
@@ -205,7 +211,8 @@
     block = 'micro'
   [../]
   [./couple_23]
-    type = InternalCouple
+    type = InternalCoupleOverlap
+    nodal_overlap_userobject = nodal_overlap
     component_i = 1
     component_j = 2
     dof_num     = 6
@@ -229,7 +236,8 @@
     block = 'micro'
   [../]
   [./couple_13]
-    type = InternalCouple
+    type = InternalCoupleOverlap
+    nodal_overlap_userobject = nodal_overlap
     component_i = 0
     component_j = 2
     dof_num     = 7
@@ -253,7 +261,8 @@
     block = 'micro'
   [../]
   [./couple_12]
-    type = InternalCouple
+    type = InternalCoupleOverlap
+    nodal_overlap_userobject = nodal_overlap
     component_i = 0
     component_j = 1
     dof_num     = 8
@@ -277,7 +286,8 @@
     block = 'micro'
   [../]
   [./couple_32]
-    type = InternalCouple
+    type = InternalCoupleOverlap
+    nodal_overlap_userobject = nodal_overlap
     component_i = 2
     component_j = 1
     dof_num     = 9
@@ -301,7 +311,8 @@
     block = 'micro'
   [../]
   [./couple_31]
-    type = InternalCouple
+    type = InternalCoupleOverlap
+    nodal_overlap_userobject = nodal_overlap
     component_i = 2
     component_j = 0
     dof_num     = 10
@@ -325,7 +336,8 @@
     block = 'micro'
   [../]
   [./couple_21]
-    type = InternalCouple
+    type = InternalCoupleOverlap
+    nodal_overlap_userobject = nodal_overlap
     component_i = 1
     component_j = 0
     dof_num     = 11
@@ -348,10 +360,40 @@
     #Define the block
     block = 'micro'
   [../]
-  [./TensorMechanics]
-    strain = FINITE
+  [./DNS_force_1]
+    type = StressDivergenceTensorsOverlap
+    nodal_overlap_userobject = nodal_overlap
+    variable = 'disp_x'
+    component = 0
+    displacements = 'disp_x disp_y disp_z'
+    use_finite_deform_jacobian = True
+    use_displaced_mesh = True
     block = 'DNS'
   [../]
+  [./DNS_force_2]
+    type = StressDivergenceTensorsOverlap
+    nodal_overlap_userobject = nodal_overlap
+    variable = 'disp_y'
+    component = 1
+    displacements = 'disp_x disp_y disp_z'
+    use_finite_deform_jacobian = True
+    use_displaced_mesh = True
+    block = 'DNS'
+  [../]
+  [./DNS_force_3]
+    type = StressDivergenceTensorsOverlap
+    nodal_overlap_userobject = nodal_overlap
+    variable = 'disp_z'
+    component = 2
+    displacements = 'disp_x disp_y disp_z'
+    use_finite_deform_jacobian = True
+    use_displaced_mesh = True
+    block = 'DNS'
+  [../]
+#  [./TensorMechanics]
+#    strain = FINITE
+#    block = 'DNS'
+#  [../]
 []
 
 [NodalKernels]
@@ -364,7 +406,7 @@
 #    macro_dof_userobject = micromorphic_dof
     dof_num = 0
     is_DNS = true
-    scale_factor = 1000
+#    scale_factor= 500
   [../]
   [./DNS_coupling_u2]
     type = ProjectedDOF
@@ -375,7 +417,7 @@
 #    macro_dof_userobject = micromorphic_dof
     dof_num = 1
     is_DNS = true
-    scale_factor = 1000
+#    scale_factor= 500
   [../]
   [./DNS_coupling_u3]
     type = ProjectedDOF
@@ -386,7 +428,7 @@
 #    macro_dof_userobject = micromorphic_dof
     dof_num = 2
     is_DNS = true
-    scale_factor = 1000
+#    scale_factor= 500
   [../]
   [./micromorphic_coupling_u1]
     type = ProjectedDOF
@@ -397,7 +439,7 @@
 #    macro_dof_userobject = micromorphic_dof
     dof_num = 0
     is_DNS = false
-    scale_factor = 1000
+#    scale_factor= 500
   [../]
   [./micromorphic_coupling_u2]
     type = ProjectedDOF
@@ -408,7 +450,7 @@
 #    macro_dof_userobject = micromorphic_dof
     dof_num = 1
     is_DNS = false
-    scale_factor = 1000
+#    scale_factor= 500
   [../]
   [./micromorphic_coupling_u3]
     type = ProjectedDOF
@@ -419,7 +461,7 @@
 #    macro_dof_userobject = micromorphic_dof
     dof_num = 2
     is_DNS = false
-    scale_factor = 1000
+#    scale_factor= 500
   [../]
   [./micromorphic_coupling_phi11]
     type = ProjectedDOF
@@ -430,7 +472,7 @@
 #    macro_dof_userobject = micromorphic_dof
     dof_num = 3
     is_DNS = false
-    scale_factor = 1000
+#    scale_factor= 500
   [../]
   [./micromorphic_coupling_phi22]
     type = ProjectedDOF
@@ -441,7 +483,7 @@
 #    macro_dof_userobject = micromorphic_dof
     dof_num = 4
     is_DNS = false
-    scale_factor = 1000
+#    scale_factor= 500
   [../]
   [./micromorphic_coupling_phi33]
     type = ProjectedDOF
@@ -452,7 +494,7 @@
 #    macro_dof_userobject = micromorphic_dof
     dof_num = 5
     is_DNS = false
-    scale_factor = 1000
+#    scale_factor= 500
   [../]
   [./micromorphic_coupling_phi23]
     type = ProjectedDOF
@@ -463,7 +505,7 @@
 #    macro_dof_userobject = micromorphic_dof
     dof_num = 6
     is_DNS = false
-    scale_factor = 1000
+#    scale_factor= 500
   [../]
   [./micromorphic_coupling_phi13]
     type = ProjectedDOF
@@ -474,7 +516,7 @@
 #    macro_dof_userobject = micromorphic_dof
     dof_num = 7
     is_DNS = false
-    scale_factor = 1000
+#    scale_factor= 500
   [../]
   [./micromorphic_coupling_phi12]
     type = ProjectedDOF
@@ -485,7 +527,7 @@
 #    macro_dof_userobject = micromorphic_dof
     dof_num = 8
     is_DNS = false
-    scale_factor = 1000
+#    scale_factor= 500
   [../]
   [./micromorphic_coupling_phi32]
     type = ProjectedDOF
@@ -496,7 +538,7 @@
 #    macro_dof_userobject = micromorphic_dof
     dof_num = 9
     is_DNS = false
-    scale_factor = 1000
+#    scale_factor= 500
   [../]
   [./micromorphic_coupling_phi31]
     type = ProjectedDOF
@@ -507,7 +549,7 @@
 #    macro_dof_userobject = micromorphic_dof
     dof_num = 10
     is_DNS = false
-    scale_factor = 1000
+#    scale_factor= 500
   [../]
   [./micromorphic_coupling_phi21]
     type = ProjectedDOF
@@ -518,7 +560,7 @@
 #    macro_dof_userobject = micromorphic_dof
     dof_num = 11
     is_DNS = false
-    scale_factor = 1000
+#    scale_factor= 500
   [../]
 []
 

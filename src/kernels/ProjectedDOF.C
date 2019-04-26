@@ -72,7 +72,6 @@ Real ProjectedDOF::computeQpResidual(){
             index += _dof_num;
 //            if (_dof_num == 2){mooseError("A micro dof of 2 has been observed\n");}
             if (index >= Qh->size()){
-                return 0;
                 mooseError("Error: index " + std::to_string(index) + " is larger than allowed\n" +
                            "Check your inputs for dof_num (currently " + std::to_string(_dof_num) + ")\n" +
                            "to ensure that they are between 0-2 for the DNS terms\n" + 
@@ -99,7 +98,6 @@ Real ProjectedDOF::computeQpResidual(){
             index += _dof_num;
 //            if (_dof_num == 2){mooseError("A macro dof of 2 has been observed\n");}
             if (index >= Dh->size()){
-                return 0;
                 mooseError("Error: index " + std::to_string(index) + " is larger than allowed\n" +
                            "Check your inputs for dof_num (currently " + std::to_string(_dof_num) + ")\n" +
                            "to ensure that they are between 0-11 for the micromorphic terms\n" + 
@@ -109,7 +107,7 @@ Real ProjectedDOF::computeQpResidual(){
                            "  # of DOF associated with micromorphic node: " + std::to_string(n_macro_dof) + "\n" + 
                            "  Dh.size(): " + std::to_string(Dh->size()) + "\n");
             }
-//            std::cout << "node id, dof_num, _u.size(), _u[_qp], Dh, R: " << _current_node->id() << ", " << _dof_num << ", " << _u.size() << ", " << _u[_qp] << ", " << (*Dh)[index] << ", " << _scale_factor*(_u[_qp] - (*Dh)[index]) << "\n";
+            std::cout << "node id, dof_num, _u.size(), _u[_qp], Dh, R: " << _current_node->id() << ", " << _dof_num << ", " << _u.size() << ", " << _u[_qp] << ", " << (*Dh)[index] << ", " << _scale_factor*(_u[_qp] - (*Dh)[index]) << "\n";
             return _scale_factor*(_u[_qp]-(*Dh)[index]);
         }
         return 0;

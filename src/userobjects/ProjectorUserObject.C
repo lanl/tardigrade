@@ -87,6 +87,35 @@ void
 ProjectorUserObject::finalize()
 {
     std::cout << "Finalizing Projector UserObject\n";
+
+//    //!begin Temporary
+//    std::cout << "Gauss domain volumes:\n";
+//    for (auto it=volumes.begin(); it!=volumes.end(); it++){
+//        std::cout << "  Element " << it->first << "\n";
+//        for (unsigned int i=0; i<it->second.size(); i++){
+//            std::cout << "    " << it->second[i] << "\n";
+//        }
+//    }
+//
+//    std::cout << "Gauss domain densities:\n";
+//    for (auto it=densities.begin(); it!=densities.end(); it++){
+//        std::cout << "  Element " << it->first << "\n";
+//        for (unsigned int i=0; i<it->second.size(); i++){
+//            std::cout << "    " << it->second[i] << "\n";
+//        }
+//    }
+//
+//    std::cout << "Gauss domain cgs:\n";
+//    for (auto it=cgs.begin(); it!=cgs.end(); it++){
+//        std::cout << "  Element " << it->first << "\n";
+//        for (unsigned int i=0; i<it->second.size(); i++){
+//            std::cout << "    " << it->second[i][0] << " " << it->second[i][1] << " " << it->second[i][2] << "\n";
+//        }
+//    }
+//    mooseError("Narf!");
+
+    //!end Temporary
+
 //    for (unsigned int i=0; i<integrated_weights.size(); i++){
 //        std::cout << integrated_weights[i] << ", " << integrated_weighted_densities[i] << ", " << integrated_weighted_densities[i]/integrated_weights[i]  << "\n";
 //    }
@@ -118,6 +147,11 @@ ProjectorUserObject::finalize()
     //Solve for BDhQ
     std::cout << "Solving for BDhQ\n";
     BDhQsolver.compute(NQDh);
+
+    bool _run_tests = false;
+    if (_run_tests){
+        overlap::SpMat Dhtmp(n_macro_dof*num_macro_ghost, 1);
+    }
 //    overlap::SpMat Imicro(n_micro_dof*num_micro_free, n_micro_dof*num_micro_free); //Set the right-hand side
 //    Imicro.setIdentity();
 //    solve_for_projector(NQDh, Imicro, BDhQ); //Run the QR solver
@@ -226,6 +260,8 @@ ProjectorUserObject::map_integrateMap_values( unsigned int gpt){
     :param unsigned int gpt: The number of the quadrature point
     */
 
+//    std::cout << "map_integrateMap_values at gpt: " << gpt << "\n";
+
     overlap::integrateMap::iterator itiM; //!The iterator through the integration map
 
     dof_id_type elnum = _current_elem->id();
@@ -241,6 +277,13 @@ ProjectorUserObject::map_integrateMap_values( unsigned int gpt){
     for (unsigned int i=0; i<3; i++){Finv[i].resize(3);}
 
     cell_points.reserve(3*dns_weights[elnum][gpt].size()); //TODO: Add the number of points to dns_weights rather than this inefficient estimate
+
+//    std::cout << "  master volume: ";
+//    double tmp_sum = 0;
+//    for (auto tmp_it = dns_weights[elnum][gpt].begin(); tmp_it != dns_weights[elnum][gpt].end(); tmp_it++){
+//        tmp_sum += tmp_it->second.volume;
+//    }
+//    std::cout << tmp_sum << "\n";
 
     //Extract all of the points to compute the shape functions and mappings at
     for (itiM=dns_weights[elnum][gpt].begin(); itiM != dns_weights[elnum][gpt].end(); itiM++){
@@ -332,6 +375,7 @@ ProjectorUserObject::map_integrateMap_values( unsigned int gpt){
 
     //Remove the total volume and mass from the density and cg calculations
     densities[_current_elem->id()][gpt] /= volumes[_current_elem->id()][gpt];
+//    std::cout << "  volume: " << volumes[_current_elem->id()][gpt] << "\n";
     for (unsigned int j=0; j<3; j++){
         cgs[_current_elem->id()][gpt][j] /= (volumes[_current_elem->id()][gpt]*densities[_current_elem->id()][gpt]);
     }
@@ -386,6 +430,8 @@ ProjectorUserObject::get_cg_local_coordinates(unsigned int gpt, Point &local_cg)
                      cgs[_current_elem->id()][gpt][1],
                      cgs[_current_elem->id()][gpt][2]);
 
+//    std::cout << "  global cg: "; print_vector(cgs[_current_elem->id()][gpt]);
+
     //Compute the local coordinates of the center of gravity
     local_cg = FEInterface::inverse_map( _current_elem->dim(), 
                                          libMesh::FEType(_current_elem->default_order()),
@@ -406,6 +452,8 @@ ProjectorUserObject::get_cg_phi(unsigned int gpt, overlap::vecOfvec &phis){
     //Get the local coordinates of the center of gravity
     Point local_cg;
     get_cg_local_coordinates(gpt, local_cg);
+
+//    std::cout << "  local_cg: "; std::cout << local_cg(0) << " " << local_cg(1) << " " << local_cg(2) << "\n";
 
     //Add the point to the points vector
     std::vector< Point > points;
@@ -442,14 +490,22 @@ ProjectorUserObject::compute_shapefunction_matrix_contributions(const std::vecto
 
 //    std::cout << "macro_node_to_col->size(): " << macro_node_to_col->size() << "\n";
 //    std::cout << "micro_node_to_row->size(): " << micro_node_to_row->size() << "\n";
-
+    std::cout << "Construcing shapefunction matrix contributions for macro-element " << elnum << "\n";
     for (unsigned int gpt=0; gpt<dns_weights[elnum].size(); gpt++){
+//        std::cout << "  gauss point: " << gpt << "\n";
         if (dns_weights[elnum][gpt].size()>0){
             get_cg_phi(gpt, phis);
+//            std::cout << "  phis: "; print_matrix(phis);
             overlap::construct_triplet_list(macro_node_to_col, micro_node_to_row, macro_node_ids,
                                             cgs[_current_elem->id()][gpt], phis, dns_weights[elnum][gpt],
                                             tripletList);
         }
+/*        //begin Temporary
+        else{
+            std::cout << "  No micro-points in gauss domain\n";
+        }
+        //end Temporary
+*/
     }
 }
 
