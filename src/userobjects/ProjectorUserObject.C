@@ -40,6 +40,7 @@ ProjectorUserObject::initialize()
     //Get the macro to row and micro to col maps
     macro_node_to_col = _nodal_overlap.get_macro_node_to_col();
     micro_node_to_row = _nodal_overlap.get_micro_node_to_row();
+    micro_node_elcount = _nodal_overlap.get_micro_node_elcount();
 }
 
 void
@@ -121,14 +122,16 @@ ProjectorUserObject::finalize()
 //    }
 //    mooseError("derp");
     std::cout << "\tConstructing the shape-function matrix\n";
-    shapefunction = overlap::SpMat(n_micro_dof*micro_node_to_row->size(), n_macro_dof*macro_node_to_col->size()); //Size the sparse matrix
-    overlap::form_sparsematrix(tripletList, true, shapefunction);//Fill the sparse matrix removing duplicates
+    shapefunction = overlap::SpMat( n_micro_dof*micro_node_to_row->size(), n_macro_dof*macro_node_to_col->size());
+    shapefunction.setFromTriplets(tripletList.begin(), tripletList.end());//Fill the sparse matrix
+    shapefunction.makeCompressed();
 
     //Get the micro-information
     unsigned int num_macro_free, num_macro_ghost, num_micro_free, num_micro_ghost;
     _nodal_overlap.get_node_info(num_macro_ghost, num_macro_free, num_micro_ghost, num_micro_free);
 
     //Extract the shape-function matrix sub-blocks
+//    overlap::SpMat NQDh = overlap::extract_block(shapefunction, 0, n_macro_dof*num_macro_free, n_micro_dof*num_micro_free, n_macro_dof*num_macro_ghost);
 //    overlap::SpMat NQD   = shapefunction.block( 0, 0, n_micro_dof*num_micro_free, n_macro_dof*num_macro_free);
     overlap::SpMat NQDh  = shapefunction.block( 0, n_macro_dof*num_macro_free, n_micro_dof*num_micro_free, n_macro_dof*num_macro_ghost);
 //    overlap::SpMat NQhD  = shapefunction.block( n_micro_dof*num_micro_free, 0, n_micro_dof*num_micro_ghost,  n_macro_dof*num_macro_free);
@@ -139,10 +142,26 @@ ProjectorUserObject::finalize()
     //Compute the Projection Matrices
 
     //Solve for BDhQ
-    std::cout << "Solving for BDhQ\n";
+    std::cout << "  Performing NQDh QR decomposition\n";
+    NQDh.makeCompressed();
     BDhQsolver.compute(NQDh);
+    if (BDhQsolver.info() != Eigen::Success){
+        mooseError("QR decomposition of the ghost micromorphic to free DNS DOF failed");
+    }
+//    BDhQsolver = overlap::form_solver(NQDh);
 
-    bool _run_tests = true;
+    if (solve_for_projectors){
+        //Form BDhQ transpose
+        std::cout << "  Performing NQDh transpose QR decomposition\n";
+        overlap::SpMat NQDh_transpose = NQDh.transpose();
+
+        BDhQ_transpose_solver.compute(NQDh_transpose);
+        if (BDhQ_transpose_solver.info() != Eigen::Success){
+            mooseError("Computation of the BDhQ_transpose solver failed");
+        }
+    }
+
+    bool _run_tests = false;
     if (_run_tests){
         overlap::EigVec Dhtmp = overlap::EigVec::Zero(n_macro_dof*num_macro_ghost, 1);
         for (unsigned int i=0; i<num_macro_ghost; i++){
@@ -150,14 +169,44 @@ ProjectorUserObject::finalize()
             Dhtmp(n_macro_dof*i + 1) =  1.00;
             Dhtmp(n_macro_dof*i + 2) = -3.42;
         }
+
+        overlap::EigVec Dtmp = overlap::EigVec::Zero(n_macro_dof*num_macro_free, 1);
+        for (unsigned int i=0; i<num_macro_free; i++){
+            Dtmp(n_macro_dof*i + 0) =  0.32;
+            Dtmp(n_macro_dof*i + 1) =  1.00;
+            Dtmp(n_macro_dof*i + 2) = -3.42;
+        }
+
 //        std::cout << "Dhtmp:\n" << Dhtmp << "\n";
 
         //Test if the macro-scale values are interpolated correctly
 
         overlap::EigVec Qtmp = NQDh*Dhtmp;
 
-        std::cout << "Qtmp:\n" << Qtmp << "\n";
-
+//        std::cout << "Qtmp:\n" << Qtmp << "\n";
+/*        std::vector< double > sum_shape_fxn(12, 0);
+        overlap::EigVec NQDhrow0 = NQDh.row(n_micro_dof*450);
+        std::cout << "NQDh.row(" << n_micro_dof*450 << "):\n";
+        for (unsigned int i=0; i<num_macro_ghost; i++){
+            for (unsigned int j=0; j<12; j++){
+                std::cout << NQDhrow0[12*i + j] << " ";
+                sum_shape_fxn[j] += NQDhrow0[12*i + j];
+            }
+            std::cout << "\n";
+        }
+        std::cout << "sum of values: ";
+        for (unsigned int j=0; j<12; j++){
+            std::cout << sum_shape_fxn[j] << " ";
+        }
+        std::cout << "\n";
+        std::cout << "Dh:\n";
+        for (unsigned int i=0; i<num_macro_ghost; i++){
+            for (unsigned int j=0; j<12; j++){
+                std::cout << Dhtmp[12*i + j] << " ";
+            }
+            std::cout << "\n";
+        }
+*/
         bool xtest, ytest, ztest;
 
         for (unsigned int i=0; i<num_micro_free; i++){
@@ -166,6 +215,11 @@ ProjectorUserObject::finalize()
             ytest = overlap::fuzzy_equals(Qtmp(n_micro_dof*i + 1),  1.00);
             ztest = overlap::fuzzy_equals(Qtmp(n_micro_dof*i + 2), -3.42);
             if (!(xtest && ytest && ztest)){
+                std::cout << "i: " << i << "\n";
+                std::cout << "num_micro_free: " << num_micro_free << "\n";
+                std::cout << "Qtmp(" << n_micro_dof*i + 0 << "): " << Qtmp(n_micro_dof*i + 0) << "\n";
+                std::cout << "Qtmp(" << n_micro_dof*i + 1 << "): " << Qtmp(n_micro_dof*i + 1) << "\n";
+                std::cout << "Qtmp(" << n_micro_dof*i + 2 << "): " << Qtmp(n_micro_dof*i + 2) << "\n";
                 mooseError("Test 1 failed: Micro-dof not expected value");
             }
         }
@@ -176,6 +230,126 @@ ProjectorUserObject::finalize()
 //        std::cout << "Dh:\n" << Dhans << "\n";
         if (!overlap::fuzzy_equals((Dhans - Dhtmp).norm(), 0)){
             mooseError("Test 2 failed");
+        }
+
+        //Make sure that there are no non-zero terms in NQD
+        overlap::SpMat NQD   = shapefunction.block( 0, 0, n_micro_dof*num_micro_free, n_macro_dof*num_macro_free);
+        if (!overlap::fuzzy_equals(NQD.norm(), 0)){
+            mooseError("Test 3 failed");
+        }
+
+        //Make sure that the interpolation of NQhD and NQhDh is carried out correctly
+        overlap::SpMat NQhD  = shapefunction.block( n_micro_dof*num_micro_free, 0, n_micro_dof*num_micro_ghost,  n_macro_dof*num_macro_free);
+        overlap::SpMat NQhDh = shapefunction.block( n_micro_dof*num_micro_free, n_macro_dof*num_macro_free, n_micro_dof*num_micro_ghost, n_macro_dof*num_macro_ghost);
+        overlap::EigVec Qhtmp = NQhD*Dtmp + NQhDh*Dhtmp;
+
+        std::vector< double > sum_shape_fxn(12, 0);
+        unsigned int dofnum = 450;
+        overlap::EigVec NQhDrow0 = NQhD.row(n_micro_dof*dofnum);
+        std::cout << "NQhD.row(" << n_micro_dof*dofnum << "):\n";
+        for (unsigned int i=0; i<num_macro_free; i++){
+            for (unsigned int j=0; j<12; j++){
+                std::cout << NQhDrow0[12*i + j] << " ";
+                sum_shape_fxn[j] += NQhDrow0[12*i + j];
+            }
+            std::cout << "\n";
+        }
+        std::cout << "sum of values from NQhD: ";
+        for (unsigned int j=0; j<12; j++){
+            std::cout << sum_shape_fxn[j] << " ";
+        }
+        std::cout << "\n";
+
+        std::cout << "NQhDh.row(" << n_micro_dof*dofnum << "):\n";
+        overlap::EigVec NQhDhrow0 = NQhDh.row(n_micro_dof*dofnum);
+        std::vector< double > sum_shape_fxn2(12, 0);
+        for (unsigned int i=0; i<num_macro_ghost; i++){
+            for (unsigned int j=0; j<12; j++){
+                std::cout << NQhDhrow0[12*i + j] << " ";
+                sum_shape_fxn2[j] += NQhDhrow0[12*i + j];
+            }
+           std::cout << "\n";
+        }
+        std::cout << "\n";
+
+        std::cout << "sum of values from NQhDh: ";
+        for (unsigned int j=0; j<12; j++){
+            std::cout << sum_shape_fxn2[j] << " ";
+        }
+        std::cout << "\n";
+
+        std::cout << "sum of values from NQhD and NQhDh: ";
+        for (unsigned int j=0; j<12; j++){
+            std::cout << sum_shape_fxn[j] + sum_shape_fxn2[j] << " ";
+        }
+        std::cout << "\n";
+
+        std::cout << "D:\n";
+        for (unsigned int i=0; i<num_macro_free; i++){
+            for (unsigned int j=0; j<12; j++){
+                std::cout << Dtmp[12*i + j] << " ";
+            }
+            std::cout << "\n";
+        }
+
+        for (unsigned int i=0; i<num_micro_ghost; i++){
+            xtest = overlap::fuzzy_equals(Qhtmp(n_micro_dof*i + 0),  0.32);
+            ytest = overlap::fuzzy_equals(Qhtmp(n_micro_dof*i + 1),  1.00);
+            ztest = overlap::fuzzy_equals(Qhtmp(n_micro_dof*i + 2), -3.42);
+            if (!(xtest && ytest && ztest)){
+                std::cout << "i: " << i << "\n";
+                std::cout << "num_micro_ghost: " << num_micro_ghost << "\n";
+                std::cout << "Qtmp(" << n_micro_dof*i + 0 << "): " << Qhtmp(n_micro_dof*i + 0) << "\n";
+                std::cout << "Qtmp(" << n_micro_dof*i + 1 << "): " << Qhtmp(n_micro_dof*i + 1) << "\n";
+                std::cout << "Qtmp(" << n_micro_dof*i + 2 << "): " << Qhtmp(n_micro_dof*i + 2) << "\n";
+                mooseError("Test 4 failed: Micro-dof not expected value");
+            }
+        }
+
+        if (solve_for_projectors){
+            overlap::SpMat NQDh_transpose = NQDh.transpose();
+            
+            std::cout << "Null rows/columns of NQDh: size: " << NQDh.rows() << ", " << NQDh.cols() << "\n";
+            for (int k=0; k<NQDh.rows(); ++k){
+                if (NQDh.row(k).norm() < 1e-8){
+                    std::cout << "row: " << k << "\n";
+                }
+            }
+
+            for (int k=0; k<NQDh.cols(); ++k){
+                if (NQDh.col(k).norm() < 1e-8){
+                    std::cout << "col: " << k << "\n";
+                }
+            }
+
+            std::cout << "Null rows/columns of NQDh_transpose: size: " << NQDh_transpose.rows() << ", " << NQDh_transpose.cols() << "\n";
+            for (int k=0; k<NQDh_transpose.rows(); ++k){
+                if (NQDh_transpose.row(k).norm() < 1e-8){
+                    std::cout << "row: " << k << "\n";
+                }
+            }
+
+            for (int k=0; k<NQDh_transpose.cols(); ++k){
+                if (NQDh_transpose.col(k).norm() < 1e-8){
+                    std::cout << "col: " << k << "\n";
+                }
+            }
+
+            Dhans = NQDh_transpose*Qtmp;
+            std::cout << "Dhans:\n";
+            for (unsigned int i=0; i<num_macro_ghost; i++){
+                for (unsigned int j=0; j<12; j++){
+                    std::cout << Dhans[12*i + j] << " ";
+                }
+                std::cout << "\n";
+            }
+
+            overlap::EigVec Qtmp_result = BDhQ_transpose_solver.solve(Dhans);
+
+            if ((Qtmp - Qtmp_result).norm() > 1e-8){
+//                std::cout << "Qtmp_result:\n" << Qtmp_result << "\n";
+                mooseWarning("Test 5 failed: BDhQ_transpose solver returning unexpected values");
+            }
         }
 
         mooseError("All tests passed");
@@ -511,19 +685,24 @@ ProjectorUserObject::compute_shapefunction_matrix_contributions(const std::vecto
 
 
     dof_id_type elnum = _current_elem->id();
+    bool macro_elem_is_ghost = _nodal_overlap.is_macro_elem_ghost(elnum);
 
     overlap::vecOfvec phis; //!The shape-function values
 
-//    std::cout << "macro_node_to_col->size(): " << macro_node_to_col->size() << "\n";
-//    std::cout << "micro_node_to_row->size(): " << micro_node_to_row->size() << "\n";
+    unsigned int num_macro_free, num_macro_ghost, num_micro_free, num_micro_ghost;
+    _nodal_overlap.get_node_info(num_macro_ghost, num_macro_free, num_micro_ghost, num_micro_free);
+
     std::cout << "Construcing shapefunction matrix contributions for macro-element " << elnum << "\n";
     for (unsigned int gpt=0; gpt<dns_weights[elnum].size(); gpt++){
 //        std::cout << "  gauss point: " << gpt << "\n";
         if (dns_weights[elnum][gpt].size()>0){
             get_cg_phi(gpt, phis);
 //            std::cout << "  phis: "; print_matrix(phis);
+
             overlap::construct_triplet_list(macro_node_to_col, micro_node_to_row, macro_node_ids,
                                             cgs[_current_elem->id()][gpt], phis, dns_weights[elnum][gpt],
+                                            micro_node_elcount, _nodal_overlap.share_ghost_free_boundary_nodes(),
+                                            macro_elem_is_ghost, num_micro_free,
                                             tripletList);
         }
 /*        //begin Temporary
@@ -585,7 +764,33 @@ ProjectorUserObject::solve_for_projector(const overlap::SpMat &A, const overlap:
         std::cout << "Error: Least squares solution to solving for the projector failed\n";
         assert(1==0);
     }
+
     X = solver.solve(B);
+    if (solver.info() != Eigen::Success){
+        std::cout << "Error: Solution of projector failed\n";
+        assert(1==0);
+    }
+
+/*    std::vector< overlap::T > tripletList;
+    tripletList.reserve(0);
+    overlap::SpEigVec x;
+
+    for (int col=0; col<B.cols(); col++){
+        //Solve for the current column of X
+        x = solver.solve(B.col(col));
+
+        //Add the non-zero values to the triplet list
+        tripletList.reserve(tripletList.size() + x.nonZeros());
+
+        for (overlap::SpEigVec::InnerIterator it(x); it; ++it){
+            tripletList.push_back(overlap::T(it.index(), col, it.value()));
+        }
+    }
+
+    //Set the outgoing projector
+    X = overlap::SpMat(A.rows(), B.cols());
+    X.setFromTriplets(tripletList.begin(), tripletList.end());
+*/
 }
 
 const overlap::SpMat* ProjectorUserObject::get_shapefunction() const{
@@ -626,6 +831,13 @@ const overlap::QRsolver* ProjectorUserObject::get_BDhQsolver() const{
     */
 
     return &BDhQsolver;
+}
+const overlap::QRsolver* ProjectorUserObject::get_BDhQ_transpose_solver() const{
+    /*!
+    Return a pointer to the BDhQ transpose solver object
+    */
+
+    return &BDhQ_transpose_solver;
 }
 //
 //const overlap::SpMat* ProjectorUserObject::get_BQhQ() const{

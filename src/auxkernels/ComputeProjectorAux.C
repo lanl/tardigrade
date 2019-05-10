@@ -251,8 +251,9 @@ ComputeProjectorAux::computeValue()
                 std::vector< overlap::T > tripletList;
 
                 //construct the triplet list to populate the sub shape-function matrix
-                overlap::construct_triplet_list(macro_node_to_col, micro_node_to_row, macro_node_ids,
-                                                cgs[i], phis, dns_weights[i], tripletList);
+                mooseError("Depreciated. Cannot call function.");
+//                overlap::construct_triplet_list(macro_node_to_col, micro_node_to_row, macro_node_ids,
+//                                                cgs[i], phis, dns_weights[i], tripletList);
                 std::cout << "tripletList.size(): " << tripletList.size() << "\n";
                 sub_shapefunction.setFromTriplets(tripletList.begin(), tripletList.end());
 

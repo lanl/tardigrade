@@ -62,6 +62,8 @@ NodalOverlapUserObject::execute()
     //!Form the map from the micro-scale nodes to their elements. Note: Forming it will only be done once.
     const std::map< dof_id_type, std::vector< dof_id_type > > & micro_node_to_micro_elements = _mesh.nodeToElemMap(); //!A map from the micro-scale node id to the micro-scale element ids
 
+    unsigned int num_elem = 0;
+
     if (_macro_bounding_box.contains_point(*_current_point))
     {
         //!Since the current node is in the bounding box, we can check if the node is in any of the macro-scale elements
@@ -106,10 +108,16 @@ NodalOverlapUserObject::execute()
                     updateMicroElements(_macro_element->id(), *elem_id);
 
                 }
+                num_elem++; //Increment the number of elements the node is shared between
                 if (restrict_nodes_to_one_element){
                     break; //A node can only appear in a single element
                 }
             }
+        }
+
+        //Set the number of elements the micro-node is contained within
+        if (num_elem>1){
+            micro_node_elcount.insert( std::pair< dof_id_type, unsigned int >(_current_node->id(), num_elem));
         }
     }
 }
@@ -157,7 +165,6 @@ NodalOverlapUserObject::finalize()
     std::map< dof_id_type, std::vector< dof_id_type > >::iterator it1;
     std::map< dof_id_type, unsigned int>::iterator it2;
 
-    std::map< dof_id_type, int > element_depth;
 //    unsigned int num_macro_ghost=0;
 //    unsigned int num_micro_free=0;
     unsigned int total_macro_nodes = macro_node_to_col.size();
@@ -246,6 +253,16 @@ NodalOverlapUserObject::finalize()
                 if ((micro_node_to_row[it1->second[n]] == 0) && (it1->second[n] != micro_index_true_zero)){
                     micro_node_to_row[it1->second[n]] = ghost_micro_index;
                     ghost_micro_index++;
+                }
+
+                //Decrement the number of elements a micro-node is contained within if it is shared between a free and ghost macro-element
+                if ((!share_ghost_boundary_nodes) && //Check if nodes shared between ghost and free macro-boundaries should be shared
+                    (micro_node_elcount.find(it1->second[n]) != micro_node_elcount.end()) && //Check if the micro-node is on a boundary
+                    (micro_node_to_row[it1->second[n]] < num_micro_free)) { //Check if the micro-node is free
+                    micro_node_elcount[it1->second[n]] -= 1; //Decrement the number of shared elements
+                    if (micro_node_elcount[it1->second[n]] <= 1){
+                        micro_node_elcount.erase(it1->second[n]); //Delete any nodes from the map which are only on the border of a single macro-element
+                    }
                 }
             }
         }
@@ -653,6 +670,53 @@ NodalOverlapUserObject::get_node_info(unsigned int &_num_macro_ghost, unsigned i
     _num_micro_ghost = num_micro_ghost;
     _num_micro_free = num_micro_free;
     
+}
+
+unsigned int
+NodalOverlapUserObject::get_node_elcount(const dof_id_type & id) const{
+    /*!
+    Return the number of elements the current node is inside. Only greater than 1 for nodes on the boundary of two elements.
+    */
+
+    auto it = micro_node_elcount.find(id);
+    if (it != micro_node_elcount.end()){
+        return it->second;
+    }
+    else{
+        return 1;
+    }
+}
+
+bool
+NodalOverlapUserObject::share_ghost_free_boundary_nodes() const{
+    /*!
+    Return a boolean indicating if nodes on the boundary between free and ghost macro elements should be shared
+    */
+    return share_ghost_boundary_nodes;
+}
+
+const std::map< dof_id_type, unsigned int>*
+NodalOverlapUserObject::get_micro_node_elcount() const{
+    /*!
+    Return the map from the micro nodes on the boundary to the number of elements they touch.
+    */
+
+    return &micro_node_elcount;
+}
+
+bool
+NodalOverlapUserObject::is_macro_elem_ghost(dof_id_type elnum) const{
+    /*!
+    Return whether a macro element is a ghost or not.
+    */
+
+    auto it = element_depth.find(elnum);
+    if (it == element_depth.end()){
+        return false;
+    }
+    else{
+        return (it->second >= ghost_depth);
+    }
 }
 
 //void

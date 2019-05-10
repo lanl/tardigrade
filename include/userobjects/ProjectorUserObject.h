@@ -33,11 +33,13 @@ class ProjectorUserObject : public ElementUserObject{
 
         const overlap::SpMat* get_shapefunction() const;
         const overlap::QRsolver* get_BDhQsolver() const;
+        const overlap::QRsolver* get_BDhQ_transpose_solver() const;
 
     protected:
         //Settings
         unsigned int n_macro_dof = 12; //!The number of degrees of freedom for each macro node
         unsigned int n_micro_dof = 3; //!The number of degrees of freedom for each micro node
+        bool solve_for_projectors = true; //!Whether to solve for the projection matrices or not
 
         //Required user objects
         const NodalOverlapUserObject & _nodal_overlap;
@@ -52,6 +54,9 @@ class ProjectorUserObject : public ElementUserObject{
         const std::map< dof_id_type, unsigned int >* macro_node_to_col;
         const std::map< dof_id_type, unsigned int >* micro_node_to_row;
 
+        //Map from nodes located on element boundaries to the number of elements they should be incorporated in the shape functions
+        const std::map< dof_id_type, unsigned int >* micro_node_elcount;
+
         //Define the dns weights objects
         std::map < dof_id_type, std::vector< overlap::integrateMap > > dns_weights;
         
@@ -62,11 +67,8 @@ class ProjectorUserObject : public ElementUserObject{
         overlap::SpMat shapefunction;
 
         //Define the projectors
-//        overlap::SpMat BDhQ;
         overlap::QRsolver BDhQsolver;
-//        overlap::SpMat BDhD;
-//        overlap::SpMat BQhQ;
-//        overlap::SpMat BQhD;
+        overlap::QRsolver BDhQ_transpose_solver;
 
         //!Utility Methods
         void collect_local_nodes(overlap::vecOfvec &local_nodes, std::vector< dof_id_type > &macro_node_ids);

@@ -47,7 +47,21 @@ class NodalOverlapUserObject : public NodalUserObject{
 
         //!Return quantities of interest about the nodes contained in the overlap domain
         void get_node_info(unsigned int &_num_macro_ghost, unsigned int &_num_macro_free,
-                           unsigned int &_num_micro_ghost, unsigned int &_num_micro_free) const;    
+                           unsigned int &_num_micro_ghost, unsigned int &_num_micro_free) const;
+
+        //!Return the number of elements a node is shared between
+        unsigned int get_node_elcount(const dof_id_type& id) const;
+
+        const std::map< dof_id_type, unsigned int>* get_micro_node_elcount() const;
+
+        //!Get the map from the micro nodes on the boundaries to the number of elements they touch
+        const std::map< dof_id_type, unsigned int >* geT_micro_node_elcount() const;
+
+        //!Return a boolean indicating if nodes are allowed to be shared between free and ghost macro elements
+        bool share_ghost_free_boundary_nodes() const;
+
+        //!Check if the macro-element is a ghost element or not
+        bool is_macro_elem_ghost(dof_id_type elnum) const;
 
     protected:
 
@@ -55,6 +69,7 @@ class NodalOverlapUserObject : public NodalUserObject{
         //!These settings may (eventually) be opened up for the user to modify. For now, they are held fixed in code.
         bool restrict_nodes_to_one_element = false; //! If true a micro-node can only appear in one macro-element. This case only occurs when nodes are exactly on the boundary between two elements.
         int ghost_depth = 1; //! The depth at which the macro-scale element (and all its nodes) will be identified as ghost. Note that ghost will supersede free for macro-scale nodes and free will supersede ghost for micro-scale nodes. This is done so that no free micro-scale nodes will be located within the support of a free macro-scale node.
+        bool share_ghost_boundary_nodes = false; //! If true a micro-node which is located on the boundary between a free and ghost macro-element will be shared
 
         //!Parameters
         SubdomainName _macroscale_domain; //! The name of the macro-scale subdomain
@@ -86,6 +101,12 @@ class NodalOverlapUserObject : public NodalUserObject{
 
         //! A map from the macro-scale node to its column index in the shape-function matrix
         std::map< dof_id_type, unsigned int > macro_node_to_col;
+
+        //! A map from the micro-scale node to the number of elements it is contained within. Nodes which are only in one element will not be found in this map. This case only occurs for nodes on the boundaries between two elements. 
+        std::map< dof_id_type, unsigned int > micro_node_elcount;
+
+        //! A map which stores the macro element's depth
+        std::map< dof_id_type, int > element_depth;
 
         //! The dimensions required of the shape-function matrix
         unsigned int num_macro_ghost = 0;

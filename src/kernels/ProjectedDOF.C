@@ -107,7 +107,7 @@ Real ProjectedDOF::computeQpResidual(){
                            "  # of DOF associated with micromorphic node: " + std::to_string(n_macro_dof) + "\n" + 
                            "  Dh.size(): " + std::to_string(Dh->size()) + "\n");
             }
-            std::cout << "node id, dof_num, _u.size(), _u[_qp], Dh, R: " << _current_node->id() << ", " << _dof_num << ", " << _u.size() << ", " << _u[_qp] << ", " << (*Dh)[index] << ", " << _scale_factor*(_u[_qp] - (*Dh)[index]) << "\n";
+//            std::cout << "node id, dof_num, _u.size(), _u[_qp], Dh, R: " << _current_node->id() << ", " << _dof_num << ", " << _u.size() << ", " << _u[_qp] << ", " << (*Dh)[index] << ", " << _scale_factor*(_u[_qp] - (*Dh)[index]) << "\n";
             return _scale_factor*(_u[_qp]-(*Dh)[index]);
         }
         return 0;
