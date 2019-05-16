@@ -37,7 +37,7 @@ ProjectorUserObject::initialize()
     //Resize the shape-function matrix terms to zero
     tripletList.resize(0);
 
-    //Get the macro to row and micro to col maps
+    //Get the macro to col and micro to row maps
     macro_node_to_col = _nodal_overlap.get_macro_node_to_col();
     micro_node_to_row = _nodal_overlap.get_micro_node_to_row();
     micro_node_elcount = _nodal_overlap.get_micro_node_elcount();
@@ -153,15 +153,24 @@ ProjectorUserObject::finalize()
     if (solve_for_projectors){
         //Form BDhQ transpose
         std::cout << "  Performing NQDh transpose QR decomposition\n";
-        overlap::SpMat NQDh_transpose = NQDh.transpose();
 
-        BDhQ_transpose_solver.compute(NQDh_transpose);
-        if (BDhQ_transpose_solver.info() != Eigen::Success){
-            mooseError("Computation of the BDhQ_transpose solver failed");
+        if (BDhQsolver.matrixR().rows() < BDhQsolver.matrixR().cols()){
+            mooseError("DNS has less degrees of freedom than the micromorphic macro-scale.");
+        }
+
+        //Extract the transpose of R
+        overlap::SpMat matrixR_transpose = BDhQsolver.matrixR().block(0, 0, n_macro_dof*num_macro_ghost, n_macro_dof*num_macro_ghost).transpose();
+
+        overlap::SpMat NQDh_PR_transpose = BDhQsolver.colsPermutation()*matrixR_transpose;
+        NQDh_PR_transpose.makeCompressed();
+
+        NQDh_PR_transpose_solver.compute(NQDh_PR_transpose);
+        if (NQDh_PR_transpose_solver.info() != Eigen::Success){
+            mooseError("Computation of the NQDh_PR_transpose solver failed");
         }
     }
 
-    bool _run_tests = false;
+    bool _run_tests = true;
     if (_run_tests){
         overlap::EigVec Dhtmp = overlap::EigVec::Zero(n_macro_dof*num_macro_ghost, 1);
         for (unsigned int i=0; i<num_macro_ghost; i++){
@@ -344,12 +353,19 @@ ProjectorUserObject::finalize()
                 std::cout << "\n";
             }
 
-            overlap::EigVec Qtmp_result = BDhQ_transpose_solver.solve(Dhans);
+            overlap::EigVec QprojDh_result = NQDh_PR_transpose_solver.solve(Dhans);
+//            std::cout << "Q->Dh:\n" << QprojDh_result << "\n";
+            std::cout << "Qtmp_result shape: " << QprojDh_result.rows() << ", " << QprojDh_result.cols() << "\n";
+            std::cout << "Q shape: " << BDhQsolver.matrixQ().rows() << ", " << BDhQsolver.matrixQ().cols() << "\n";
+            Eigen::MatrixXd testing_things = BDhQsolver.matrixQ()*NQDh_PR_transpose_solver.solve(Dhans);
+            //std::cout << "Qtmp_result shape: " << Qtmp_result.rows() << ", " << Qtmp_result.cols() << "\n";
+            mooseError("It worked, but why can't I save it?");
+            assert(-1==1);
 
-            if ((Qtmp - Qtmp_result).norm() > 1e-8){
+//            if ((Qtmp - Qtmp_result).norm() > 1e-8){
 //                std::cout << "Qtmp_result:\n" << Qtmp_result << "\n";
-                mooseWarning("Test 5 failed: BDhQ_transpose solver returning unexpected values");
-            }
+//                mooseWarning("Test 5 failed: BDhQ_transpose solver returning unexpected values");
+//            }
         }
 
         mooseError("All tests passed");
@@ -832,12 +848,12 @@ const overlap::QRsolver* ProjectorUserObject::get_BDhQsolver() const{
 
     return &BDhQsolver;
 }
-const overlap::QRsolver* ProjectorUserObject::get_BDhQ_transpose_solver() const{
+const overlap::QRsolver* ProjectorUserObject::get_NQDh_PR_transpose_solver() const{
     /*!
-    Return a pointer to the BDhQ transpose solver object
+    Return a pointer to the NQDh PR_transpose solver object
     */
 
-    return &BDhQ_transpose_solver;
+    return &NQDh_PR_transpose_solver;
 }
 //
 //const overlap::SpMat* ProjectorUserObject::get_BQhQ() const{

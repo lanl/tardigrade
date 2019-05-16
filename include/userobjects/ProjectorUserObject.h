@@ -33,7 +33,7 @@ class ProjectorUserObject : public ElementUserObject{
 
         const overlap::SpMat* get_shapefunction() const;
         const overlap::QRsolver* get_BDhQsolver() const;
-        const overlap::QRsolver* get_BDhQ_transpose_solver() const;
+        const overlap::QRsolver* get_NQDh_PR_transpose_solver() const;
 
     protected:
         //Settings
@@ -68,7 +68,7 @@ class ProjectorUserObject : public ElementUserObject{
 
         //Define the projectors
         overlap::QRsolver BDhQsolver;
-        overlap::QRsolver BDhQ_transpose_solver;
+        overlap::QRsolver NQDh_PR_transpose_solver;
 
         //!Utility Methods
         void collect_local_nodes(overlap::vecOfvec &local_nodes, std::vector< dof_id_type > &macro_node_ids);
