@@ -48,11 +48,11 @@ DNSDOFUserObject::initialize()
    _nodal_overlap.get_node_info(num_macro_ghost, num_macro_free, num_micro_ghost, num_micro_free);
 
    //Initialize the free degree of freedom vector
-   Q = overlap::EigVec::Zero(num_micro_dof*num_micro_free);
+   Q = std::vector< double >(num_micro_dof*num_micro_free, 0);//overlap::EigVec::Zero(num_micro_dof*num_micro_free);
 
    //Initialize the ghost degree of freedom vectors
-   Dh = overlap::EigVec::Zero(num_macro_dof*num_macro_ghost);
-   Qh = overlap::EigVec::Zero(num_micro_dof*num_micro_ghost);
+   Dh = std::vector< double >(num_macro_dof*num_macro_ghost, 0);//overlap::EigVec::Zero(num_macro_dof*num_macro_ghost);
+   Qh = std::vector< double >(num_micro_dof*num_micro_ghost, 0);//overlap::EigVec::Zero(num_micro_dof*num_micro_ghost);
    
 }
 
@@ -87,6 +87,8 @@ DNSDOFUserObject::finalize()
 {
 
     std::cout << "Finalizing DNS DOF\n";
+    const std::vector< double >* D = _micromorphic_DOF.get_D();
+    _projector.project_dof((*D), Q, Dh, Qh);
 
 //    std::cout << "Q:\n";
 //    for (unsigned int i=0; i<Q.size()/3; i++){
@@ -95,35 +97,35 @@ DNSDOFUserObject::finalize()
 //        }
 //    }
 
-    //Get the solver object
-    BDhQsolver = _projector.get_BDhQsolver();
-
-    //Get the shapefunction matrix
-    const overlap::SpMat* shapefunction = _projector.get_shapefunction();
-
-    //Extract the sub-shapefunction matrices
-    //Get the micro-information
-    unsigned int num_macro_free, num_macro_ghost, num_micro_free, num_micro_ghost;
-    _nodal_overlap.get_node_info(num_macro_ghost, num_macro_free, num_micro_ghost, num_micro_free);
-
-    overlap::SpMat NQhD = shapefunction->block( num_micro_dof*num_micro_free, 0, num_micro_dof*num_micro_ghost,  num_macro_dof*num_macro_free);
-    overlap::SpMat NQhDh = shapefunction->block( num_micro_dof*num_micro_free, num_macro_dof*num_macro_free, num_micro_dof*num_micro_ghost, num_macro_dof*num_macro_ghost);
-
-    //Solve for Dh
-    Dh = BDhQsolver->solve(Q);
-
+//    //Get the solver object
+//    BDhQsolver = _projector.get_BDhQsolver();
+//
+//    //Get the shapefunction matrix
+//    const overlap::SpMat* shapefunction = _projector.get_shapefunction();
+//
+//    //Extract the sub-shapefunction matrices
+//    //Get the micro-information
+//    unsigned int num_macro_free, num_macro_ghost, num_micro_free, num_micro_ghost;
+//    _nodal_overlap.get_node_info(num_macro_ghost, num_macro_free, num_micro_ghost, num_micro_free);
+//
+//    overlap::SpMat NQhD = shapefunction->block( num_micro_dof*num_micro_free, 0, num_micro_dof*num_micro_ghost,  num_macro_dof*num_macro_free);
+//    overlap::SpMat NQhDh = shapefunction->block( num_micro_dof*num_micro_free, num_macro_dof*num_macro_free, num_micro_dof*num_micro_ghost, num_macro_dof*num_macro_ghost);
+//
+//    //Solve for Dh
+//    Dh = BDhQsolver->solve(Q);
+//
 //    std::cout << "Dh:\n" << Dh << "\n";
-
-    //Solve for Qh
-    const overlap::EigVec* D_macro = _micromorphic_DOF.get_D();
-    Qh = NQhD*(*D_macro) + NQhDh*Dh;
-
+//
+//    //Solve for Qh
+//    const overlap::EigVec* D_macro = _micromorphic_DOF.get_D();
+//    Qh = NQhD*(*D_macro) + NQhDh*Dh;
+//
 //    std::cout << "Qh:\n" << Qh << "\n";
-
+//
     std::cout << "End of Nodal DOF\n\n";
 }
 
-const overlap::EigVec* DNSDOFUserObject::get_Dh() const{
+const std::vector< double >* DNSDOFUserObject::get_Dh() const{
     /*!
     Return a pointer to the ghost macro dof vector
     */
@@ -131,7 +133,7 @@ const overlap::EigVec* DNSDOFUserObject::get_Dh() const{
     return &Dh;
 }
 
-const overlap::EigVec* DNSDOFUserObject::get_Qh() const{
+const std::vector< double >* DNSDOFUserObject::get_Qh() const{
     /*!
     Return a pointer to the ghost DNS dof vector
     */

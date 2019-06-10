@@ -31,7 +31,7 @@ class MicromorphicDOFUserObject : public NodalUserObject{
         virtual void threadJoin(const UserObject & y) override;
         virtual void finalize() override;
 
-        const overlap::EigVec* get_D() const;
+        const std::vector< double >* get_D() const;
 
     protected:
 
@@ -68,7 +68,7 @@ class MicromorphicDOFUserObject : public NodalUserObject{
         const std::map< dof_id_type, unsigned int >* macro_node_to_col;
 
         //The degree of freedom vectors
-        overlap::EigVec D;
+        std::vector< double > D;
 
 };
 

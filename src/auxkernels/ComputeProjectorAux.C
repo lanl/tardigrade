@@ -79,8 +79,8 @@ ComputeProjectorAux::computeValue()
 
     //Initialize the sparse matrix
     std::cout << "initializing the sparse matrix...\n";
-    overlap::SpMat shapefunction(3*micro_node_to_row->size(), 12*macro_node_to_col->size());
-    overlap::SpMat sub_shapefunction(3*micro_node_to_row->size(), 12*macro_node_to_col->size());
+//    overlap::SpMat shapefunction(3*micro_node_to_row->size(), 12*macro_node_to_col->size());
+//    overlap::SpMat sub_shapefunction(3*micro_node_to_row->size(), 12*macro_node_to_col->size());
     std::cout << "we did it!\n";
 
     //!Get the micro-nodes from the nodal overlap object
@@ -248,17 +248,17 @@ ComputeProjectorAux::computeValue()
                     std::cout << "  node " << j << ": " << phis[j][0] << "\n";
                 }
 
-                std::vector< overlap::T > tripletList;
+//                std::vector< overlap::T > tripletList;
 
                 //construct the triplet list to populate the sub shape-function matrix
                 mooseError("Depreciated. Cannot call function.");
 //                overlap::construct_triplet_list(macro_node_to_col, micro_node_to_row, macro_node_ids,
 //                                                cgs[i], phis, dns_weights[i], tripletList);
-                std::cout << "tripletList.size(): " << tripletList.size() << "\n";
-                sub_shapefunction.setFromTriplets(tripletList.begin(), tripletList.end());
+//                std::cout << "tripletList.size(): " << tripletList.size() << "\n";
+//                sub_shapefunction.setFromTriplets(tripletList.begin(), tripletList.end());
 
                 //Add the values to the full shape-function matrix
-                shapefunction += sub_shapefunction;
+//                shapefunction += sub_shapefunction;
             }
         }
 

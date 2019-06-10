@@ -52,8 +52,8 @@ protected:
     const std::map< dof_id_type, unsigned int >* macro_node_to_col;
     const std::map< dof_id_type, unsigned int >* micro_node_to_row;
 
-    const overlap::EigVec* Dh; //The macro-scale ghost dof vector
-    const overlap::EigVec* Qh; //The DNS ghost dof vector
+    const std::vector< double >* Dh; //The macro-scale ghost dof vector
+    const std::vector< double >* Qh; //The DNS ghost dof vector
 };
 
 #endif /* PROJECTEDDOF_H */

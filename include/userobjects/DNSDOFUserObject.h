@@ -32,8 +32,8 @@ class DNSDOFUserObject : public NodalUserObject{
         virtual void threadJoin(const UserObject & y) override;
         virtual void finalize() override;
 
-        const overlap::EigVec* get_Dh() const;
-        const overlap::EigVec* get_Qh() const;
+        const std::vector< double >* get_Dh() const;
+        const std::vector< double >* get_Qh() const;
 
     protected:
 
@@ -63,18 +63,18 @@ class DNSDOFUserObject : public NodalUserObject{
         unsigned int num_micro_ghost;
         unsigned int num_micro_free;
 
-        //Projection Matrices and solvers
-        const overlap::QRsolver* BDhQsolver;
+//        //Projection Matrices and solvers
+//        const overlap::QRsolver* BDhQsolver;
 
         //Maps from the node number to the order in the projection matrices
         const std::map< dof_id_type, unsigned int >* micro_node_to_row;
 
         //The degree of freedom vectors
-        overlap::EigVec Q; 
+        std::vector< double > Q; 
 
         //The computed contributions to the degree of freedom vectors
-        overlap::EigVec Dh;
-        overlap::EigVec Qh;
+        std::vector< double > Dh;
+        std::vector< double > Qh;
 
 };
 

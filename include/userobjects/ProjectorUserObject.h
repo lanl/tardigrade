@@ -31,9 +31,11 @@ class ProjectorUserObject : public ElementUserObject{
         virtual void threadJoin(const UserObject & y) override;
         virtual void finalize() override;
 
-        const overlap::SpMat* get_shapefunction() const;
-        const overlap::QRsolver* get_BDhQsolver() const;
-        const overlap::QRsolver* get_NQDh_PR_transpose_solver() const;
+//        const overlap::SpMat* get_shapefunction() const;
+        void run_BDhQsolver(std::vector< double > &b, std::vector< double > &x) const;
+        void run_BDhQtransposeSolver(const std::vector< double > &b, std::vector< double > &x) const;
+        void project_dof(const std::vector< double > &D, const std::vector< double > &Q,
+                         std::vector< double > &Dh, std::vector< double > &Qh) const;
 
     protected:
         //Settings
@@ -59,16 +61,9 @@ class ProjectorUserObject : public ElementUserObject{
 
         //Define the dns weights objects
         std::map < dof_id_type, std::vector< overlap::integrateMap > > dns_weights;
-        
-        //Define the vectors which will be used to store the entries to the shapefunction matrix
-        std::vector< overlap::T > tripletList;
 
-        //Define the shapefunction matrix
-        overlap::SpMat shapefunction;
-
-        //Define the projectors
-        overlap::QRsolver BDhQsolver;
-        overlap::QRsolver NQDh_PR_transpose_solver;
+        //Define the Projector object from the overlap coupling library
+        overlap::Projector projector;
 
         //!Utility Methods
         void collect_local_nodes(overlap::vecOfvec &local_nodes, std::vector< dof_id_type > &macro_node_ids);
@@ -85,7 +80,6 @@ class ProjectorUserObject : public ElementUserObject{
         void print_vector(const std::vector< myType > &);
         template< class myType >
         void print_matrix(const std::vector< std::vector< myType > > &);
-        void solve_for_projector(const overlap::SpMat &A, const overlap::SpMat &B, overlap::SpMat &X);
 
 };
 

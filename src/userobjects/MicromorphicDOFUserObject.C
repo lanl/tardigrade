@@ -64,7 +64,7 @@ MicromorphicDOFUserObject::initialize()
    _nodal_overlap.get_node_info(num_macro_ghost, num_macro_free, num_micro_ghost, num_micro_free);
 
    //Initialize the free degree of freedom vector
-   D = overlap::EigVec::Zero(num_macro_dof*num_macro_free);
+   D = std::vector< double >(num_macro_dof*num_macro_free, 0);//overlap::EigVec::Zero(num_macro_dof*num_macro_free);
 
    //Initialize the ghost degree of freedom vectors
 }
@@ -114,7 +114,7 @@ MicromorphicDOFUserObject::finalize()
     std::cout << "End of Micromorphic DOF\n\n";
 }
 
-const overlap::EigVec* MicromorphicDOFUserObject::get_D() const{
+const std::vector< double >* MicromorphicDOFUserObject::get_D() const{
     /*!
     Return a pointer to the free macro dof vector
     */
