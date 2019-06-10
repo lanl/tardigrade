@@ -41,6 +41,7 @@ ElementIntegrateUserObject::ElementIntegrateUserObject(const InputParameters & p
 void
 ElementIntegrateUserObject::initialize()
 {
+    mooseWarning("Initializing Element Overlap");
     _console << "Initializing Element Overlap UserObject: " << name() << std::endl;
 }
 

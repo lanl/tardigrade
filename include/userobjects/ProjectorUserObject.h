@@ -31,7 +31,6 @@ class ProjectorUserObject : public ElementUserObject{
         virtual void threadJoin(const UserObject & y) override;
         virtual void finalize() override;
 
-//        const overlap::SpMat* get_shapefunction() const;
         void run_BDhQsolver(std::vector< double > &b, std::vector< double > &x) const;
         void run_BDhQtransposeSolver(const std::vector< double > &b, std::vector< double > &x) const;
         void project_dof(const std::vector< double > &D, const std::vector< double > &Q,

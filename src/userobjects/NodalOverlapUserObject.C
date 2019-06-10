@@ -33,6 +33,7 @@ NodalOverlapUserObject::NodalOverlapUserObject(const InputParameters & parameter
 void
 NodalOverlapUserObject::initialize()
 {
+    mooseWarning("Initializing NodalOverlap");
     _console << "Initializing Nodal Overlap UserObject: " << name() << std::endl;
 
     //!Set the id of the macro-scale domain

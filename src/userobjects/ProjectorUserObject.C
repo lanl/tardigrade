@@ -33,6 +33,7 @@ void
 ProjectorUserObject::initialize()
 {
     _console << "Initializing Projector UserObject: " << name() << std::endl;
+    mooseError("derp");
 
     //Get the macro to col and micro to row maps
     macro_node_to_col = _nodal_overlap.get_macro_node_to_col();
