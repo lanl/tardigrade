@@ -46,8 +46,7 @@ include $(MOOSE_DIR)/modules/modules.mk
 
 # dep apps
 APPLICATION_DIR    := $(CURDIR)
-SUPPORT_DIR        := /projects/nathanm/micromorphic/micromorphic_library/lib
-INCLUDE_DIR        := /projects/nathanm/micromorphic/micromorphic_library/include
+MICROMORPHIC_DIR   := /home/nathan/research
 APPLICATION_NAME   := tardigrade
 BUILD_EXEC         := yes
 GEN_REVISION       := no
@@ -56,11 +55,16 @@ include            $(FRAMEWORK_DIR)/app.mk
 ###############################################################################
 # Additional special case targets should be added here
 
-ADDITIONAL_INCLUDES += -I$(SUPPORT_DIR) -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/voro++ -I$(INCLUDE_DIR)/micro_element -I$(INCLUDE_DIR)/overlap -I$(INCLUDE_DIR)/quickhull
-ADDITIONAL_CPPFLAGS += -I$(SUPPORT_DIR) -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/voro++ -I$(INCLUDE_DIR)/micro_element -I$(INCLUDE_DIR)/overlap -I$(INCLUDE_DIR)/quickhull
-ADDITIONAL_LIBS     += -L$(SUPPORT_DIR) -L$(SUPPORT_DIR)/voro++ -L$(SUPPORT_DIR)/micro_element -L$(SUPPORT_DIR)/overlap
+#ADDITIONAL_INCLUDES += -I$(MICROMORPHIC_DIR)/voro++ -I$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+#ADDITIONAL_INCLUDES += -I$(MICROMORPHIC_DIR)/vector_tools/src/cpp
+#ADDITIONAL_INCLUDES += -I$(MICROMORPHIC_DIR)/overlap -I$(MICROMORPHIC_DIR)/quickhull
+
+ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/voro++/voro++ -I$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/vector_tools/src/cpp -I$(MICROMORPHIC_DIR)/error_tools/src/cpp
+ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/overlap_coupling/src/cpp -I$(MICROMORPHIC_DIR)
+
+ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/voro++/voro++ -L$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/overlap_coupling/src/cpp
 ADDITIONAL_LIBS     += -lmicromat -lmicrobalance -lvoro++ -loverlap
-#
-#ADDITIONAL_CPPFLAGS := -lmicromat -lmicrobalance -fmax-errors=5
-#ADDITIONAL_CPPFLAGS += -I$(SUPPORT_DIR)
-#EXTERNAL_FLAGS      += -L$(SUPPORT_DIR) -lmicromat -lmicrobalance
+
+$(info $$MICROMORPHIC_DIR is [${MICROMORPHIC_DIR}])
