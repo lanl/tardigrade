@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'rotate_stretch.i'
+    exodiff = 'rotate_stretch_out.e'
+  [../]
+[]
