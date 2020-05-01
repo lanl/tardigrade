@@ -117,12 +117,10 @@ Real InternalForce::computeQpResidual(){
     for (int indx=0; indx<3; indx++){dNdX[indx] = _grad_test[_i][_qp](indx);}//p+i);}
 
     balance_equations::compute_internal_force(_component, dNdX, _deformation_gradient[_qp], _PK2[_qp], fint);
-    //std::cout << "fint: " << fint << "\n";
 
     if(_MMS){
         balance_equations::compute_internal_force(_component, dNdX, _deformation_gradient[_qp], _PK2_MMS[_qp], fint_MMS);
         fint -= fint_MMS;
-        //std::cout << "fint - fint_MMS: " << fint << "\n";
     }
 
     return fint;
@@ -181,31 +179,30 @@ Real InternalForce::computeQpOffDiagJacobian(unsigned int jvar){
     else if(jvar == _phi_11_int){
         _off_diag_dof_num = 3;
     }
-    else if(jvar == _phi_22_int){
+    else if(jvar == _phi_12_int){
         _off_diag_dof_num = 4;
     }
-    else if(jvar == _phi_33_int){
+    else if(jvar == _phi_13_int){
         _off_diag_dof_num = 5;
     }
-    else if(jvar == _phi_23_int){
+    else if(jvar == _phi_21_int){
         _off_diag_dof_num = 6;
     }
-    else if(jvar == _phi_13_int){
+    else if(jvar == _phi_22_int){
         _off_diag_dof_num = 7;
     }
-    else if(jvar == _phi_12_int){
+    else if(jvar == _phi_23_int){
         _off_diag_dof_num = 8;
     }
-    else if(jvar == _phi_32_int){
+    else if(jvar == _phi_31_int){
         _off_diag_dof_num = 9;
     }
-    else if(jvar == _phi_31_int){
+    else if(jvar == _phi_32_int){
         _off_diag_dof_num = 10;
     }
-    else if(jvar == _phi_21_int){
+    else if(jvar == _phi_33_int){
         _off_diag_dof_num = 11;
     }
-
 
     //Copy the test and interpolation functions so that the balance equation function can read it
     double dNdX[3];
@@ -215,13 +212,14 @@ Real InternalForce::computeQpOffDiagJacobian(unsigned int jvar){
         detadX[indx] = _grad_phi[_j][_qp](indx);
     }
 
+    int errorCode;
     if(_off_diag_dof_num>=0){
-        balance_equations::compute_internal_force_jacobian(                _component, _off_diag_dof_num, 
-                                                                       _test[_i][_qp],              dNdX,       _phi[_j][_qp], detadX,
-                                                           _deformation_gradient[_qp],
-                                                                            _PK2[_qp],
-                                                                    _DPK2Dgrad_u[_qp],    _DPK2Dphi[_qp], _DPK2Dgrad_phi[_qp],
-                                                                             dfdUint);
+        errorCode = balance_equations::compute_internal_force_jacobian(      _component, _off_diag_dof_num, 
+                                                                         _test[_i][_qp],              dNdX,       _phi[_j][_qp], detadX,
+                                                             _deformation_gradient[_qp],
+                                                                              _PK2[_qp],
+                                                                      _DPK2Dgrad_u[_qp],    _DPK2Dphi[_qp], _DPK2Dgrad_phi[_qp],
+                                                                               dfdUint);
         return dfdUint;
     }
     else{

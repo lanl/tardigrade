@@ -47,6 +47,7 @@ include $(MOOSE_DIR)/modules/modules.mk
 # dep apps
 APPLICATION_DIR    := $(CURDIR)
 MICROMORPHIC_DIR   := /home/nathan/research
+MICROMORPHIC_COMPILER_PATH := /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/
 APPLICATION_NAME   := tardigrade
 BUILD_EXEC         := yes
 GEN_REVISION       := no
@@ -65,6 +66,7 @@ ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/overlap_coupling/src/cpp -I$(MICROM
 
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/voro++/voro++ -L$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/overlap_coupling/src/cpp
-ADDITIONAL_LIBS     += -lmicromat -lmicrobalance -lvoro++ -loverlap
+ADDITIONAL_LIBS     += -lmicromat -lmicrobalance -lvoro++# -loverlap
+ADDITIONAL_LIBS     += -L$(MICROMORPHIC_COMPILER_PATH) -lresolv
 
 $(info $$MICROMORPHIC_DIR is [${MICROMORPHIC_DIR}])

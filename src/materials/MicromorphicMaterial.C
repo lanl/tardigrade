@@ -193,7 +193,7 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
     _old_grad_phi_31(coupledGradientOld("phi_31")),
     _old_grad_phi_21(coupledGradientOld("phi_21")),
     _deformation_gradient(declareProperty<std::vector<double>>("MM_deformation_gradient")),
-    _micro_displacement(declareProperty<std::vector<double>>("micro_displacement")),
+    _micro_deformation(declareProperty<std::vector<double>>("micro_deformation")),
     _gradient_micro_displacement(declareProperty<std::vector<std::vector<double>>>("gradient_micro_displacement")),
     _cauchy(declareProperty<std::vector<double>>("cauchy")),
     _s(declareProperty<std::vector<double>>("s")),
@@ -352,9 +352,6 @@ void MicromorphicMaterial::computeQpProperties(){
 
     RealVectorValue tmp_grad;
 
-    //std::cout << "coords: " << _q_point[_qp](0) << " " << _q_point[_qp](1) << " " << _q_point[_qp](2) << "\n";
-    //std::cout << "u:      " << _u1[_qp] << " " << _u2[_qp] << " " << _u3[_qp] << "\n";
-
     //Copy over the gradient of u
     for (int i=0; i<3; i++){__grad_u[0][i] = _grad_u1[_qp](i);}
     for (int i=0; i<3; i++){__grad_u[1][i] = _grad_u2[_qp](i);}
@@ -422,14 +419,14 @@ void MicromorphicMaterial::computeQpProperties(){
     _deformation_gradient[ _qp ][ 4 ] += 1;
     _deformation_gradient[ _qp ][ 8 ] += 1;
 
-    //Copy the micro-displacement
-    _micro_displacement[_qp].resize(9);
+    //Copy the micro-deformation
+    _micro_deformation[_qp].resize(9);
     for ( int i=0; i<9; i++ ){
-        _micro_displacement[ _qp ][ i ] = __phi[ i ];
+        _micro_deformation[ _qp ][ i ] = __phi[ i ];
     }
-    _micro_displacement[ _qp ][ 0 ] += 1;
-    _micro_displacement[ _qp ][ 4 ] += 1;
-    _micro_displacement[ _qp ][ 8 ] += 1;
+    _micro_deformation[ _qp ][ 0 ] += 1;
+    _micro_deformation[ _qp ][ 4 ] += 1;
+    _micro_deformation[ _qp ][ 8 ] += 1;
 
     //Copy the gradient of the micro-displacement
     _gradient_micro_displacement[_qp].resize(9);
@@ -764,15 +761,6 @@ void MicromorphicMaterial::computeQpProperties(){
             error_message += output_message;
             mooseException( error_message.c_str() );
         }
-/*        std::cout << "_PK2_MMS[_qp]: ";
-        for (int i=0; i<9; i++){std::cout << _PK2_MMS[_qp][i] << " ";}
-        std::cout << "\n";
-        std::cout << "_s_MMS[_qp]: ";
-        for (int i=0; i<9; i++){std::cout << _s_MMS[_qp][i] << " ";}
-        std::cout << "\n";
-        std::cout << "_m_MMS[_qp]: ";
-        for (int i=0; i<27; i++){std::cout << _m_MMS[_qp][i] << " ";}
-        std::cout << "\n";*/
     }
 
 }

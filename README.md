@@ -12,6 +12,10 @@ be identified in the Makefile as the variable `MICROMORPHIC_DIR`. All the
 default repostitory names should be used except for Voro++ which should be
 located in the directory `voro++` in `MICROMORPHIC_DIR`.
 
+The user also must define the location of the C++ library for the compiler
+used to build libmicromat and libmicrobalance in Tardigrade's makefile. This
+is done by specifying the path in `MICROMORPHIC_COMPILER_PATH`.
+
 In order to generate the material models which are used by MicromorphicMaterial 
 one should run
 
