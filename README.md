@@ -5,6 +5,13 @@ values defined in the micromorphic_element repository available using SSH
 from
 > `git@bitbucket.org:NateAM2/micromorphic_element.git`
 
+TODO: UPDATE GIT LOCATIONS
+
+All required repositories should be located in a common directory which must 
+be identified in the Makefile as the variable `MICROMORPHIC_DIR`. All the 
+default repostitory names should be used except for Voro++ which should be
+located in the directory `voro++` in `MICROMORPHIC_DIR`.
+
 In order to generate the material models which are used by MicromorphicMaterial 
 one should run
 
