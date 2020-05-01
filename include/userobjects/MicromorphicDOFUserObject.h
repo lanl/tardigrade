@@ -11,8 +11,8 @@
 #define MICROMORPHICDOFUSEROBJECT_H
 
 // MOOSE includes
-#include "NodalUserObject.h"
-#include "NodalOverlapUserObject.h"
+//#include "NodalUserObject.h"
+//#include "NodalOverlapUserObject.h"
 #include "ProjectorUserObject.h"
 
 // Forward Declarations

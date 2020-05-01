@@ -11,8 +11,8 @@
 #define DNSDOFUSEROBJECT_H
 
 // MOOSE includes
-#include "NodalUserObject.h"
-#include "NodalOverlapUserObject.h"
+//#include "NodalUserObject.h"
+//#include "NodalOverlapUserObject.h"
 #include "ProjectorUserObject.h"
 #include "MicromorphicDOFUserObject.h"
 
