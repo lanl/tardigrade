@@ -86,8 +86,8 @@ class MicromorphicMaterial : public Material{
         const VariableGradient & _grad_phi_21;
 
         //Fundamental deformation measures
-        MaterialProperty<std::vector<std::vector<double>>> & _deformation_gradient;
-        MaterialProperty<std::vector<std::vector<double>>> & _micro_displacement;
+        MaterialProperty<std::vector<double>> & _deformation_gradient;
+        MaterialProperty<std::vector<double>> & _micro_displacement;
         MaterialProperty<std::vector<std::vector<double>>> & _gradient_micro_displacement;
 
         //Stresses (Material Properties in MOOSE parlance)

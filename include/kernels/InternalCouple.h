@@ -62,6 +62,9 @@ class InternalCouple : public Kernel{
         //The off-diagonal members of the jacobian at the quadrature point.
         virtual Real computeQpOffDiagJacobian(unsigned int jvar) override; 
 
+        //Assume 3D
+        const unsigned int _dim = 3;
+
         //Parameters
         const int _component_i;
         const int _component_j;
@@ -83,8 +86,8 @@ class InternalCouple : public Kernel{
         unsigned int _phi_21_int;
 
         //Deformation measures
-        const MaterialProperty<std::vector<std::vector<double>>> &_deformation_gradient;        //The gradient of the displacement
-        const MaterialProperty<std::vector<std::vector<double>>> &_micro_displacement;          //The micro-displacement
+        const MaterialProperty<std::vector<double>> &_deformation_gradient;                     //The deformation gradient
+        const MaterialProperty<std::vector<double>> &_micro_deformation;                        //The micro-deformation
         const MaterialProperty<std::vector<std::vector<double>>> &_gradient_micro_displacement; //The gradient of the micro-displacement
 
         //Stress measures and their gradients

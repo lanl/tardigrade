@@ -153,8 +153,8 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
     _grad_phi_32(coupledGradient("phi_32")),
     _grad_phi_31(coupledGradient("phi_31")),
     _grad_phi_21(coupledGradient("phi_21")),
-    _deformation_gradient(declareProperty<std::vector<std::vector<double>>>("MM_deformation_gradient")),
-    _micro_displacement(declareProperty<std::vector<std::vector<double>>>("micro_displacement")),
+    _deformation_gradient(declareProperty<std::vector<double>>("MM_deformation_gradient")),
+    _micro_displacement(declareProperty<std::vector<double>>("micro_displacement")),
     _gradient_micro_displacement(declareProperty<std::vector<std::vector<double>>>("gradient_micro_displacement")),
     _cauchy(declareProperty<std::vector<double>>("cauchy")),
     _s(declareProperty<std::vector<double>>("s")),
@@ -321,53 +321,52 @@ void MicromorphicMaterial::computeQpProperties(){
     
     //Copy over phi
     __phi[0] = _phi_11[_qp];
-    __phi[1] = _phi_22[_qp];
-    __phi[2] = _phi_33[_qp];
-    __phi[3] = _phi_23[_qp];
-    __phi[4] = _phi_13[_qp];
-    __phi[5] = _phi_12[_qp];
-    __phi[6] = _phi_32[_qp];
-    __phi[7] = _phi_31[_qp];
-    __phi[8] = _phi_21[_qp];
+    __phi[1] = _phi_12[_qp];
+    __phi[2] = _phi_13[_qp];
+    __phi[3] = _phi_21[_qp];
+    __phi[4] = _phi_22[_qp];
+    __phi[5] = _phi_23[_qp];
+    __phi[6] = _phi_31[_qp];
+    __phi[7] = _phi_32[_qp];
+    __phi[8] = _phi_33[_qp];
 
     //Copy over grad_phi
     for (int i=0; i<3; i++){__grad_phi[0][i] = _grad_phi_11[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[1][i] = _grad_phi_22[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[2][i] = _grad_phi_33[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[3][i] = _grad_phi_23[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[4][i] = _grad_phi_13[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[5][i] = _grad_phi_12[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[6][i] = _grad_phi_32[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[7][i] = _grad_phi_31[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[8][i] = _grad_phi_21[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[1][i] = _grad_phi_12[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[2][i] = _grad_phi_13[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[3][i] = _grad_phi_21[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[4][i] = _grad_phi_22[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[5][i] = _grad_phi_23[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[6][i] = _grad_phi_31[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[7][i] = _grad_phi_32[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[8][i] = _grad_phi_33[_qp](i);}
 
     //Store deformation values for use by other kernels
 
     //Copy the deformation gradient
     _deformation_gradient[_qp].resize(3);
     for (int i=0; i<3; i++){
-        _deformation_gradient[_qp][i].resize(3);
+        _deformation_gradient[_qp][i].resize(9);
         for (int j=0; j<3; j++){
-            _deformation_gradient[_qp][i][j] = __grad_u[i][j];
+            _deformation_gradient[_qp][ 3 * i + j ] = __grad_u[i][j];
         }
     }
-
-    for (int i=0; i<3; i++){_deformation_gradient[_qp][i][i] += 1.;}
+    _deformation_gradinet[ _qp ][ 0 ] += 1;
+    _deformation_gradient[ _qp ][ 4 ] += 1;
+    _deformation_gradient[ _qp ][ 8 ] += 1;
 
     //Copy the micro-displacement
     int sot_to_voigt_map[3][3] = {{0,5,4},
                                   {8,1,3},
                                   {7,6,2}};
 
-    _micro_displacement[_qp].resize(3);
-    for (int i=0; i<3; i++){
-        _micro_displacement[_qp][i].resize(3);
-        for (int j=0; j<3; j++){
-            _micro_displacement[_qp][i][j] = __phi[sot_to_voigt_map[i][j]];
-        }
+    _micro_displacement[_qp].resize(9);
+    for ( int i=0; i<9; i++ ){
+        _micro_displacement[ _qp ][ i ] = __phi[ i ];
     }
-
-    for (int i=0; i<3; i++){_micro_displacement[_qp][i][i] += 1.;}
+    _micro_displacement[ _qp ][ 0 ] += 1;
+    _micro_displacement[ _qp ][ 4 ] += 1;
+    _micro_displacement[ _qp ][ 8 ] += 1;
 
     //Copy the gradient of the micro-displacement
     _gradient_micro_displacement[_qp].resize(9);
@@ -542,33 +541,33 @@ void MicromorphicMaterial::computeQpProperties(){
 
         //Compute and copy phi
         mms_phi[0] = _phi_11_fxn.value(_t,_q_point[_qp]);
-        mms_phi[1] = _phi_22_fxn.value(_t,_q_point[_qp]);
-        mms_phi[2] = _phi_33_fxn.value(_t,_q_point[_qp]);
-        mms_phi[3] = _phi_23_fxn.value(_t,_q_point[_qp]);
-        mms_phi[4] = _phi_13_fxn.value(_t,_q_point[_qp]);
-        mms_phi[5] = _phi_12_fxn.value(_t,_q_point[_qp]);
-        mms_phi[6] = _phi_32_fxn.value(_t,_q_point[_qp]);
-        mms_phi[7] = _phi_31_fxn.value(_t,_q_point[_qp]);
-        mms_phi[8] = _phi_21_fxn.value(_t,_q_point[_qp]);
+        mms_phi[1] = _phi_12_fxn.value(_t,_q_point[_qp]);
+        mms_phi[2] = _phi_13_fxn.value(_t,_q_point[_qp]);
+        mms_phi[3] = _phi_21_fxn.value(_t,_q_point[_qp]);
+        mms_phi[4] = _phi_22_fxn.value(_t,_q_point[_qp]);
+        mms_phi[5] = _phi_23_fxn.value(_t,_q_point[_qp]);
+        mms_phi[6] = _phi_31_fxn.value(_t,_q_point[_qp]);
+        mms_phi[7] = _phi_32_fxn.value(_t,_q_point[_qp]);
+        mms_phi[8] = _phi_33_fxn.value(_t,_q_point[_qp]);
 
         //Compute and copy grad_phi
         tmp_grad = _phi_11_fxn.gradient(_t,_q_point[_qp]);
         for (int i=0; i<3; i++){mms_grad_phi[0][i] = tmp_grad(i);}
-        tmp_grad = _phi_22_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[1][i] = tmp_grad(i);}
-        tmp_grad = _phi_33_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[2][i] = tmp_grad(i);}
-        tmp_grad = _phi_23_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[3][i] = tmp_grad(i);}
-        tmp_grad = _phi_13_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[4][i] = tmp_grad(i);}
         tmp_grad = _phi_12_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[5][i] = tmp_grad(i);}
-        tmp_grad = _phi_32_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[6][i] = tmp_grad(i);}
-        tmp_grad = _phi_31_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[7][i] = tmp_grad(i);}
+        for (int i=0; i<3; i++){mms_grad_phi[1][i] = tmp_grad(i);}
+        tmp_grad = _phi_13_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){mms_grad_phi[2][i] = tmp_grad(i);}
         tmp_grad = _phi_21_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){mms_grad_phi[3][i] = tmp_grad(i);}
+        tmp_grad = _phi_22_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){mms_grad_phi[4][i] = tmp_grad(i);}
+        tmp_grad = _phi_23_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){mms_grad_phi[5][i] = tmp_grad(i);}
+        tmp_grad = _phi_31_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){mms_grad_phi[6][i] = tmp_grad(i);}
+        tmp_grad = _phi_32_fxn.gradient(_t,_q_point[_qp]);
+        for (int i=0; i<3; i++){mms_grad_phi[7][i] = tmp_grad(i);}
+        tmp_grad = _phi_22_fxn.gradient(_t,_q_point[_qp]);
         for (int i=0; i<3; i++){mms_grad_phi[8][i] = tmp_grad(i);}
 
         //TODO: Add in function support for the additional DOF and their gradients.        

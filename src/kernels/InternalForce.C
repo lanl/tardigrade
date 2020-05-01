@@ -72,8 +72,8 @@ InternalForce::InternalForce(const InputParameters & parameters)
                                         : 100),
         _phi_21_int(isCoupled("phi_21") ? coupled("phi_21")
                                         : 100),
-        _deformation_gradient(getMaterialProperty<std::vector<std::vector<double>>>("MM_deformation_gradient")),
-        _micro_displacement(getMaterialProperty<std::vector<std::vector<double>>>("micro_displacement")),
+        _deformation_gradient(getMaterialProperty<std::vector<double>>("MM_deformation_gradient")),
+        _micro_deformation(getMaterialProperty<std::vector<double>>("micro_deformation")),
         _gradient_micro_displacement(getMaterialProperty<std::vector<std::vector<double>>>("gradient_micro_displacement")),
         _PK2(getMaterialProperty<std::vector<double>>("PK2")),
         _DPK2Dgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DPK2Dgrad_u")),
