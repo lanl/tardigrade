@@ -14,6 +14,7 @@
 #include "NodalOverlapUserObject.h"
 #include "ElementIntegrateUserObject.h"
 #include "occonfiguration.h"
+#define OVERLAP_LIBCOMPILE
 #include "overlap_coupling.h"
 
 // Forward Declarations
