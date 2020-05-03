@@ -63,9 +63,11 @@ include            $(FRAMEWORK_DIR)/app.mk
 ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/voro++/voro++ -I$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
 ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/vector_tools/src/cpp -I$(MICROMORPHIC_DIR)/error_tools/src/cpp
 ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/overlap_coupling/src/cpp -I$(MICROMORPHIC_DIR)
+ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/solver_tools/src/cpp
 
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/voro++/voro++ -L$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/overlap_coupling/src/cpp
+ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/solver_tools/src/cpp
 ADDITIONAL_LIBS     += -lmicromat -lmicrobalance -lvoro++# -loverlap
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_COMPILER_PATH) -lresolv
 
