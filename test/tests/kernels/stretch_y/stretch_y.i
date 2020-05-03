@@ -387,7 +387,8 @@
 []
 
 [BCs]
-  active = 'left_x back_z bottom_y bottom_x top_y top_x'
+  active = 'left_x back_z bottom_y top_y'
+#  active = 'left_x back_z bottom_y bottom_x top_y top_x'
   [./left_x]
     type = DirichletBC
     #type = PresetBC
@@ -475,7 +476,7 @@
 [Preconditioning]
   [./SMP]
     type = SMP
-    #type = FDP
+#    type = FDP
     full = true
   [../]
 []
@@ -485,8 +486,8 @@
   type = Transient
   num_steps = 10
   dt        = 0.1
-#  solve_type = 'PJFNK'
-  solve_type = 'NEWTON'
+  solve_type = 'PJFNK'
+#  solve_type = 'NEWTON'
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
   nl_max_its = 100
