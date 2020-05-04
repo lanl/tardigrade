@@ -69,6 +69,11 @@ ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/voro++/voro++ -L$(MICROMORPHIC_DIR)
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/overlap_coupling/src/cpp
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/solver_tools/src/cpp
 ADDITIONAL_LIBS     += -lmicromat -lmicrobalance -lvoro++# -loverlap
-ADDITIONAL_LIBS     += -L$(MICROMORPHIC_COMPILER_PATH) -lresolv
+ADDITIONAL_LIBS     += -L$(MICROMORPHIC_COMPILER_PATH) -lresolv -DDEBUG_MODE
+
+ifeq ($(METHOD),dbg)
+    ADDITIONAL_CPPFLAGS += -DDEBUG_MODE
+    ADDITIONAL_LIBS += -DDEBUG_MODE
+endif
 
 $(info $$MICROMORPHIC_DIR is [${MICROMORPHIC_DIR}])
