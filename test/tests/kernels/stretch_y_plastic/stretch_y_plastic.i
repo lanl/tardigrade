@@ -1,8 +1,8 @@
 ###############################################################################
-#                             rotate_stretch.i                                #
+#                                stretch_y.i                                  #
 ###############################################################################
-# A test which rotates and stretches a material at the same time to make sure #
-# that the stress is invariant w.r.t. rotations.                              #
+# A ``sign of life'' test which makes sure that a simple stretching test      #
+# problem runs to completion.                                                 #
 ###############################################################################
 
 [Mesh]
@@ -12,6 +12,7 @@
   nx = 1
   ny = 1
   nz = 1
+#  file = unit_cube.e
 []
 
 [Variables]
@@ -215,54 +216,12 @@
     phi_31 = phi_zx
     phi_21 = phi_yx
   [../]
-  [./couple_22]
+  [./couple_12]
     type = InternalCouple
-    component_i = 1
+    component_i = 0
     component_j = 1
-    dof_num     = 7
-    variable    = phi_yy
-
-    #Coupled variables
-    u1     = disp_x
-    u2     = disp_y
-    u3     = disp_z
-    phi_11 = phi_xx
-    phi_22 = phi_yy
-    phi_33 = phi_zz
-    phi_23 = phi_yz
-    phi_13 = phi_xz
-    phi_12 = phi_xy
-    phi_32 = phi_zy
-    phi_31 = phi_zx
-    phi_21 = phi_yx
-  [../]
-  [./couple_33]
-    type = InternalCouple
-    component_i = 2
-    component_j = 2
-    dof_num     = 11
-    variable    = phi_zz
-
-    #Coupled variables
-    u1     = disp_x
-    u2     = disp_y
-    u3     = disp_z
-    phi_11 = phi_xx
-    phi_22 = phi_yy
-    phi_33 = phi_zz
-    phi_23 = phi_yz
-    phi_13 = phi_xz
-    phi_12 = phi_xy
-    phi_32 = phi_zy
-    phi_31 = phi_zx
-    phi_21 = phi_yx
-  [../]
-  [./couple_23]
-    type = InternalCouple
-    component_i = 1
-    component_j = 2
-    dof_num     = 8
-    variable    = phi_yz
+    dof_num     = 4
+    variable    = phi_xy
 
     #Coupled variables
     u1     = disp_x
@@ -299,12 +258,12 @@
     phi_31 = phi_zx
     phi_21 = phi_yx
   [../]
-  [./couple_12]
+  [./couple_21]
     type = InternalCouple
-    component_i = 0
-    component_j = 1
-    dof_num     = 4
-    variable    = phi_xy
+    component_i = 1
+    component_j = 0
+    dof_num     = 6
+    variable    = phi_yx
 
     #Coupled variables
     u1     = disp_x
@@ -320,12 +279,33 @@
     phi_31 = phi_zx
     phi_21 = phi_yx
   [../]
-  [./couple_32]
+  [./couple_22]
     type = InternalCouple
-    component_i = 2
+    component_i = 1
     component_j = 1
-    dof_num     = 10
-    variable    = phi_zy
+    dof_num     = 7
+    variable    = phi_yy
+
+    #Coupled variables
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
+    phi_11 = phi_xx
+    phi_22 = phi_yy
+    phi_33 = phi_zz
+    phi_23 = phi_yz
+    phi_13 = phi_xz
+    phi_12 = phi_xy
+    phi_32 = phi_zy
+    phi_31 = phi_zx
+    phi_21 = phi_yx
+  [../]
+  [./couple_23]
+    type = InternalCouple
+    component_i = 1
+    component_j = 2
+    dof_num     = 8
+    variable    = phi_yz
 
     #Coupled variables
     u1     = disp_x
@@ -362,12 +342,33 @@
     phi_31 = phi_zx
     phi_21 = phi_yx
   [../]
-  [./couple_21]
+  [./couple_32]
     type = InternalCouple
-    component_i = 1
-    component_j = 0
-    dof_num     = 6
-    variable    = phi_yx
+    component_i = 2
+    component_j = 1
+    dof_num     = 10
+    variable    = phi_zy
+
+    #Coupled variables
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
+    phi_11 = phi_xx
+    phi_22 = phi_yy
+    phi_33 = phi_zz
+    phi_23 = phi_yz
+    phi_13 = phi_xz
+    phi_12 = phi_xy
+    phi_32 = phi_zy
+    phi_31 = phi_zx
+    phi_21 = phi_yx
+  [../]
+  [./couple_33]
+    type = InternalCouple
+    component_i = 2
+    component_j = 2
+    dof_num     = 11
+    variable    = phi_zz
 
     #Coupled variables
     u1     = disp_x
@@ -386,85 +387,62 @@
 []
 
 [BCs]
-  active = 'left_x left_y back_z bottom_x bottom_y top_x top_y'
+  active = 'left_x back_z bottom_y top_y'
+#  active = 'left_x back_z bottom_y bottom_x top_y top_x'
   [./left_x]
-    type     = FunctionDirichletBC
+    type = DirichletBC
+    #type = PresetBC
     variable = disp_x
     boundary = 'left'
-    function = moving_x
-  [../]
-  [./left_y]
-    type     = FunctionDirichletBC
-    variable = disp_y
-    boundary = 'left'
-    function = moving_y
-  [../]
-  [./right_x]
-    type     = FunctionDirichletBC
-    variable = disp_x
-    boundary = 'right'
-    function = moving_x
-  [../]
-  [./right_y]
-    type     = FunctionDirichletBC
-    variable = disp_y
-    boundary = 'right'
-    function = moving_y
-  [../]
-  [./back_z]
-    type = PresetBC
-    variable = disp_z
-    boundary = 'back'
+    #boundary = 'left right bottom top front back'
     value = 0
   [../]
-  [./front_z]
-    type = PresetBC
+  [./back_z]
+    type = DirichletBC
+    #type = PresetBC
     variable = disp_z
-    boundary = 'front'
+    boundary = 'back'
+    #boundary = 'left right bottom top front back'
     value = 0
   [../]
   [./bottom_x]
-    type     = FunctionDirichletBC
+    type = DirichletBC
+    #type = PresetBC
     variable = disp_x
     boundary = 'bottom'
-    function = fixed_x
+    #boundary = 'left right bottom top front back'
+    value = 0
   [../]
   [./bottom_y]
-    type     = FunctionDirichletBC
+    type = DirichletBC
+    #type = PresetBC
     variable = disp_y
     boundary = 'bottom'
-    function = fixed_y
+    #boundary = 'left right bottom top front back'
+    value = 0
   [../]
   [./top_x]
-    type = FunctionDirichletBC
+    type     = DirichletBC
+    #type     = PresetBC
     variable = disp_x
     boundary = 'top'
-    function = moving_x
+    value    = 0
   [../]
   [./top_y]
+    #type = DirichletBC
+    #type = PresetBC
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'top'
-    function = moving_y
+    #boundary = 'left right bottom top front back'
+    function = top_bc
   [../]
 []
 
 [Functions]
-  [./fixed_x]
+  [./top_bc]
     type  = ParsedFunction
-    value = 'x*(cos(pi*t)-1)-y*sin(pi*t)'
-  [../]
-  [./fixed_y]
-    type  = ParsedFunction
-    value = 'x*sin(pi*t)+y*(cos(pi*t)-1)'
-  [../]
-  [./moving_x]
-    type  = ParsedFunction
-    value = 'x*(cos(pi*t)-1)-(1+0.05*t)*y*sin(pi*t)'
-  [../]
-  [./moving_y]
-    type  = ParsedFunction
-    value = 'x*sin(pi*t)+(1+0.05*t)*y*(cos(pi*t)-1)'
+    value = 0.1*t
   [../]
 []
 
@@ -477,8 +455,11 @@
 #    material_fparameters = '29.48e3 25.48e3 1e3 0.4e3 -1.5e3 -1.4e3 -3e3 0 0 0 0 0 0 10e5 0. 0. 0. 0.'
 #    material_fparameters = '29. 7. 60. 10. 10. 8. 5. 0. 0. 0. 0. 0. 0. 8. 0. 0. 0. 0.'
 #    material_fparameters = '2. 696.47 65.84 5. -7.69 -51.92 38.61 -27.31 5.13 11. 1.85 -0.19 -1.08 -1.57 2.29 -0.61 5.97 -2.02 2.38 -0.32 -3.25 2. -51.92 5.13'
-    material_fparameters = '2 29.48e3 25.48e3 5 1e3 0.4e3 -1.5e3 -1.4e3 -3e3 11 0 0 0 0 0 0 10e5 0 0 0 0 2 .4e3 -3e3'
-    model_name = "LinearElasticity"
+#    material_fparameters = '2 2.4e2 1.5e1 2 1.4e2 2.0e1 2 2.0e0 2.7e1 2 0.56 0.2 2 0.15 -0.2 2 0.82 0.1 2 0.70 0.3 2 0.40 -0.3 2 0.52 0.4 2 29.48e3 25.48e3 5 1e3 0.4e3 -1.5e3 -1.4e3 -3e3 11 0 0 0 0 0 0 10e5 0 0 0 0 2 .4e3 -3e3 0.5 0.5 0.5 1e-9 1e-9'
+    material_fparameters = '2 170 15 2 140 20 2 2 27 2 0.56 0.2 2 0.15 0.3 2 0.82 0.1 2 0.42 0.3 2 0.05 0.2 2 0.52 0.4 2 29480 25480 5 1000 400 -1500 -1400 -3000 11 0 0 0 0 0 0 1e+06 0 0 0 0 2 400 -3000 0.5 0.5 0.5 1e-09 1e-09'
+#    material_fparameters = '2 2.4e2 1.5e1 2 1.4e2 2.0e1 2 2.0e0 2.7e1 2 0.56 0.2 2 0.15 -0.2 2 0.82 0.1 2 0.70 0.3 2 0.40 -0.3 2 0.52 0.4 2 696.47 65.84 5 -7.69 -51.92 38.61 -27.31 5.13 11 1.85 -0.19 -1.08 -1.57 2.29 -0.61 5.97 -2.02 2.38 -0.32 -3.25 2 -51.92 5.13 0.4 0.3 0.35 1e-8 1e-8'
+    number_SDVS = 55
+    model_name = "LinearElasticityDruckerPragerPlasticity"
 
     #Coupled variables
     u1     = 'disp_x'
@@ -499,7 +480,7 @@
 [Preconditioning]
   [./SMP]
     type = SMP
-    #type = FDP
+#    type = FDP
     full = true
   [../]
 []
@@ -507,29 +488,28 @@
 [Executioner]
 #  type = Steady
   type = Transient
-  end_time = 1.0
-  dtmin    = 1e-3
-#  solve_type = 'NEWTON'
-  solve_type = 'PJFNK'
-  [./TimeStepper]
-    type = IterationAdaptiveDT
-    dt   = 0.1
-#    dt   = 0.01
-    cutback_factor     = 0.4
-    growth_factor      = 1.2
-    optimal_iterations = 100
-  [../]
-  petsc_options = '-ksp_monitor_true_residual -ksp_compute_singularvalues'
-  petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart -print_linear_residuals'
-  petsc_options_value = 'asm      lu           1               101                false                  '
- 
+  num_steps = 20
+  dt        = 0.01
+#  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-8
+  nl_max_its = 100
+  #Terms for debugging
+#  petsc_options = '-ksp_monitor_true_residual -ksp_compute_singularvalues' 
+#  petsc_options = '-snes_converged_reason -ksp_converged_reason'
+#  l_max_its  = 10
+#  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
+#  petsc_options_value = 'hypre    boomeramg      100'
+#  petsc_options_iname = '-ksp_gmres_restart'
+#  petsc_options_value = '100'
+#  petsc_options = '-snes_ksp_ew -ksp_monitor_true_residual -ksp_compute_singularvalues'# -pc_svd_monitor'
+#  petsc_options = '-ksp_monitor_true_residual -ksp_compute_singularvalues'# -pc_svd_monitor'
+#  petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart -print_linear_residuals'# -ksp_view_mat'
+#  petsc_options_value = 'asm      lu           1               101                false                  '# binary'
 []
 
 [Outputs]
   exodus = true
   perf_graph = true
-#  [./out]
-#    type = Exodus
-#    output_material_properties = true
-#  [../]
 []

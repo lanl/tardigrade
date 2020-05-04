@@ -146,7 +146,7 @@
     type = InternalCouple
     component_i = 1
     component_j = 1
-    dof_num     = 4
+    dof_num     = 7
     variable    = phi_yy
     MMS       = true
 
@@ -168,7 +168,7 @@
     type = InternalCouple
     component_i = 2
     component_j = 2
-    dof_num     = 5
+    dof_num     = 11
     variable    = phi_zz
     MMS       = true
 
@@ -190,7 +190,7 @@
     type = InternalCouple
     component_i = 1
     component_j = 2
-    dof_num     = 6
+    dof_num     = 8
     variable    = phi_yz
     MMS       = true
 
@@ -212,7 +212,7 @@
     type = InternalCouple
     component_i = 0
     component_j = 2
-    dof_num     = 7
+    dof_num     = 5
     variable    = phi_xz
     MMS       = true
 
@@ -234,7 +234,7 @@
     type = InternalCouple
     component_i = 0
     component_j = 1
-    dof_num     = 8
+    dof_num     = 4
     variable    = phi_xy
     MMS       = true
 
@@ -255,7 +255,7 @@
     type = InternalCouple
     component_i = 2
     component_j = 1
-    dof_num     = 9
+    dof_num     = 10
     variable    = phi_zy
     MMS       = true
 
@@ -277,7 +277,7 @@
     type = InternalCouple
     component_i = 2
     component_j = 0
-    dof_num     = 10
+    dof_num     = 9
     variable    = phi_zx
     MMS       = true
 
@@ -299,7 +299,7 @@
     type = InternalCouple
     component_i = 1
     component_j = 0
-    dof_num     = 11
+    dof_num     = 6
     variable    = phi_yx
     MMS       = true
 
@@ -399,7 +399,8 @@
     type = MicromorphicMaterial
 #    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0. 0. 0. 0. 0. 0. 0.769 0. 0. 0. 0.'
 #    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0.12 0.51 0.72 0.84 0.443 0.62 0.769 0.945 0.47 0.63 0.58'
-    material_fparameters = '29. 7. 60. 10. 10. 8. 5. 0. 0. 0. 0. 0. 0. 8. 0. 0. 0. 0.'
+#    material_fparameters = '29. 7. 60. 10. 10. 8. 5. 0. 0. 0. 0. 0. 0. 8. 0. 0. 0. 0.'
+    material_fparameters = '2. 696.47 65.84 5. -7.69 -51.92 38.61 -27.31 5.13 11. 1.85 -0.19 -1.08 -1.57 2.29 -0.61 5.97 -2.02 2.38 -0.32 -3.25 2. -51.92 5.13'
     model_name = "LinearElasticity"
     MMS       = true
 
