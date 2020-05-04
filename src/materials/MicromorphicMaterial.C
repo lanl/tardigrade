@@ -470,6 +470,18 @@ void MicromorphicMaterial::computeQpProperties(){
     //Evaluate the model
     std::string output_message;
 
+#ifdef DEBUG_MODE
+    std::map<std::string, std::map<std::string, std::map<std::string, std::vector<double>>>> debug;
+#endif
+
+    //Set the state variables to the previously converged values
+    _SDVS[ _qp ] = _old_SDVS[ _qp ];
+
+//    if ( _qp == 0 ){
+//        std::cout << "SDVS pre model evaluation:\n";
+//        vectorTools::print( _SDVS[ _qp ] );
+//    }
+
     int errorCode = material->evaluate_model( time, _fparams,
                                               __grad_u, __phi, __grad_phi,
                                               __old_grad_u, __old_phi, __old_grad_phi,
@@ -480,7 +492,11 @@ void MicromorphicMaterial::computeQpProperties(){
                                               _DPK2Dgrad_u[_qp],   _DPK2Dphi[_qp],     _DPK2Dgrad_phi[_qp],
                                               _DSIGMADgrad_u[_qp], _DSIGMADphi[_qp],   _DSIGMADgrad_phi[_qp],
                                               _DMDgrad_u[_qp],     _DMDphi[_qp],       _DMDgrad_phi[_qp],
-                                              _ADD_TERMS[_qp],     _ADD_JACOBIANS[_qp], output_message );
+                                              _ADD_TERMS[_qp],     _ADD_JACOBIANS[_qp], output_message
+#ifdef DEBUG_MODE
+                                              , debug
+#endif  
+                    );
 
     if ( errorCode == 1 ){
         std::string error_message = "Convergence not achieved in material model. Requesting timestep cutback.\n";
@@ -493,6 +509,76 @@ void MicromorphicMaterial::computeQpProperties(){
         error_message += output_message;
         mooseError( error_message.c_str() );
     }
+
+//    if ( _qp == 0 ){
+//        std::cout << "time:\n";
+//        for ( unsigned int i = 0; i < 2; i++ ){ std::cout << time[ i ] << ", "; }
+//        std::cout << "\n";
+//        std::cout << "fparams:\n";
+//        for ( unsigned int i = 0; i < _fparams.size(); i++ ){ std::cout << _fparams[ i ] << ", "; };
+//        std::cout << "\n";
+//        std::cout << "__grad_u:\n";
+//        for ( unsigned int i = 0; i < 3; i++ ){
+//            for ( unsigned int j = 0; j < 3; j++ ){
+//                std::cout << __grad_u[ i ][ j ] << ", ";
+//            }
+//            std::cout << "\n";
+//        }
+//
+//        std::cout << "__old_grad_u:\n";
+//        for ( unsigned int i = 0; i < 3; i++ ){
+//            for ( unsigned int j = 0; j < 3; j++ ){
+//                std::cout << __old_grad_u[ i ][ j ] << ", ";
+//            }
+//            std::cout << "\n";
+//        }
+//
+//        std::cout << "__phi:\n";
+//        for ( unsigned int i = 0; i < 9; i++ ){ std::cout << __phi[ i ] << ", "; }
+//        std::cout << "\n";
+//        std::cout << "__old_phi:\n";
+//        for ( unsigned int i = 0; i < 9; i++ ){ std::cout << __old_phi[ i ] << ", "; }
+//        std::cout << "\n";
+//
+//        std::cout << "__grad_phi:\n";
+//        for ( unsigned int i = 0; i < 9; i++ ){
+//            for ( unsigned int j = 0; j < 3; j++ ){
+//                std::cout << __grad_phi[ i ][ j ] << ", ";
+//            }
+//            std::cout << "\n";
+//        }
+//
+//        std::cout << "__old_grad_phi:\n";
+//        for ( unsigned int i = 0; i < 9; i++ ){
+//            for ( unsigned int j = 0; j < 3; j++ ){
+//                std::cout << __old_grad_phi[ i ][ j ] << ", ";
+//            }
+//            std::cout << "\n";
+//        }
+//
+//
+//        std::cout << "    _old_SDVS[ _qp ]: "; vectorTools::print( _old_SDVS[ _qp ] );
+//        std::cout << "    _SDVS[ _qp ]: "; vectorTools::print( _SDVS[ _qp ] );
+//
+//        mooseWarning( output_message );
+//
+//        for ( auto step = debug.begin(); step != debug.end(); step++ ){
+//            std::cout << step->first << "\n";
+//            for ( auto iteration = step->second.begin(); iteration != step->second.end(); iteration++ ){
+//                std::cout << "    " << iteration->first << "\n";
+//                for ( auto iteration2 = iteration->second.begin(); iteration2 != iteration->second.end(); iteration2++ ){
+//                    std::cout << "        " << iteration2->first << "\n";
+//                    if ( iteration2->second.size() <= 27 ){
+//                        std::cout << "            "; vectorTools::print( iteration2->second );
+//                    }
+//                }
+//            }
+//        }
+//
+//        if ( ( std::fabs( _SDVS[ _qp ][ 0 ] ) > 1e-3 ) && ( _t >= 0.045 ) ){
+//            mooseError( output_message.c_str() );
+//        }
+//    }
 
 /*    //Jacobian debugging routines to follow uncomment only if absolutely necessary!
     std::vector<double> __PK2;
@@ -748,13 +834,22 @@ void MicromorphicMaterial::computeQpProperties(){
 
         //Evaluate the method of manufactured solutions stresses
         std::vector< double > mms_SDVS = _old_SDVS[ _qp ];
+
+#ifdef DEBUG_MODE
+        debug.clear();
+#endif
+
         errorCode = material->evaluate_model( time, _fparams,
                                               mms_grad_u, mms_phi, mms_grad_phi,
                                               mms_old_grad_u, mms_old_phi, mms_old_grad_phi,
                                               mms_SDVS,
                                               ADD_DOF,     ADD_grad_DOF,
                                               old_ADD_DOF, old_ADD_grad_DOF,
-                                              _PK2_MMS[_qp], _SIGMA_MMS[_qp], _M_MMS[_qp], _ADD_TERMS_MMS[_qp], output_message );
+                                              _PK2_MMS[_qp], _SIGMA_MMS[_qp], _M_MMS[_qp], _ADD_TERMS_MMS[_qp], output_message
+#ifdef DEBUG_MODE
+                                              , debug
+#endif      
+                        );
 
         if ( errorCode == 1 ){
             std::string error_message = "Convergence not achieved in method of manufactured solutions evaluation";
