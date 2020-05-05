@@ -386,6 +386,88 @@
   [../]
 []
 
+
+[AuxVariables]
+  [./pk2_11]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./pk2_22]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./pk2_33]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./sigma_11]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./sigma_22]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./sigma_33]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [./pk2_11]
+    type = MaterialStdVectorAux
+    property = PK2
+    index = 0
+    variable = pk2_11
+  [../]
+[]
+
+[AuxKernels]
+  [./pk2_22]
+    type = MaterialStdVectorAux
+    property = PK2
+    index = 4
+    variable = pk2_22
+  [../]
+[]
+
+[AuxKernels]
+  [./pk2_33]
+    type = MaterialStdVectorAux
+    property = PK2
+    index = 8
+    variable = pk2_33
+  [../]
+[]
+
+[AuxKernels]
+  [./sigma_11]
+    type = MaterialStdVectorAux
+    property = SIGMA
+    index = 0
+    variable = sigma_11
+  [../]
+[]
+
+[AuxKernels]
+  [./sigma_22]
+    type = MaterialStdVectorAux
+    property = SIGMA
+    index = 4
+    variable = sigma_22
+  [../]
+[]
+
+[AuxKernels]
+  [./sigma_33]
+    type = MaterialStdVectorAux
+    property = SIGMA
+    index = 8
+    variable = sigma_33
+  [../]
+[]
+
 [BCs]
   active = 'left_x back_z bottom_y top_y'
 #  active = 'left_x back_z bottom_y bottom_x top_y top_x'
