@@ -477,6 +477,7 @@
     variable = disp_x
     boundary = 'left'
     #boundary = 'left right bottom top front back'
+    preset = true
     value = 0
   [../]
   [./back_z]
@@ -485,6 +486,7 @@
     variable = disp_z
     boundary = 'back'
     #boundary = 'left right bottom top front back'
+    preset = true
     value = 0
   [../]
   [./bottom_x]
@@ -493,6 +495,7 @@
     variable = disp_x
     boundary = 'bottom'
     #boundary = 'left right bottom top front back'
+    preset = true
     value = 0
   [../]
   [./bottom_y]
@@ -501,6 +504,7 @@
     variable = disp_y
     boundary = 'bottom'
     #boundary = 'left right bottom top front back'
+    preset = true
     value = 0
   [../]
   [./top_x]
@@ -508,6 +512,7 @@
     #type     = PresetBC
     variable = disp_x
     boundary = 'top'
+    preset = true
     value    = 0
   [../]
   [./top_y]
@@ -517,6 +522,7 @@
     variable = disp_y
     boundary = 'top'
     #boundary = 'left right bottom top front back'
+    preset = true
     function = top_bc
   [../]
 []
@@ -591,7 +597,7 @@
 [Outputs]
   exodus = true
   perf_graph = true
-#  [./xdmf]
-#    type = Xdmf
-#  [../]
+  [./xdmf]
+    type = Xdmf
+  [../]
 []
