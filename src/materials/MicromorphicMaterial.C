@@ -517,6 +517,8 @@ void MicromorphicMaterial::computeQpProperties(){
 //        std::cout << "fparams:\n";
 //        for ( unsigned int i = 0; i < _fparams.size(); i++ ){ std::cout << _fparams[ i ] << ", "; };
 //        std::cout << "\n";
+//        std::cout << "_u:     " << _u1[ _qp ] << ", " << _u2[ _qp ] << ", " << _u3[ _qp ] << "\n";
+//        std::cout << "_old_u: " << _old_u1[ _qp ] << ", " << _old_u2[ _qp ] << ", " << _old_u3[ _qp ] << "\n";
 //        std::cout << "__grad_u:\n";
 //        for ( unsigned int i = 0; i < 3; i++ ){
 //            for ( unsigned int j = 0; j < 3; j++ ){

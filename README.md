@@ -29,6 +29,14 @@ which will need to be linked to by setting the environment variable
 
 > `LD_LIBRARY_PATH=/path/to/libs:$LD_LIBRARY_PATH`
 
+The user is expected to have built the xdmf library in the root directory of tardigrade
+( i.e. from the location of this Readme the xmdf directory is ../xmdf ) using the typical
+nomenclature of, "build," as the build directory name ( ../xmdf/build ). xmdf requires
+the boost header files ( which should be referenced by the environment variable BOOST_ROOT )
+and libxml2 which is included in the moose conda environment. Xmdf should be built against
+those libraries. The location of libxml2 needs to be updated in the Makefile along with 
+the root micromorphic directory.
+
 The documentation for this implementation detailing the theory is available 
 in the micromorphic_element repository as the balance equations and other 
 materials are located there.

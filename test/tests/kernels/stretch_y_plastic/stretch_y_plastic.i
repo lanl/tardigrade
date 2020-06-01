@@ -22,7 +22,7 @@
 #      min  = -0.1
 #      max  =  0.1
 #    [../]
-#    scaling = 1e-4
+##    scaling = 1e-4
   [../]
   [./disp_y]
 #    [./InitialCondition]
@@ -30,7 +30,7 @@
 #      min  = -0.1
 #      max  =  0.1
 #    [../]
-#    scaling = 1e-4
+##    scaling = 1e-4
   [../]
   [./disp_z]
 #    [./InitialCondition]
@@ -38,97 +38,97 @@
 #      min  = -0.1
 #      max  =  0.1
 #    [../]
-#    scaling = 1e-4
+##    scaling = 1e-4
   [../]
   [./phi_xx]
-#    order = CONSTANT
-#    family = MONOMIAL
+##    order = CONSTANT
+##    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -0.1
 #      max  =  0.1
 #    [../]
-#    scaling = 1e-5
+##    scaling = 1e-5
   [../]
   [./phi_yy]
-#    order = CONSTANT
-#    family = MONOMIAL
+##    order = CONSTANT
+##    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -0.1
 #      max  =  0.1
 #    [../]
-#    scaling = 1e-5
+##    scaling = 1e-5
   [../]
   [./phi_zz]
-#    order = CONSTANT
-#    family = MONOMIAL
+##    order = CONSTANT
+##    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -0.1
 #      max  =  0.1
 #    [../]
-#    scaling = 1e-5
+##    scaling = 1e-5
   [../]
   [./phi_yz]
-#    order = CONSTANT
-#    family = MONOMIAL
+##    order = CONSTANT
+##    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -0.1
 #      max  =  0.1
 #    [../]
-#    scaling = 1e-1
+##    scaling = 1e-1
   [../]
   [./phi_xz]
-#    order = CONSTANT
-#    family = MONOMIAL
+##    order = CONSTANT
+##    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -0.1
 #      max  =  0.1
 #    [../]
-#    scaling = 1e-1
+##    scaling = 1e-1
   [../]
   [./phi_xy]
-#    order = CONSTANT
-#    family = MONOMIAL
+##    order = CONSTANT
+##    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -0.1
 #      max  =  0.1
 #    [../]
-#    scaling = 1e-1
+##    scaling = 1e-1
   [../]
   [./phi_zy]
-#    order = CONSTANT
-#    family = MONOMIAL
+##    order = CONSTANT
+##    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -0.1
 #      max  =  0.1
 #    [../]
-#    scaling = 1e-1
+##    scaling = 1e-1
   [../]
   [./phi_zx]
-#    order = CONSTANT
-#    family = MONOMIAL
+##    order = CONSTANT
+##    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -0.1
 #      max  =  0.1
 #    [../]
-#    scaling = 1e-1
+##    scaling = 1e-1
   [../]
   [./phi_yx]
-#    order = CONSTANT
-#    family = MONOMIAL
+##    order = CONSTANT
+##    family = MONOMIAL
 #    [./InitialCondition]
 #      type = RandomIC
 #      min  = -0.1
 #      max  =  0.1
 #    [../]
-#    scaling = 1e-1
+##    scaling = 1e-1
   [../]
 []
 
@@ -387,6 +387,10 @@
 []
 
 [AuxVariables]
+  [./test]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./pk2_11]
     order = FIRST
     family = MONOMIAL
@@ -430,6 +434,15 @@
   [./micro_gradient_isv_3]
     order = FIRST
     family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [./test]
+    type = MaterialStdVectorAux
+    property = PK2
+    index = 0
+    variable = test
   [../]
 []
 
@@ -541,6 +554,7 @@
     variable = disp_x
     boundary = 'left'
     #boundary = 'left right bottom top front back'
+    preset = true
     value = 0
   [../]
   [./back_z]
@@ -549,6 +563,7 @@
     variable = disp_z
     boundary = 'back'
     #boundary = 'left right bottom top front back'
+    preset = true
     value = 0
   [../]
   [./bottom_x]
@@ -557,6 +572,7 @@
     variable = disp_x
     boundary = 'bottom'
     #boundary = 'left right bottom top front back'
+    preset = true
     value = 0
   [../]
   [./bottom_y]
@@ -565,6 +581,7 @@
     variable = disp_y
     boundary = 'bottom'
     #boundary = 'left right bottom top front back'
+    preset = true
     value = 0
   [../]
   [./top_x]
@@ -572,6 +589,7 @@
     #type     = PresetBC
     variable = disp_x
     boundary = 'top'
+    preset = true
     value    = 0
   [../]
   [./top_y]
@@ -581,6 +599,7 @@
     variable = disp_y
     boundary = 'top'
     #boundary = 'left right bottom top front back'
+    preset = true
     function = top_bc
   [../]
 []
@@ -602,8 +621,9 @@
 #    material_fparameters = '29. 7. 60. 10. 10. 8. 5. 0. 0. 0. 0. 0. 0. 8. 0. 0. 0. 0.'
 #    material_fparameters = '2. 696.47 65.84 5. -7.69 -51.92 38.61 -27.31 5.13 11. 1.85 -0.19 -1.08 -1.57 2.29 -0.61 5.97 -2.02 2.38 -0.32 -3.25 2. -51.92 5.13'
 #    material_fparameters = '2 2.4e2 1.5e1 2 1.4e2 2.0e1 2 2.0e0 2.7e1 2 0.56 0.2 2 0.15 -0.2 2 0.82 0.1 2 0.70 0.3 2 0.40 -0.3 2 0.52 0.4 2 29.48e3 25.48e3 5 1e3 0.4e3 -1.5e3 -1.4e3 -3e3 11 0 0 0 0 0 0 10e5 0 0 0 0 2 .4e3 -3e3 0.5 0.5 0.5 1e-9 1e-9'
-    material_fparameters = '2 170 15 2 140 20 2 2 27 2 0.56 0.2 2 0.15 0.3 2 0.82 0.1 2 0.42 0.3 2 0.05 0.2 2 0.52 0.4 2 29480 25480 5 1000 400 -1500 -1400 -3000 11 0 0 0 0 0 0 1e+06 0 0 0 0 2 400 -3000 0.5 0.5 0.5 1e-09 1e-09'
-#    material_fparameters = '2 2.4e2 1.5e1 2 1.4e2 2.0e1 2 2.0e0 2.7e1 2 0.56 0.2 2 0.15 -0.2 2 0.82 0.1 2 0.70 0.3 2 0.40 -0.3 2 0.52 0.4 2 696.47 65.84 5 -7.69 -51.92 38.61 -27.31 5.13 11 1.85 -0.19 -1.08 -1.57 2.29 -0.61 5.97 -2.02 2.38 -0.32 -3.25 2 -51.92 5.13 0.4 0.3 0.35 1e-8 1e-8'
+#    material_fparameters = '2 170 15 2 140 20 2 2 27 2 0.56 0.2 2 0.15 0.3 2 0.82 0.1 2 0.42 0.3 2 0.05 0.2 2 0.52 0.4 2 29480 25480 5 1000 400 -1500 -1400 -3000 11 0 0 0 0 0 0 1e+06 0 0 0 0 2 400 -3000 0.5 0.5 0.5 1e-09 1e-09'
+    material_fparameters = '2 1e3 1e4 2 2e3 1e4 2 1e3 1e4 2 0. 0. 2 0. 0. 2 0. 0. 2 0. 0. 2 0. 0. 2 0. 0. 2 29480 25480 5 1000 400 -1500 -1400 -3000 11 0 0 0 0 0 0 1e+06 0 0 0 0 2 400 -3000 0.5 0.5 0.5 1e-09 1e-09'
+#    material_fparameters = '2 2.4e2 1.5e1 2 2.4e2 2.0e1 2 2.0e0 2.7e1 2 0.56 0.2 2 0.15 -0.2 2 0.82 0.1 2 0.70 0.3 2 0.40 -0.3 2 0.52 0.4 2 696.47 65.84 5 -7.69 -51.92 38.61 -27.31 5.13 11 1.85 -0.19 -1.08 -1.57 2.29 -0.61 5.97 -2.02 2.38 -0.32 -3.25 2 -51.92 5.13 0.4 0.3 0.35 1e-8 1e-8'
     number_SDVS = 55
     model_name = "LinearElasticityDruckerPragerPlasticity"
 
@@ -634,13 +654,13 @@
 [Executioner]
 #  type = Steady
   type = Transient
-  num_steps = 20
-  dt        = 0.01
+  num_steps = 80
+  dt        = 0.05
 #  solve_type = 'PJFNK'
   solve_type = 'NEWTON'
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
-  nl_max_its = 100
+  nl_max_its = 20
   #Terms for debugging
 #  petsc_options = '-ksp_monitor_true_residual -ksp_compute_singularvalues' 
 #  petsc_options = '-snes_converged_reason -ksp_converged_reason'
@@ -657,5 +677,10 @@
 
 [Outputs]
   exodus = true
+#  file_base = out
   perf_graph = true
+#  [./exodus]
+#    type = Exodus
+#    sequence = true
+#  [../]
 []

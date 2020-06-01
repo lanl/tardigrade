@@ -48,6 +48,8 @@ include $(MOOSE_DIR)/modules/modules.mk
 APPLICATION_DIR    := $(CURDIR)
 MICROMORPHIC_DIR   := /home/nathan/research
 MICROMORPHIC_COMPILER_PATH := /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/
+ANACONDA_INCLUDE   := /home/nathan/anaconda3/include
+ANACONDA_LIB       := /home/nathan/anaconda3/lib
 APPLICATION_NAME   := tardigrade
 BUILD_EXEC         := yes
 GEN_REVISION       := no
@@ -64,12 +66,19 @@ ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/voro++/voro++ -I$(MICROMORPHIC_DIR)
 ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/vector_tools/src/cpp -I$(MICROMORPHIC_DIR)/error_tools/src/cpp
 ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/overlap_coupling/src/cpp -I$(MICROMORPHIC_DIR)
 ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/solver_tools/src/cpp
+ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/xdmf -I$(MICROMORPHIC_DIR)/xdmf/build
+ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/xdmf/core -I$(MICROMORPHIC_DIR)/xdmf/build/core
+ADDITIONAL_CPPFLAGS += -I$(ANACONDA_INCLUDE)/libxml2
+ADDITIONAL_CPPFLAGS += -I$(BOOST_ROOT)
 
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/voro++/voro++ -L$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/overlap_coupling/src/cpp
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/solver_tools/src/cpp
 ADDITIONAL_LIBS     += -lmicromat -lmicrobalance -lvoro++# -loverlap
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_COMPILER_PATH) -lresolv -DDEBUG_MODE
+ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/xdmf/build/lib -lXdmf -lXdmfCore -lXdmfUtils
+ADDITIONAL_LIBS     += -L$(ANACONDA_LIB)/libxml2 -lxml2
+ADDITIONAL_LIBS     += -L$(ANACONDA_LIB) -lhdf5 -ltiff
 
 ifeq ($(METHOD),dbg)
     ADDITIONAL_CPPFLAGS += -DDEBUG_MODE
@@ -77,3 +86,4 @@ ifeq ($(METHOD),dbg)
 endif
 
 $(info $$MICROMORPHIC_DIR is [${MICROMORPHIC_DIR}])
+$(info $$ADDITIONAL_LIBS is [${ADDITIONAL_LIBS}])
