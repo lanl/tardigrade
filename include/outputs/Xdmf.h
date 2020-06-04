@@ -9,8 +9,7 @@
 #include "AdvancedOutput.h"
 
 //XDMF includes
-//#include "XdmfDomain.hpp"
-//#include "XdmfWriter.hpp"
+#include "XdmfUnstructuredGrid.hpp"
 
 //Forward declarations
 class Xdmf;
@@ -27,15 +26,6 @@ class Xdmf : public AdvancedOutput
     public:
         static InputParameters validParams();
 
-        enum class OutputDimension : int
-        {
-            DEFAULT,
-            ONE,
-            TWO,
-            THREE,
-            PROBLEM_DIMENSION
-        };
-
         /*!
          * Class constructor
          */
@@ -49,10 +39,27 @@ class Xdmf : public AdvancedOutput
         void initialSetup();
 
         /*!
+         * Output the data
+         */
+
+        void output( const ExecFlagType &type );
+
+        /*!
          * Class destructor
          */
 
         ~Xdmf(){};
+
+    protected:
+        //Protected  attributes
+//        shared_ptr< XdmfDomain > _domain;
+//        std::shared_ptr<XdmfHDF5Writer> heavyWriter;
+        std::string _filename;
+
+        void writeMeshToFile( const bool local = false );
+
+        void outputNodalVariables( const std::set< std::string > * system_names = nullptr );
+
 };
 
 #endif
