@@ -63,7 +63,21 @@ void Xdmf::output( const ExecFlagType &type ){
 
     outputNodalVariables( );
 
+    _xdmf_mesh_changed = false;
+
     return;
+}
+
+void Xdmf::meshChanged( ){
+    /*!
+     * Detect if the mesh has been changed.
+     */
+
+    //Run the parent object's meshChanged function
+    AdvancedOutput::meshChanged();
+
+    //Alert the object that the mesh has changed
+    _xdmf_mesh_changed = true;
 }
 
 void Xdmf::writeMeshToFile( const bool local ){
@@ -227,14 +241,19 @@ void Xdmf::writeMeshToFile( const bool local ){
     grid->setTopology( topology );
 
     //Set the element ID numbers
-    shared_ptr<XdmfAttribute> elementIds = XdmfAttribute::New();
-    elementIds->setType( XdmfAttributeType::GlobalId() );
-    elementIds->setCenter( XdmfAttributeCenter::Cell() );
+    shared_ptr< XdmfAttribute > elementIds = XdmfAttribute::New( );
+    elementIds->setType( XdmfAttributeType::GlobalId( ) );
+    elementIds->setCenter( XdmfAttributeCenter::Cell( ) );
     elementIds->setName( "ID" );
-    elementIds->insert( 0, _elementIds.data(), _nFiniteElements, 1, 1 );
+    elementIds->insert( 0, _elementIds.data( ), _nFiniteElements, 1, 1 );
     shared_ptr< XdmfInformation > elementIdsInfo = XdmfInformation::New( "ID", "The element IDs" );
     elementIds->insert( elementIdsInfo );
     grid->insert( elementIds );
+
+    //TODO: REMOVE THIS
+    shared_ptr< XdmfInformation > derpInfo = XdmfInformation::New( "derp", "we be derpin" );
+    grid->insert( derpInfo );
+
 
     /*==========================
     | Write to the output file |

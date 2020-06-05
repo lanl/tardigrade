@@ -45,6 +45,12 @@ class Xdmf : public AdvancedOutput
         void output( const ExecFlagType &type );
 
         /*!
+         * Detect of the mesh has changed
+         */
+
+        virtual void meshChanged( );
+
+        /*!
          * Class destructor
          */
 
@@ -59,6 +65,10 @@ class Xdmf : public AdvancedOutput
         void writeMeshToFile( const bool local = false );
 
         void outputNodalVariables( const std::set< std::string > * system_names = nullptr );
+
+    private:
+        //Private attributes
+        bool _xdmf_mesh_changed;
 
 };
 
