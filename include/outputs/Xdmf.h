@@ -24,7 +24,7 @@ InputParameters validParams<Xdmf>();
 class Xdmf : public AdvancedOutput
 {
     public:
-        static InputParameters validParams();
+        static InputParameters validParams( );
 
         /*!
          * Class constructor
@@ -69,6 +69,7 @@ class Xdmf : public AdvancedOutput
     private:
         //Private attributes
         bool _xdmf_mesh_changed;
+        unsigned int _num_temporal_collections = 0;
 
 };
 

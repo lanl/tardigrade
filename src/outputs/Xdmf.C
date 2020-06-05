@@ -10,6 +10,8 @@
 #include "XdmfWriter.hpp"
 #include "XdmfHDF5Writer.hpp"
 #include "XdmfGeometry.hpp"
+#include "XdmfGridCollection.hpp"
+#include "XdmfGridCollectionType.hpp"
 
 #include "FEProblem.h"
 #include "FileMesh.h"
@@ -44,6 +46,15 @@ void Xdmf::initialSetup(){
     shared_ptr< XdmfDomain > _domain = XdmfDomain::New();
     shared_ptr< XdmfInformation > domaininfo = XdmfInformation::New( "Domain", "Primary data structure from a MOOSE simulation" );
     _domain->insert( domaininfo );
+
+    //Create the first temporal collection
+    shared_ptr< XdmfGridCollection > _gridHolder = XdmfGridCollection::New( );
+    _gridHolder->setType( XdmfGridCollectionType::Temporal( ) );
+    shared_ptr< XdmfInformation > _holderInfo = XdmfInformation::New( "Collection_" + std::to_string( _num_temporal_collections ), "The collection of temporal grids" );
+    _gridHolder->insert( _holderInfo );
+    _domain->insert( _gridHolder );
+    _num_temporal_collections++;
+
     shared_ptr< XdmfHDF5Writer > heavyWriter = XdmfHDF5Writer::New( _filename + ".h5", true );
     shared_ptr< XdmfWriter > writer = XdmfWriter::New( _filename + ".xdmf", heavyWriter );
     _domain->accept( writer );
@@ -250,16 +261,13 @@ void Xdmf::writeMeshToFile( const bool local ){
     elementIds->insert( elementIdsInfo );
     grid->insert( elementIds );
 
-    //TODO: REMOVE THIS
-    shared_ptr< XdmfInformation > derpInfo = XdmfInformation::New( "derp", "we be derpin" );
-    grid->insert( derpInfo );
-
-
     /*==========================
     | Write to the output file |
     ==========================*/
 
-    domain->insert( grid );
+    shared_ptr< XdmfGridCollection > collection = domain->getGridCollection( _num_temporal_collections - 1 );
+
+    collection->insert( grid );
 
     //Construct the file writers
     shared_ptr< XdmfHDF5Writer > heavyWriter = XdmfHDF5Writer::New( _filename + ".h5" );
@@ -347,15 +355,18 @@ void Xdmf::outputNodalVariables( const std::set< std::string > * system_names ){
         //Read in the XDMF domain    
         shared_ptr< XdmfDomain > domain = shared_dynamic_cast< XdmfDomain >( reader->read( _filename + ".xdmf" ) );
     
+        //Get the most recent temporal grid collection
+        shared_ptr< XdmfGridCollection > collection = domain->getGridCollection( _num_temporal_collections - 1 );
+
         //Get the number of grids
-        unsigned int nGrids = domain->getNumberUnstructuredGrids( );
+        unsigned int nGrids = collection->getNumberUnstructuredGrids( );
     
         if ( nGrids == 0 ){
             mooseError( "No meshes found in XDMF output" );
         }
-    
-        //Get the most recent grid
-        shared_ptr< XdmfUnstructuredGrid > grid = domain->getUnstructuredGrid( nGrids - 1 );
+
+        //Get the most recent grid //TODO: Should determine how to handle multiple grids
+        shared_ptr< XdmfUnstructuredGrid > grid = collection->getUnstructuredGrid( nGrids - 1 );
     
         //Make sure the time associated with the grid is correct
         if ( abs( grid->getTime()->getValue() - _time ) > 1e-9 ){ //TODO: This may fail for very small timesteps
