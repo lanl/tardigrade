@@ -70,6 +70,7 @@ class Xdmf : public AdvancedOutput
         //Private attributes
         bool _xdmf_mesh_changed;
         unsigned int _num_temporal_collections = 0;
+        unsigned int _current_reference_grid = 0;
 
 };
 

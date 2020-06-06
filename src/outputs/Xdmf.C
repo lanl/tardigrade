@@ -117,6 +117,36 @@ void Xdmf::writeMeshToFile( const bool local ){
     untime->insert( untimeinfo );
     grid->setTime( untime );
 
+    if ( ( domain->getGridCollection( 0 )->getNumberUnstructuredGrids() > 0 ) && ( !_xdmf_mesh_changed ) ){
+
+        //Point the new grid to the current reference grid's geometry, topology, and ids
+        
+        shared_ptr< XdmfUnstructuredGrid > reference_grid = domain->getGridCollection( 0 )->getUnstructuredGrid( _current_reference_grid );
+
+        //Reference the geometry and topology to the previous grid
+        grid->setGeometry( reference_grid->getGeometry( ) );
+        grid->setTopology( reference_grid->getTopology( ) );
+
+        //Get the Node and Element ID references
+        grid->insert( reference_grid->getAttribute( "NODEID" ) );
+        grid->insert( reference_grid->getAttribute( "ELEMID" ) );
+
+        //Write the grid to the file
+        shared_ptr< XdmfGridCollection > collection = domain->getGridCollection( _num_temporal_collections - 1 );
+
+        collection->insert( grid );
+
+        //Construct the file writers
+        shared_ptr< XdmfHDF5Writer > heavyWriter = XdmfHDF5Writer::New( _filename + ".h5" );
+        shared_ptr< XdmfWriter > writer = XdmfWriter::New( _filename + ".xdmf", heavyWriter );
+        writer->setLightDataLimit( 1 );
+
+        //Write out the data
+        domain->accept( writer );
+
+        return;
+    }
+
     /*!===============
     | Save the nodes |
     ================*/
@@ -157,7 +187,7 @@ void Xdmf::writeMeshToFile( const bool local ){
     shared_ptr<XdmfAttribute> nodeIds = XdmfAttribute::New();
     nodeIds->setType( XdmfAttributeType::GlobalId() );
     nodeIds->setCenter( XdmfAttributeCenter::Node() );
-    nodeIds->setName( "ID" );
+    nodeIds->setName( "NODEID" );
     nodeIds->insert( 0, _nodeIds.data(), _nNodes, 1, 1 );
     shared_ptr< XdmfInformation > nodeIdsInfo = XdmfInformation::New( "ID", "The nodal IDs" );
     nodeIds->insert( nodeIdsInfo );
@@ -255,7 +285,7 @@ void Xdmf::writeMeshToFile( const bool local ){
     shared_ptr< XdmfAttribute > elementIds = XdmfAttribute::New( );
     elementIds->setType( XdmfAttributeType::GlobalId( ) );
     elementIds->setCenter( XdmfAttributeCenter::Cell( ) );
-    elementIds->setName( "ID" );
+    elementIds->setName( "ELEMID" );
     elementIds->insert( 0, _elementIds.data( ), _nFiniteElements, 1, 1 );
     shared_ptr< XdmfInformation > elementIdsInfo = XdmfInformation::New( "ID", "The element IDs" );
     elementIds->insert( elementIdsInfo );
@@ -276,6 +306,9 @@ void Xdmf::writeMeshToFile( const bool local ){
 
     //Write out the data
     domain->accept( writer );
+
+    //Update the reference grid
+    _current_reference_grid = domain->getGridCollection( 0 )->getNumberUnstructuredGrids( ) - 1;
 
     return;
 }
