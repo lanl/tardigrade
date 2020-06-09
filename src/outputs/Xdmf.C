@@ -56,6 +56,7 @@ void Xdmf::initialSetup(){
     _num_temporal_collections++;
 
     shared_ptr< XdmfHDF5Writer > heavyWriter = XdmfHDF5Writer::New( _filename + ".h5", true );
+    heavyWriter->setReleaseData( true );
     shared_ptr< XdmfWriter > writer = XdmfWriter::New( _filename + ".xdmf", heavyWriter );
     _domain->accept( writer );
 
@@ -130,6 +131,7 @@ void Xdmf::writeMeshToFile( const bool local ){
         //Get the Node and Element ID references
         grid->insert( reference_grid->getAttribute( "NODEID" ) );
         grid->insert( reference_grid->getAttribute( "ELEMID" ) );
+        grid->insert( reference_grid->getAttribute( "SUBDOMAINID" ) );
 
         //Write the grid to the file
         shared_ptr< XdmfGridCollection > collection = domain->getGridCollection( _num_temporal_collections - 1 );
@@ -138,6 +140,7 @@ void Xdmf::writeMeshToFile( const bool local ){
 
         //Construct the file writers
         shared_ptr< XdmfHDF5Writer > heavyWriter = XdmfHDF5Writer::New( _filename + ".h5" );
+        heavyWriter->setReleaseData( true );
         shared_ptr< XdmfWriter > writer = XdmfWriter::New( _filename + ".xdmf", heavyWriter );
         writer->setLightDataLimit( 1 );
 
@@ -154,7 +157,7 @@ void Xdmf::writeMeshToFile( const bool local ){
     unsigned int _dim = _mesh_ptr->dimension(); //Get the dimension of the mesh
     dof_id_type _nNodes = _mesh_ptr->nNodes();  //Determine the number of nodes
 
-    std::vector< dof_id_type > _nodeIds, _elementIds;
+    std::vector< dof_id_type > _nodeIds, _elementIds, _subdomainIds;
     _nodeIds.reserve( _nNodes ); //Reserve the node id vector
     std::vector< Real > _coordinates;
     _coordinates.reserve( 3 * _nNodes ); //Reserve the coordinate vector
@@ -228,7 +231,8 @@ void Xdmf::writeMeshToFile( const bool local ){
         }
     }
 
-    _elementIds.reserve( _nFiniteElements ); //Reserve the id vector
+    _elementIds.reserve( _nFiniteElements ); //Reserve the element id vector
+    _subdomainIds.reserve( _nFiniteElements ); //Reserve the subdomain id vector
     _topology.reserve( _topology_size ); //Reserve the topology vector
 
     //Construct the topology vector
@@ -241,6 +245,7 @@ void Xdmf::writeMeshToFile( const bool local ){
         }
 #endif
         _elementIds.push_back( elem->id() ); //Save the element ID
+        _subdomainIds.push_back( elem->subdomain_id() ); //Save the subdomain ID
 
         if ( elem->dim() == 1 ){
             _topology.push_back(  2 ); //XDMF Polyline Type
@@ -291,6 +296,16 @@ void Xdmf::writeMeshToFile( const bool local ){
     elementIds->insert( elementIdsInfo );
     grid->insert( elementIds );
 
+    //Set the element subdomain ID numbers
+    shared_ptr< XdmfAttribute > subdomainIds = XdmfAttribute::New( );
+    subdomainIds->setType( XdmfAttributeType::GlobalId( ) );
+    subdomainIds->setCenter( XdmfAttributeCenter::Cell( ) );
+    subdomainIds->setName( "SUBDOMAINID" );
+    subdomainIds->insert( 0, _subdomainIds.data( ), _nFiniteElements, 1, 1 );
+    shared_ptr< XdmfInformation > subdomainIdsInfo = XdmfInformation::New( "BLOCK ID", "The subdomain ( block ) IDs" );
+    subdomainIds->insert( subdomainIdsInfo );
+    grid->insert( subdomainIds );
+
     /*==========================
     | Write to the output file |
     ==========================*/
@@ -301,6 +316,10 @@ void Xdmf::writeMeshToFile( const bool local ){
 
     //Construct the file writers
     shared_ptr< XdmfHDF5Writer > heavyWriter = XdmfHDF5Writer::New( _filename + ".h5" );
+    heavyWriter->setReleaseData( true );
+    if ( ( _nNodes < 1000 ) || ( _nFiniteElements < 1000 ) ){
+        heavyWriter->setChunkSize( std::max( _nNodes, _nFiniteElements ) );
+    }
     shared_ptr< XdmfWriter > writer = XdmfWriter::New( _filename + ".xdmf", heavyWriter );
     writer->setLightDataLimit( 1 );
 
@@ -455,6 +474,10 @@ void Xdmf::outputNodalVariables( const std::set< std::string > * system_names ){
 
         //Construct the file writers
         shared_ptr< XdmfHDF5Writer > heavyWriter = XdmfHDF5Writer::New( _filename + ".h5" );
+        heavyWriter->setReleaseData( true );
+        if ( num_nodes < 1000 ){
+            heavyWriter->setChunkSize( num_nodes );
+        }
         shared_ptr< XdmfWriter > writer = XdmfWriter::New( _filename + ".xdmf", heavyWriter );
         writer->setLightDataLimit( 1 );
     
