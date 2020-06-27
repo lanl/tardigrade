@@ -30,7 +30,7 @@ CHEMICAL_REACTIONS  := no
 CONTACT             := no
 FLUID_PROPERTIES    := no
 HEAT_CONDUCTION     := no
-MISC                := no
+MISC                := yes
 NAVIER_STOKES       := no
 PHASE_FIELD         := no
 RDG                 := no
@@ -84,6 +84,3 @@ ifeq ($(METHOD),dbg)
     ADDITIONAL_CPPFLAGS += -DDEBUG_MODE
     ADDITIONAL_LIBS += -DDEBUG_MODE
 endif
-
-$(info $$MICROMORPHIC_DIR is [${MICROMORPHIC_DIR}])
-$(info $$ADDITIONAL_LIBS is [${ADDITIONAL_LIBS}])
