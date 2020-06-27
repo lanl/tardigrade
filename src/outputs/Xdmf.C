@@ -36,6 +36,11 @@ Xdmf::Xdmf( const InputParameters &parameters )
 
 void Xdmf::initialSetup(){
 
+    //TODO: Allow for parallel output
+    if( this->processor_id() != 0 ){
+        return;
+    }
+
     //Call the base class setup method
     AdvancedOutput::initialSetup();
 
@@ -69,7 +74,11 @@ void Xdmf::output( const ExecFlagType &type ){
      * :param const ExecFlagType &type: The type of execution.
      */
 
-    //TODO: Determine how to share the grid and only output if it changes
+    //TODO: Allow for parallel output
+    if( this->processor_id() != 0 ){
+        return;
+    }
+
     //Write the nodes to the file
     writeMeshToFile( );
 
@@ -131,7 +140,12 @@ void Xdmf::writeMeshToFile( const bool local ){
         //Get the Node and Element ID references
         grid->insert( reference_grid->getAttribute( "NODEID" ) );
         grid->insert( reference_grid->getAttribute( "ELEMID" ) );
-        grid->insert( reference_grid->getAttribute( "SUBDOMAINID" ) );
+//        grid->insert( reference_grid->getAttribute( "SUBDOMAINID" ) );
+
+        //Get the nodesets
+        for ( unsigned int i = 0; i < reference_grid->getNumberSets(); i++ ){
+            grid->insert( reference_grid->getSet( i ) );
+        }
 
         //Write the grid to the file
         shared_ptr< XdmfGridCollection > collection = domain->getGridCollection( _num_temporal_collections - 1 );
@@ -205,6 +219,48 @@ void Xdmf::writeMeshToFile( const bool local ){
     nodeGeometry->insert( nodeGeometryInfo );
     grid->setGeometry( nodeGeometry );
 
+    //Save the nodesets
+    const std::set< BoundaryID > nodesetIds = _mesh_ptr->meshNodesetIds();
+
+    //TODO: Having to loop over the nodes in the nodesets to determine their size seems sub-optimal
+    //      but I suspect having to resize the vectors would be worse.
+    std::vector< unsigned int > nodesetSizes( nodesetIds.size(), 0 );
+    std::vector< std::shared_ptr< std::vector< unsigned int > > > nodesetNodeIds;
+    nodesetNodeIds.reserve( nodesetIds.size() );
+    std::vector< shared_ptr< XdmfSet > > XDMFnodeSets( nodesetIds.size() );
+
+    unsigned int indx = 0;
+
+    for ( auto it = nodesetIds.begin(); it != nodesetIds.end(); it++ ){
+
+        //Get the size of the nodeset
+        for ( auto nit = _mesh_ptr->getMesh().bid_nodes_begin( *it ); nit != _mesh_ptr->getMesh().bid_nodes_end( *it ); nit++ ){
+            Node* node = *nit;
+
+            nodesetSizes[ indx ] += 1;
+        }
+
+        //Get the ids of the nodes in the nodeset
+        nodesetNodeIds.emplace_back( std::shared_ptr< std::vector< unsigned int > >( new std::vector< unsigned int > ) ) ;
+        nodesetNodeIds[ indx ]->reserve( nodesetSizes[ indx ] );
+
+        for ( auto nit = _mesh_ptr->getMesh().bid_nodes_begin( *it ); nit != _mesh_ptr->getMesh().bid_nodes_end( *it ); nit++ ){
+            Node* node = *nit;
+
+            nodesetNodeIds[ indx ]->push_back( node->id() );
+        }
+
+        //Emplace the nodeset IDs into the XDMF domain
+        XDMFnodeSets[ indx ] = XdmfSet::New();
+        XDMFnodeSets[ indx ]->setType( XdmfSetType::Node() );
+        XDMFnodeSets[ indx ]->setName( _mesh_ptr->getBoundaryName( *it ) );
+        XDMFnodeSets[ indx ]->insert( 0, nodesetNodeIds[ indx ]->data(), nodesetSizes[ indx ], 1, 1 );
+        grid->insert( XDMFnodeSets[ indx ] );
+
+        indx++;
+
+    }
+
     /*!==================
     | Save the elements |
     ===================*/
@@ -224,10 +280,16 @@ void Xdmf::writeMeshToFile( const bool local ){
         }
 #endif
         _nFiniteElements += 1; //Increment the number of elements
-        _topology_size += 2; //Add space for the topology type and number of sides
 
-        for ( unsigned int i = 0; i < elem->n_sides(); i++ ){
-            _topology_size += elem->side_ptr(i)->n_nodes() + 1; //Save the number of nodes for a given side
+        if( elem->type( ) == HEX8 ){
+            _topology_size += 9; //Add space for the topology type and the number of sides
+        }
+        else{ //Polyhedron in other cases
+            _topology_size += 2; //Add space for the topology type and number of sides
+    
+            for ( unsigned int i = 0; i < elem->n_sides(); i++ ){
+                _topology_size += elem->side_ptr(i)->n_nodes() + 1; //Save the number of nodes for a given side
+            }
         }
     }
 
@@ -254,28 +316,44 @@ void Xdmf::writeMeshToFile( const bool local ){
             _topology.push_back(  3 ); //XDMF Polygon Type
         }
         else if ( elem->dim() == 3 ){
-            _topology.push_back( 16 ); //XDMF Polyhedron Type
+            if ( elem->type( ) == HEX8 ){
+                _topology.push_back( 9 );
+            }
+            else{
+                _topology.push_back( 16 ); //XDMF Polyhedron Type
+            }
         }
         else{
             mooseError( "Element dimension not implemented" );
         }
 
-       _topology.push_back( elem->n_sides() ); //Store the number of sides for the element
+        if ( elem->type( ) == HEX8 ){
+
+            for ( unsigned int i = 0; i < elem->n_nodes( ); i++ ){
+
+                _topology.push_back( elem->node_id( i ) );
+
+            }
+
+        }
+        else{
+        _topology.push_back( elem->n_sides() ); //Store the number of sides for the element
     
-        for ( unsigned int i = 0; i < elem->n_sides(); i++ ){
-
-            if ( elem->dim() > 1 ){
-
-                _topology.push_back( elem->side_ptr( i )->n_nodes() ); //Store the number of nodes on the given side
-
+            for ( unsigned int i = 0; i < elem->n_sides(); i++ ){
+    
+                if ( elem->dim() > 1 ){
+    
+                    _topology.push_back( elem->side_ptr( i )->n_nodes() ); //Store the number of nodes on the given side
+    
+                }
+    
+                for ( unsigned int n = 0; n < elem->side_ptr( i )->n_nodes(); n++ ){
+    
+                    _topology.push_back( elem->side_ptr( i )->node_ptr( n )->id() ); //Push back the node id's on this face
+    
+                }
+    
             }
-
-            for ( unsigned int n = 0; n < elem->side_ptr( i )->n_nodes(); n++ ){
-
-                _topology.push_back( elem->side_ptr( i )->node_ptr( n )->id() ); //Push back the node id's on this face
-
-            }
-
         }
     }
 
@@ -296,15 +374,65 @@ void Xdmf::writeMeshToFile( const bool local ){
     elementIds->insert( elementIdsInfo );
     grid->insert( elementIds );
 
-    //Set the element subdomain ID numbers
-    shared_ptr< XdmfAttribute > subdomainIds = XdmfAttribute::New( );
-    subdomainIds->setType( XdmfAttributeType::GlobalId( ) );
-    subdomainIds->setCenter( XdmfAttributeCenter::Cell( ) );
-    subdomainIds->setName( "SUBDOMAINID" );
-    subdomainIds->insert( 0, _subdomainIds.data( ), _nFiniteElements, 1, 1 );
-    shared_ptr< XdmfInformation > subdomainIdsInfo = XdmfInformation::New( "BLOCK ID", "The subdomain ( block ) IDs" );
-    subdomainIds->insert( subdomainIdsInfo );
-    grid->insert( subdomainIds );
+//    //Set the element subdomain ID numbers
+//    shared_ptr< XdmfAttribute > subdomainIds = XdmfAttribute::New( );
+//    subdomainIds->setType( XdmfAttributeType::GlobalId( ) );
+//    subdomainIds->setCenter( XdmfAttributeCenter::Cell( ) );
+//    subdomainIds->setName( "SUBDOMAINID" );
+//    subdomainIds->insert( 0, _subdomainIds.data( ), _nFiniteElements, 1, 1 );
+//    shared_ptr< XdmfInformation > subdomainIdsInfo = XdmfInformation::New( "BLOCK ID", "The subdomain ( block ) IDs" );
+//    subdomainIds->insert( subdomainIdsInfo );
+//    grid->insert( subdomainIds );
+
+
+    //Save the element subdomains
+
+    const std::set< SubdomainID > subdomainIds = _mesh_ptr->meshSubdomains();
+    //TODO: Having to loop over the elements to determine the size of the subdomains seems inefficient
+    //      If this could be determined without a loop that would be ideal.
+
+    std::vector< unsigned int > subdomainSizes( subdomainIds.size(), 0 );
+    std::vector< std::shared_ptr< std::vector< unsigned int > > > subdomainElementIds;
+    subdomainElementIds.reserve( subdomainElementIds.size() );
+    std::vector< shared_ptr< XdmfSet > > XDMFelementSets( subdomainIds.size() );
+
+    indx = 0;
+
+    for ( auto it = subdomainIds.begin(); it != subdomainIds.end(); it++ ){
+
+//        std::cout << _mesh_ptr->getSubdomainName( *it ) << ": " << *it  << "\n";
+
+        //Get the size of the nodeset
+        for ( auto eit =  _mesh_ptr->getMesh().active_subdomain_elements_begin( *it );
+                   eit != _mesh_ptr->getMesh().active_subdomain_elements_end( *it ); eit++ ){
+            Elem* elem = *eit;
+
+            subdomainSizes[ indx ] += 1;
+        }
+
+        //Get the ids of the nodes in the nodeset
+        subdomainElementIds.emplace_back( std::shared_ptr< std::vector< unsigned int > >( new std::vector< unsigned int > ) ) ;
+        subdomainElementIds[ indx ]->reserve( subdomainSizes[ indx ] );
+
+        for ( auto eit =  _mesh_ptr->getMesh().active_subdomain_elements_begin( *it );
+                   eit != _mesh_ptr->getMesh().active_subdomain_elements_end( *it ); eit++ ){
+            Elem* elem = *eit;
+
+            subdomainElementIds[ indx ]->push_back( elem->id() );
+        }
+
+        //Emplace the nodeset IDs into the XDMF domain
+        XDMFelementSets[ indx ] = XdmfSet::New();
+        XDMFelementSets[ indx ]->setType( XdmfSetType::Cell() );
+        XDMFelementSets[ indx ]->setName( _mesh_ptr->getSubdomainName( *it ) );
+        XDMFelementSets[ indx ]->insert( 0, subdomainElementIds[ indx ]->data(), subdomainSizes[ indx ], 1, 1 );
+        grid->insert( XDMFelementSets[ indx ] );
+
+        indx++;
+
+    }
+
+
 
     /*==========================
     | Write to the output file |
