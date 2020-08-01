@@ -37,7 +37,7 @@ RDG                 := no
 RICHARDS            := no
 SOLID_MECHANICS     := no
 STOCHASTIC_TOOLS    := no
-TENSOR_MECHANICS    := yes
+TENSOR_MECHANICS    := no
 XFEM                := no
 POROUS_FLOW         := no
 
