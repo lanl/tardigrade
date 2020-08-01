@@ -137,7 +137,6 @@ Real InertialForce::computeQpOffDiagJacobian(unsigned int jvar){
     */
 
 
-    Real dfdUint;
     int  _off_diag_dof_num = -1;
 
     if(jvar == _u1_int){
