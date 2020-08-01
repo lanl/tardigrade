@@ -21,6 +21,7 @@ template<>
 InputParameters
 validParams< InertialForce >( ){
     InputParameters params = validParams< Kernel >( );
+    params.set< bool >( "use_displaced_mesh" ) = false;
     params.addRequiredParam< int >( "component", "The component of the inertial force vector" );
     params.addRequiredParam< int >( "dof_num",   "The degree of freedom to use for the diagonal jacobian calculation" );
     params.addParam< bool >( "MMS", false,       "The flag for whether the run will be using the method of manufactured solutions" );

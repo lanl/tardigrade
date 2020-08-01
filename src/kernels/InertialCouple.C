@@ -22,6 +22,7 @@ template<>
 InputParameters
 validParams< InertialCouple >( ){
     InputParameters params = validParams< Kernel >( );
+    params.set< bool >( "use_displaced_mesh" ) = false;
     params.addRequiredParam< int >( "component_i", "The i component of the inertial couple tensor" );
     params.addRequiredParam< int >( "component_j", "The j component of the inertial couple tensor" );
     params.addRequiredParam< int >( "dof_num",   "The degree of freedom to use for the diagonal jacobian calculation" );
