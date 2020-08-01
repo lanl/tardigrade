@@ -67,9 +67,9 @@ class InertialForce : public Kernel{
         unsigned int _u3_int;
 
         const Real _density;
-        const VariableValue &_a_1;
-        const VariableValue &_a_2;
-        const VariableValue &_a_3;
+        const VariableValue &_a1;
+        const VariableValue &_a2;
+        const VariableValue &_a3;
         const VariableValue &_da1du;
         const VariableValue &_da2du;
         const VariableValue &_da3du;

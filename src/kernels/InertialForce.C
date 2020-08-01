@@ -44,9 +44,9 @@ InertialForce::InertialForce( const InputParameters & parameters )
         _u3_int(isCoupled("u3") ? coupled("u3")
                                 : 100),
         _density( getParam< Real >( "reference_density" ) ),
-        _a_1( coupledDotDot( "u1" ) ),
-        _a_2( coupledDotDot( "u2" ) ),
-        _a_3( coupledDotDot( "u3" ) ),
+        _a1( coupledDotDot( "u1" ) ),
+        _a2( coupledDotDot( "u2" ) ),
+        _a3( coupledDotDot( "u3" ) ),
         _da1du( coupledDotDotDu( "u1" ) ),
         _da2du( coupledDotDotDu( "u2" ) ),
         _da3du( coupledDotDotDu( "u3" ) )
@@ -87,7 +87,7 @@ Real InertialForce::computeQpResidual(){
 
     Real finertia;
 
-    double _acceleration[ 3 ] = { _a_1[ _qp ], _a_2[ _qp ], _a_3[ _qp ] };
+    double _acceleration[ 3 ] = { _a1[ _qp ], _a2[ _qp ], _a3[ _qp ] };
     
     //Copy the test function so that the balance equation function can read it
     int errorCode = balance_equations::compute_inertia_force( _component, _test[ _i ][ _qp ], _density, _acceleration, finertia );
@@ -110,7 +110,7 @@ Real InertialForce::computeQpJacobian(){
     */
     Real dfinertiadU_ij;
 
-    double _acceleration[ 3 ] = { _a_1[ _qp ], _a_2[ _qp ], _a_3[ _qp ] };
+    double _acceleration[ 3 ] = { _a1[ _qp ], _a2[ _qp ], _a3[ _qp ] };
     std::vector< double > DaDu_i = { _da1du[ _qp ], _da2du[ _qp ], _da3du[ _qp ] };
 
     //Copy the test and interpolation functions so that the balance equation function can read it
@@ -152,7 +152,7 @@ Real InertialForce::computeQpOffDiagJacobian(unsigned int jvar){
 
     Real dfinertiadU_ij;
 
-    double _acceleration[ 3 ] = { _a_1[ _qp ], _a_2[ _qp ], _a_3[ _qp ] };
+    double _acceleration[ 3 ] = { _a1[ _qp ], _a2[ _qp ], _a3[ _qp ] };
     std::vector< double > DaDu_i = { _da1du[ _qp ], _da2du[ _qp ], _da3du[ _qp ] };
 
     //Copy the test and interpolation functions so that the balance equation function can read it
