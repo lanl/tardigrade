@@ -1,6 +1,6 @@
 /*!
 =====================================================================
-|                        InertialCouple.cpp                         |
+|                  MicromorphicInertialCouple.cpp                   |
 ---------------------------------------------------------------------
 | The source file for the micromorphic inertial couple kernel. This |
 | kernel draws upon the balance equations from the git repository   |
@@ -13,14 +13,14 @@
 =====================================================================
 */
 
-#include<InertialCouple.h>
+#include<MicromorphicInertialCouple.h>
 
 //We define the valid parameters for this kernel and their default values
-registerMooseObject("tardigradeApp", InertialCouple);
+registerMooseObject("tardigradeApp", MicromorphicInertialCouple);
 
 template<>
 InputParameters
-validParams< InertialCouple >( ){
+validParams< MicromorphicInertialCouple >( ){
     InputParameters params = validParams< Kernel >( );
     params.set< bool >( "use_displaced_mesh" ) = false;
     params.addRequiredParam< int >( "component_i", "The i component of the inertial couple tensor" );
@@ -46,7 +46,7 @@ validParams< InertialCouple >( ){
     return params;
 }
 
-InertialCouple::InertialCouple( const InputParameters & parameters )
+MicromorphicInertialCouple::MicromorphicInertialCouple( const InputParameters & parameters )
     : // We have to call the constructor for the base class first
         Kernel( parameters ),
         _component_i( getParam< int >( "component_i" ) ),
@@ -111,7 +111,7 @@ InertialCouple::InertialCouple( const InputParameters & parameters )
     |    Constructor    |
     =====================
 
-    The constructor for the InertialCouple class.
+    The constructor for the MicromorphicInertialCouple class.
     Note that this constructor is just variable 
     assignments.
 
@@ -119,13 +119,13 @@ InertialCouple::InertialCouple( const InputParameters & parameters )
 
     if ( _MMS ){
 
-        mooseError( "Method of manufactured solutions not implemented for InertialCouple" );
+        mooseError( "Method of manufactured solutions not implemented for MicromorphicInertialCouple" );
 
     }
 
 }
 
-Real InertialCouple::computeQpResidual(){
+Real MicromorphicInertialCouple::computeQpResidual(){
     /*!
     ===========================
     |    computeQpResidual    |
@@ -168,7 +168,7 @@ Real InertialCouple::computeQpResidual(){
     return cinertia_ij;
 }
 
-Real InertialCouple::computeQpJacobian(){
+Real MicromorphicInertialCouple::computeQpJacobian(){
     /*!
     ===========================
     |    computeQpJacobian    |
@@ -214,7 +214,7 @@ Real InertialCouple::computeQpJacobian(){
     return dcinertiadU_ij;
 }
 
-Real InertialCouple::computeQpOffDiagJacobian(unsigned int jvar){
+Real MicromorphicInertialCouple::computeQpOffDiagJacobian(unsigned int jvar){
     /*!
     ==================================
     |    computeQpOffDiagJacobian    |

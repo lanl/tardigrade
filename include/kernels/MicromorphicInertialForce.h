@@ -1,6 +1,6 @@
 /*!
 =====================================================================
-|                          InertialForce.h                          |
+|                    MicromorphicInertialForce.h                    |
 ---------------------------------------------------------------------
 | The header file for the micromorphic inertial force kernel. This  |
 | kernel draws upon the balance equations from the git repository   |
@@ -12,23 +12,23 @@
 =====================================================================
 */
 
-#ifndef INERTIALFORCE_H
-#define INERTIALFORCE_H
+#ifndef MICROMORPHICINERTIALFORCE_H
+#define MICROMORPHICINERTIALFORCE_H
 
 #include "Kernel.h"
 #include <balance_equations.h> //The Micromorphic balance equations
 
 //Forward declarations
-class InertialForce;
+class MicromorphicInertialForce;
 
 template <>
-InputParameters validParams<InertialForce>();
+InputParameters validParams<MicromorphicInertialForce>();
 
-class InertialForce : public Kernel{
+class MicromorphicInertialForce : public Kernel{
     /*!
-    -----------------------------------------
-    |    InertialForce kernel definition    |
-    -----------------------------------------
+    -----------------------------------------------------
+    |    MicromorphicInertialForce kernel definition    |
+    -----------------------------------------------------
 
     We define the kernel for the inernal force to be
 
@@ -40,7 +40,7 @@ class InertialForce : public Kernel{
     */
     public:
         //The constructor definition
-        InertialForce(const InputParameters & parameters);
+        MicromorphicInertialForce(const InputParameters & parameters);
 
     protected:
         //The residual at a quadrature point.

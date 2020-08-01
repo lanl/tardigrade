@@ -1,6 +1,6 @@
 /*!
 =====================================================================
-|                         InertialForce.cpp                         |
+|                   MicromorphicInertialForce.cpp                   |
 ---------------------------------------------------------------------
 | The source file for the micromorphic inertial force kernel. This  |
 | kernel draws upon the balance equations from the git repository   |
@@ -12,14 +12,14 @@
 =====================================================================
 */
 
-#include<InertialForce.h>
+#include<MicromorphicInertialForce.h>
 
 //We define the valid parameters for this kernel and their default values
-registerMooseObject("tardigradeApp", InertialForce);
+registerMooseObject("tardigradeApp", MicromorphicInertialForce);
 
 template<>
 InputParameters
-validParams< InertialForce >( ){
+validParams< MicromorphicInertialForce >( ){
     InputParameters params = validParams< Kernel >( );
     params.set< bool >( "use_displaced_mesh" ) = false;
     params.addRequiredParam< int >( "component", "The component of the inertial force vector" );
@@ -32,7 +32,7 @@ validParams< InertialForce >( ){
     return params;
 }
 
-InertialForce::InertialForce( const InputParameters & parameters )
+MicromorphicInertialForce::MicromorphicInertialForce( const InputParameters & parameters )
     : // We have to call the constructor for the base class first
         Kernel( parameters ),
         _component( getParam< int >( "component" ) ),
@@ -57,7 +57,7 @@ InertialForce::InertialForce( const InputParameters & parameters )
     |    Constructor    |
     =====================
 
-    The constructor for the InertialForce class.
+    The constructor for the MicromorphicInertialForce class.
     Note that this constructor is just variable 
     assignments.
 
@@ -65,13 +65,13 @@ InertialForce::InertialForce( const InputParameters & parameters )
 
     if ( _MMS ){
 
-        mooseError( "Method of manufactured solutions not implemented for InertialForce" );
+        mooseError( "Method of manufactured solutions not implemented for MicromorphicInertialForce" );
 
     }
 
 }
 
-Real InertialForce::computeQpResidual(){
+Real MicromorphicInertialForce::computeQpResidual(){
     /*!
     ===========================
     |    computeQpResidual    |
@@ -100,7 +100,7 @@ Real InertialForce::computeQpResidual(){
     return finertia;
 }
 
-Real InertialForce::computeQpJacobian(){
+Real MicromorphicInertialForce::computeQpJacobian(){
     /*!
     ===========================
     |    computeQpJacobian    |
@@ -128,7 +128,7 @@ Real InertialForce::computeQpJacobian(){
     return dfinertiadU_ij;
 }
 
-Real InertialForce::computeQpOffDiagJacobian(unsigned int jvar){
+Real MicromorphicInertialForce::computeQpOffDiagJacobian(unsigned int jvar){
     /*!
     ==================================
     |    computeQpOffDiagJacobian    |

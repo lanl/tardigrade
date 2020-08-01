@@ -1,6 +1,6 @@
 /*!
 =====================================================================
-|                         InertialCouple.h                          |
+|                   MicromorphicInertialCouple.h                    |
 ---------------------------------------------------------------------
 | The header file for the micromorphic inertial couple kernel. This |
 | kernel draws upon the balance equations from the git repository   |
@@ -14,22 +14,22 @@
 */
 
 
-#ifndef INERTIALCOUPLE_H
-#define INERTIALCOUPLE_H
+#ifndef MICROMORPHICINERTIALCOUPLE_H
+#define MICROMORPHICINERTIALCOUPLE_H
 
 #include "Kernel.h"
 #include <balance_equations.h> //The Micromorphic balance equations
 
 //Forward declarations
-class InertialCouple;
+class MicromorphicInertialCouple;
 
 template <>
-InputParameters validParams<InertialCouple>();
+InputParameters validParams<MicromorphicInertialCouple>();
 
-class InertialCouple : public Kernel{
+class MicromorphicInertialCouple : public Kernel{
     /*!
     ------------------------------------------
-    |    InertialCouple kernel definition    |
+    |    MicromorphicInertialCouple kernel definition    |
     ------------------------------------------
 
     We define the kernel for the inertial couple to be
@@ -46,7 +46,7 @@ class InertialCouple : public Kernel{
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         //The constructor definition
-        InertialCouple(const InputParameters & parameters);
+        MicromorphicInertialCouple(const InputParameters & parameters);
 
     protected:
         //The residual at a quadrature point.
