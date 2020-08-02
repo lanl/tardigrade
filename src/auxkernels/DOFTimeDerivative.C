@@ -19,7 +19,7 @@ DOFTimeDerivative::DOFTimeDerivative( const InputParameters & parameters )
       _dotDotc( coupledDotDot( "coupled" ) )
 {
 
-    if ( ( _derivativeOrder != 1 ) || ( _derivativeOrder != 2 ) ){
+    if ( ( _derivativeOrder != 1 ) && ( _derivativeOrder != 2 ) ){
 
         mooseError( "The derivative order of " + std::to_string( _derivativeOrder ) + " is not supported" );
 
