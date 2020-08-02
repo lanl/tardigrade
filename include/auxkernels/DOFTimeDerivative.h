@@ -16,5 +16,7 @@ class DOFTimeDerivative : public AuxKernel
     protected:
         virtual Real computeValue( ) override;
         const int _derivativeOrder;
+        const VariableValue &_dotc;
+        const VariableValue &_dotDotc;
 
 };

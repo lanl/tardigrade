@@ -8,12 +8,15 @@ validParams<DOFTimeDerivative>()
 {
     InputParameters params = validParams<AuxKernel>();
     params.addParam< int >( "derivative_order", 1, "The order of the temporal derivative 1 or 2 is supported ( defaults to 1 )" );
+    params.addRequiredCoupledVar( "coupled", "The variable to compute the temporal derivative of" );
     return params;
 }
 
 DOFTimeDerivative::DOFTimeDerivative( const InputParameters & parameters )
     : AuxKernel( parameters ),
-      _derivativeOrder( getParam< int >( "derivative_order" ) )
+      _derivativeOrder( getParam< int >( "derivative_order" ) ),
+      _dotc( coupledDot( "coupled" ) ),
+      _dotDotc( coupledDotDot( "coupled" ) )
 {
 
     if ( ( _derivativeOrder != 1 ) || ( _derivativeOrder != 2 ) ){
@@ -31,12 +34,12 @@ DOFTimeDerivative::computeValue()
 
         if ( _derivativeOrder == 1 ){
 
-            return _var.uDot( )[ _qp ];
+            return _dotc[ _qp ];
 
         }
         else if ( _derivativeOrder == 2 ){
 
-            return _var.uDotDot( )[ _qp ];
+            return _dotDotc[ _qp ];
 
         }
 
