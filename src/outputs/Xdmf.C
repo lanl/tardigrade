@@ -103,7 +103,7 @@ void Xdmf::meshChanged( ){
 
 void Xdmf::writeMeshToFile( const bool local ){
     /*!
-     * Write the mesh data to teh file
+     * Write the mesh data to the file
      *
      * :param const bool local: Whether to use the local nodes or not
      */
@@ -131,7 +131,8 @@ void Xdmf::writeMeshToFile( const bool local ){
 
         //Point the new grid to the current reference grid's geometry, topology, and ids
         
-        shared_ptr< XdmfUnstructuredGrid > reference_grid = domain->getGridCollection( 0 )->getUnstructuredGrid( _current_reference_grid );
+        shared_ptr< XdmfUnstructuredGrid > reference_grid
+            = domain->getGridCollection( 0 )->getUnstructuredGrid( _current_reference_grid );
 
         //Reference the geometry and topology to the previous grid
         grid->setGeometry( reference_grid->getGeometry( ) );
