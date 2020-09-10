@@ -35,6 +35,12 @@ class OverlapCoupling : public GeneralUserObject {
 
         unsigned int _dim;
 
+        std::unordered_map< unsigned int, unsigned int > _microGlobalLocalNodeMap;
+        std::unordered_map< unsigned int, unsigned int > _macroGlobalLocalNodeMap;
+
+        std::vector< double > _updatedMicroDisplacementDOF;
+        std::vector< double > _updatedMacroDisplacementDOF;
+
 };
 
 #endif

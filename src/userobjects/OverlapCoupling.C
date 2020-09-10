@@ -62,8 +62,10 @@ void OverlapCoupling::execute( ){
 
     std::cout << "execute\n";
 
-    std::stringbuf buffer;
-    cerr_redirect rd( &buffer );
+//    std::stringbuf buffer;
+//    cerr_redirect rd( &buffer );
+
+    mooseInfo( "Performing overlap coupling" );
 
     overlapCoupling::overlapCoupling oc( _overlapCouplingFilename );
 
@@ -76,9 +78,12 @@ void OverlapCoupling::execute( ){
 
         result->print( );
 
-        mooseError( buffer.str( ) );
+        mooseError( "failure in constructing the overlap coupling object" );
+//        mooseError( buffer.str( ) );
 
     }
+
+    mooseInfo( "Initializing the overlap coupling" );
 
     overlapCoupling::errorOut error = oc.initializeCoupling( );
 
@@ -91,9 +96,12 @@ void OverlapCoupling::execute( ){
 
         result->print( );
 
-        mooseError( buffer.str( ) );
+        mooseError( "failure in initializing the overlap coupling" );
+//        mooseError( buffer.str( ) );
 
     }
+
+    mooseInfo( "Processing the last increments" );
 
     error = oc.processLastIncrements( );
 
@@ -106,9 +114,18 @@ void OverlapCoupling::execute( ){
 
         result->print( );
 
-        mooseError( buffer.str( ) );
+        mooseError( "processing the last increments" );
+//        mooseError( buffer.str( ) );
 
     }
+
+    //Retrieve the updated DOF information from the data file
+
+    _microGlobalLocalNodeMap = oc.getMicroGlobalLocalNodeMap( );
+    _updatedMicroDisplacementDOF = oc.getUpdatedMicroDisplacementDOF( );
+
+    _macroGlobalLocalNodeMap = oc.getMacroGlobalLocalNodeMap( );
+    _updatedMacroDisplacementDOF = oc.getUpdatedMacroDisplacementDOF( );
 
     mooseError( "The overlap coupling configuration file should be updated" );
 

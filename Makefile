@@ -75,12 +75,12 @@ ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/yaml-cpp/include
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/voro++/voro++ -L$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/overlap_coupling/src/cpp
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/solver_tools/src/cpp
-ADDITIONAL_LIBS     += -lmicromat -lmicrobalance -lvoro++# -loverlap
+ADDITIONAL_LIBS     += -lmicromat -lmicrobalance -lvoro++ -loverlap -lyaml-cpp
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_COMPILER_PATH) -lresolv -DDEBUG_MODE
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/xdmf/build/lib -lXdmf -lXdmfCore -lXdmfUtils
 ADDITIONAL_LIBS     += -L$(ANACONDA_LIB)/libxml2 -lxml2
 ADDITIONAL_LIBS     += -L$(ANACONDA_LIB) -lhdf5 -ltiff
-ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/yaml=cpp/build
+ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/yaml-cpp/build
 
 ifeq ($(METHOD),dbg)
     ADDITIONAL_CPPFLAGS += -DDEBUG_MODE
