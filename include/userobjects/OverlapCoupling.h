@@ -29,8 +29,19 @@ class OverlapCoupling : public GeneralUserObject {
 
         virtual void finalize( ) override;
 
+        void setAttribute( const std::unordered_map< unsigned int, unsigned int > &attribute, const std::string &attributeName );
+
+        void setAttribute( const std::vector< double > &attribute, const std::string &attributeName );
+
+        const std::unordered_map< unsigned int, unsigned int > *getMicroGlobalLocalNodeMap( ) const;
+        const std::vector< double > *getMicroDisplacementDOF( ) const;
+
+        const std::unordered_map< unsigned int, unsigned int > *getMacroGlobalLocalNodeMap( ) const;
+        const std::vector< double > *getMacroDisplacementDOF( ) const;
+
     protected:
 
+        const bool &_isMacro;
         const std::string &_overlapCouplingFilename;
 
         unsigned int _dim;
