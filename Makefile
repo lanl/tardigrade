@@ -48,8 +48,8 @@ include $(MOOSE_DIR)/modules/modules.mk
 APPLICATION_DIR    := $(CURDIR)
 MICROMORPHIC_DIR   := /home/nathan/research
 MICROMORPHIC_COMPILER_PATH := /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/
-ANACONDA_INCLUDE   := /home/nathan/anaconda3/include
-ANACONDA_LIB       := /home/nathan/anaconda3/lib
+ANACONDA_INCLUDE   := /home/nathan/anaconda3/envs/moose/include
+ANACONDA_LIB       := /home/nathan/anaconda3/envs/moose/lib
 APPLICATION_NAME   := tardigrade
 BUILD_EXEC         := yes
 GEN_REVISION       := no
