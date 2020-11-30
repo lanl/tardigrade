@@ -47,6 +47,7 @@ void MultiAppOverlapCouplingTransfer::execute( ){
 
                     _multi_app->appProblemBase( i ).getUserObject< OverlapCoupling >( _target_user_object_name ).setAttribute( *main_user_object.getMicroGlobalLocalNodeMap( ), "microGlobalLocalNodeMap" );
                     _multi_app->appProblemBase( i ).getUserObject< OverlapCoupling >( _target_user_object_name ).setAttribute( *main_user_object.getMicroDisplacementDOF( ), "updatedMicroDisplacementDOF" );
+                    _multi_app->appProblemBase( i ).getUserObject< OverlapCoupling >( _target_user_object_name ).setAttribute( *main_user_object.getMicroAugmentedLagrangianForce( ), "microAugmentedLagrangianForce" );
 
                 }
 

@@ -78,14 +78,18 @@ void OverlapCoupling::execute( ){
     std::cout << "execute\n";
 
     if ( !_isMacro ){
+        _console << name( ) << " is not macro\n";
         return;
     }
+    _console << name( ) << " is macro\n";
 
     mooseInfo( "Performing overlap coupling" );
 
     overlapCoupling::errorOut error = overlapCoupling::runOverlapCoupling( _overlapCouplingFilename,
                                                                            _microGlobalLocalNodeMap, _updatedMicroDisplacementDOF,
-                                                                           _macroGlobalLocalNodeMap, _updatedMacroDisplacementDOF );
+                                                                           _microAugmentedLagrangianForce,
+                                                                           _macroGlobalLocalNodeMap, _updatedMacroDisplacementDOF,
+                                                                           _macroAugmentedLagrangianForce );
 
     if ( error ){
 
@@ -97,8 +101,8 @@ void OverlapCoupling::execute( ){
 
     }
 
-    _console << "_microGlobalLocalNodeMap.size( ):     " << _microGlobalLocalNodeMap.size( );
-    _console << "_updatedMicroDisplacementDOF.size( ): " << _updatedMicroDisplacementDOF.size( );
+    _console << "_microGlobalLocalNodeMap.size( ):     " << _microGlobalLocalNodeMap.size( ) << "\n";
+    _console << "_updatedMicroDisplacementDOF.size( ): " << _updatedMicroDisplacementDOF.size( ) << "\n";
 
     std::cerr << "exiting execute\n";
 
@@ -157,6 +161,11 @@ void OverlapCoupling::setAttribute( const std::vector< double > &attribute, cons
         _updatedMicroDisplacementDOF = attribute;
 
     }
+    else if ( attributeName.compare( "microAugmentedLagrangianForce" ) == 0 ){
+        
+        _microAugmentedLagrangianForce = attribute;
+
+    }
     else{
 
         mooseError( "Attribute name " + attributeName + " not recognized." );
@@ -194,4 +203,20 @@ const std::vector< double > *OverlapCoupling::getMacroDisplacementDOF( ) const{
      */
 
     return &_updatedMacroDisplacementDOF;
+}
+
+const std::vector< double > *OverlapCoupling::getMacroAugmentedLagrangianForce( ) const{
+    /*!
+     * Return a reference to the macro augmented lagrangian force
+     */
+
+    return &_macroAugmentedLagrangianForce;
+}
+
+const std::vector< double > *OverlapCoupling::getMicroAugmentedLagrangianForce( ) const{
+    /*!
+     * Return a reference to the micro augmented lagrangian force
+     */
+
+    return &_microAugmentedLagrangianForce;
 }

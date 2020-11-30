@@ -8,7 +8,7 @@ InputParameters
 validParams< CoupledDirichletBC >( ){
     InputParameters params = validParams<DirichletBCBase>( );
     params.addRequiredParam< UserObjectName >( "overlap_coupling_object", "The overlap coupling user object" );
-    params.addRequiredParam< unsigned int >( "component", "The component of the DOF vector being constrained" );
+    params.addRequiredParam< unsigned int >( "component", "The component of the DOF vector being constrained (indexes from 0)" );
     params.addRequiredParam< bool > ( "is_macroscale", "Flag for whether the domain is the macroscale or the micro-scale" );
     return params;
 }
@@ -32,6 +32,7 @@ Real CoupledDirichletBC::computeQpValue( ){
 
         if ( localIndex == _overlap_coupling.getMacroGlobalLocalNodeMap( )->end( ) ){
 
+            return 0;
             mooseError( "The current node is not found in the global-local node map" );
 
         }
@@ -46,6 +47,7 @@ Real CoupledDirichletBC::computeQpValue( ){
 
         if ( localIndex == _overlap_coupling.getMicroGlobalLocalNodeMap( )->end( ) ){
 
+            return 0;
             mooseError( "The current node is not found in the global-local node map" );
 
         }
