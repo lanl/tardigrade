@@ -5,8 +5,8 @@
  * perform the overlap coupling.                                              *
  *============================================================================*/
 
-#ifndef OVERLAPCOUPLING
-#define OVERLAPCOUPLING
+#ifndef OVERLAPCOUPLINGUSEROBJECT_H
+#define OVERLAPCOUPLINGUSEROBJECT_H
 #include "GeneralUserObject.h"
 #include "FEProblemBase.h"
 #include "NonlinearSystemBase.h"
@@ -35,9 +35,11 @@ class OverlapCoupling : public GeneralUserObject {
 
         const std::unordered_map< unsigned int, unsigned int > *getMicroGlobalLocalNodeMap( ) const;
         const std::vector< double > *getMicroDisplacementDOF( ) const;
+        const std::vector< double > *getMicroAugmentedLagrangianForce( ) const;
 
         const std::unordered_map< unsigned int, unsigned int > *getMacroGlobalLocalNodeMap( ) const;
         const std::vector< double > *getMacroDisplacementDOF( ) const;
+        const std::vector< double > *getMacroAugmentedLagrangianForce( ) const;
 
     protected:
 
@@ -51,6 +53,9 @@ class OverlapCoupling : public GeneralUserObject {
 
         std::vector< double > _updatedMicroDisplacementDOF;
         std::vector< double > _updatedMacroDisplacementDOF;
+
+        std::vector< double > _microAugmentedLagrangianForce;
+        std::vector< double > _macroAugmentedLagrangianForce;
 
 };
 
