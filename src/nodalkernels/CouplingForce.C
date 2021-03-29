@@ -30,63 +30,53 @@ Real CouplingForce::computeQpResidual( ){
      *       EVEN THOSE NOT BEING OVERLAPPED!
      */
 
-//    unsigned int _dim = _mesh.dimension( );
-//
-//    auto elementCount = _mesh.nodeToElemMap( ).find( _current_node->id( ) );
-//    if ( elementCount == _mesh.nodeToElemMap( ).end( ) ){
-//        mooseError("Node " + std::to_string( _current_node->id( ) ) + " was not found in the node to element map");
-//    }
-//    if ( _isMacro ){
-//
-////        _console << "current node: " << _current_node->id( ) << "\n";
-////        _console << "element count: " << elementCount->second.size( ) << "\n";
-//
-//        auto localIndex = _overlap_coupling.getMacroGlobalLocalNodeMap( )->find( _current_node->id( ) );
-//
-//        if ( localIndex == _overlap_coupling.getMacroGlobalLocalNodeMap( )->end( ) ){
-//
-//            _console << "remove this!\n";
-//            return -( *_current_node )(2);
-//            return 0;
-//            mooseError( "The current node is not found in the global-local node map" );
-//
-//        }
-//
-////        _console << "it was found\n";
-//
-//        if ( _overlap_coupling.getMacroAugmentedLagrangianForce( )->size( ) <= ( ( _dim * _dim + _dim ) * localIndex->second + _component ) ){
-//            mooseError("macro oops");
-//        }
-//
-//        _console << "name: " << name( ) << " dim: " << _dim << " global node: " << localIndex->first << " local index: " << localIndex->second << " component: " << _component << " value: " << _overlap_coupling.getMacroAugmentedLagrangianForce( )->at( ( _dim * _dim + _dim ) * localIndex->second + _component ) / elementCount->second.size( ) << "\n";
-//
-//        return -( *_current_node )(2);//_overlap_coupling.getMacroAugmentedLagrangianForce( )->at( ( _dim * _dim + _dim ) * localIndex->second + _component ) / elementCount->second.size( );
-//
-//    }
-//    else{
-//
-//        auto localIndex = _overlap_coupling.getMicroGlobalLocalNodeMap( )->find( _current_node->id( ) );
-//
-//        if ( localIndex == _overlap_coupling.getMicroGlobalLocalNodeMap( )->end( ) ){
-//
-//            _console << "remove this!\n";
-//            return -( *_current_node )(2);
-//            return 0;
-//            mooseError( "The current node is not found in the global-local node map" );
-//
-//        }
-//
-//        if ( _overlap_coupling.getMicroAugmentedLagrangianForce( )->size( ) <= ( _dim * localIndex->second + _component ) ){
-//
-//            mooseError("micro oops");
-//
-//        }
-//        return ( *_current_node )(2);//-_overlap_coupling.getMicroAugmentedLagrangianForce( )->at( _dim * localIndex->second + _component ) / elementCount->second.size( );
-//
-//    }
+    unsigned int _dim = _mesh.dimension( );
 
-    _console << "remove this!\n";
-    return ( *_current_node )(2);
+    auto elementCount = _mesh.nodeToElemMap( ).find( _current_node->id( ) );
+    if ( elementCount == _mesh.nodeToElemMap( ).end( ) ){
+        mooseError("Node " + std::to_string( _current_node->id( ) ) + " was not found in the node to element map");
+    }
+    if ( _isMacro ){
+
+        auto localIndex = _overlap_coupling.getMacroGlobalLocalNodeMap( )->find( _current_node->id( ) );
+
+        if ( localIndex == _overlap_coupling.getMacroGlobalLocalNodeMap( )->end( ) ){
+
+            return 0;
+            mooseError( "The current node is not found in the global-local node map" );
+
+        }
+
+        if ( _overlap_coupling.getMacroAugmentedLagrangianForce( )->size( ) <= ( ( _dim * _dim + _dim ) * localIndex->second + _component ) ){
+            mooseError("macro oops");
+        }
+
+//        _console << "name: " << name( ) << " dim: " << _dim << " global node: " << localIndex->first << " local index: " << localIndex->second << " component: " << _component << " value: " << -_overlap_coupling.getMacroAugmentedLagrangianForce( )->at( ( _dim * _dim + _dim ) * localIndex->second + _component ) << "\n";
+
+        return -_overlap_coupling.getMacroAugmentedLagrangianForce( )->at( ( _dim * _dim + _dim ) * localIndex->second + _component );
+
+    }
+    else{
+
+        auto localIndex = _overlap_coupling.getMicroGlobalLocalNodeMap( )->find( _current_node->id( ) );
+
+        if ( localIndex == _overlap_coupling.getMicroGlobalLocalNodeMap( )->end( ) ){
+
+            return 0;
+            mooseError( "The current node is not found in the global-local node map" );
+
+        }
+
+        if ( _overlap_coupling.getMicroAugmentedLagrangianForce( )->size( ) <= ( _dim * localIndex->second + _component ) ){
+
+            mooseError("micro oops");
+
+        }
+//        _console << _current_node->id() << ", " << localIndex->second << ", " << _component << ": " << _overlap_coupling.getMicroAugmentedLagrangianForce( )->at( _dim * localIndex->second + _component ) << "\n";
+        return _overlap_coupling.getMicroAugmentedLagrangianForce( )->at( _dim * localIndex->second + _component );
+
+    }
+
     return 0;
 
 }
