@@ -183,9 +183,9 @@ void OutputXdmf::writeMeshToFile( const bool local ){
     ================*/
 
     unsigned int _dim = _mesh.dimension(); //Get the dimension of the mesh
-    dof_id_type _nNodes = _mesh.nNodes();  //Determine the number of nodes
+    unsigned int _nNodes = _mesh.nNodes();  //Determine the number of nodes
 
-    std::vector< dof_id_type > _nodeIds, _elementIds, _subdomainIds;
+    std::vector< unsigned int > _nodeIds, _elementIds, _subdomainIds;
     _nodeIds.reserve( _nNodes ); //Reserve the node id vector
     std::vector< Real > _coordinates;
     _coordinates.reserve( 3 * _nNodes ); //Reserve the coordinate vector
@@ -279,7 +279,7 @@ void OutputXdmf::writeMeshToFile( const bool local ){
     | Save the elements |
     ===================*/
 
-    std::vector< dof_id_type > _topology;
+    std::vector< unsigned int > _topology;
 
     unsigned int _nFiniteElements = 0; //We will ignore infinite elements
     unsigned int _topology_size = 0;
@@ -533,7 +533,7 @@ void OutputXdmf::outputNodalVariables( const std::set< std::string > * system_na
         //Extract the variable values
         for ( const auto & node : _mesh.getMesh().node_ptr_range() ){
             
-            dof_id_type idx = node->id() * num_vars + variable_name_position;
+            unsigned int idx = node->id() * num_vars + variable_name_position;
 #ifdef LIBMESH_USE_REAL_NUMBERS
             cur_soln.push_back( soln[ idx ] );
 #else
