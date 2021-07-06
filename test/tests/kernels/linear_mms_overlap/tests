@@ -1,7 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'linear_mms.i'
-    exodiff = 'linear_mms_out.e'
-  [../]
-[]
