@@ -2,6 +2,6 @@
   [./test]
     type = 'Exodiff'
     input = 'stretch_y_plastic.i'
-    exodiff = 'stretch_y_out.e'
+    exodiff = 'stretch_y_plastic_out.e'
   [../]
 []

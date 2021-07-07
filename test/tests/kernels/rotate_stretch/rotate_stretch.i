@@ -507,19 +507,22 @@
 [Executioner]
 #  type = Steady
   type = Transient
-  end_time = 1.0
-  dtmin    = 1e-3
+  end_time = 0.1
+  dtmin    = 1e-4
+  nl_rel_tol = 1e-9
+  nl_abs_tol = 1e-9
 #  solve_type = 'NEWTON'
   solve_type = 'PJFNK'
+  nl_max_its = 200
   [./TimeStepper]
     type = IterationAdaptiveDT
-    dt   = 0.1
+    dt   = 0.05
 #    dt   = 0.01
     cutback_factor     = 0.4
     growth_factor      = 1.2
     optimal_iterations = 100
   [../]
-  petsc_options = '-ksp_monitor_true_residual -ksp_compute_singularvalues'
+  petsc_options = '-ksp_monitor_true_residual'
   petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart -print_linear_residuals'
   petsc_options_value = 'asm      lu           1               101                false                  '
  

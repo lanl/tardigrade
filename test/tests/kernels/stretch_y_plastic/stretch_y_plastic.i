@@ -654,7 +654,7 @@
 [Executioner]
 #  type = Steady
   type = Transient
-  num_steps = 80
+  num_steps = 10
   dt        = 0.05
 #  solve_type = 'PJFNK'
   solve_type = 'NEWTON'
