@@ -1,0 +1,7 @@
+[Tests]
+  [micromorphic_continuum]
+    type = Exodiff
+    input = 'micromorphic_uniaxial_tension.i'
+    exodiff = 'micromorphic_uniaxial_tension_out.e'
+  []
+[]
