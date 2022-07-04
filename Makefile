@@ -46,10 +46,10 @@ include $(MOOSE_DIR)/modules/modules.mk
 
 # dep apps
 APPLICATION_DIR    := $(CURDIR)
-MICROMORPHIC_DIR   := /projects/nathanm/tardigrade
+MICROMORPHIC_DIR   := $(CURDIR)/..
 #MICROMORPHIC_COMPILER_PATH := /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/
-ANACONDA_INCLUDE   := /projects/nathanm/python_environments/moose/include
-ANACONDA_LIB       := /projects/nathanm/python_environments/moose/lib
+ANACONDA_INCLUDE   := $(CONDA_PREFIX)/include
+ANACONDA_LIB       := $(CONDA_PREFIX)/lib
 APPLICATION_NAME   := tardigrade
 BUILD_EXEC         := yes
 GEN_REVISION       := no
