@@ -23,13 +23,12 @@
 // Forward Declarations
 class ElementIntegrateUserObject;
 
-template <>
-InputParameters validParams<ElementIntegrateUserObject>();
-
 class ElementIntegrateUserObject : public ElementUserObject,
                                  public MooseVariableInterface<Real>{
     public:
         ElementIntegrateUserObject(const InputParameters & parameters);
+
+        static InputParameters validParams();
 
         virtual void initialize() override;
         virtual void execute() override;

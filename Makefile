@@ -62,7 +62,8 @@ include            $(FRAMEWORK_DIR)/app.mk
 #ADDITIONAL_INCLUDES += -I$(MICROMORPHIC_DIR)/vector_tools/src/cpp
 #ADDITIONAL_INCLUDES += -I$(MICROMORPHIC_DIR)/overlap -I$(MICROMORPHIC_DIR)/quickhull
 
-ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/voro++/voro++-0.4.6/src -I$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+#ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/voro++/voro++-0.4.6/src -I$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/voro/src -I$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
 ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/vector_tools/src/cpp -I$(MICROMORPHIC_DIR)/error_tools/src/cpp
 ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/overlap_coupling/src/cpp -I$(MICROMORPHIC_DIR)
 ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/solver_tools/src/cpp
@@ -72,7 +73,8 @@ ADDITIONAL_CPPFLAGS += -I$(ANACONDA_INCLUDE)/libxml2
 ADDITIONAL_CPPFLAGS += -I$(BOOST_ROOT)
 ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/yaml-cpp/include
 
-ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/voro++/voro++-0.4.6/src -L$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+#ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/voro++/voro++-0.4.6/src -L$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/voro/src -L$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/overlap_coupling/src/cpp
 ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/solver_tools/src/cpp
 ADDITIONAL_LIBS     += -lmicromat -lmicrobalance -lvoro++ -loverlap -lyaml-cpp

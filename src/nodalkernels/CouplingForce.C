@@ -3,10 +3,9 @@
 //Register the object
 registerMooseObject( "tardigradeApp", CouplingForce );
 
-defineLegacyParams(CouplingForce);
-
 InputParameters
-CouplingForce::validParams( ){
+CouplingForce::validParams( )
+{
     InputParameters params = NodalKernel::validParams( );
     params.addRequiredParam< UserObjectName >( "overlap_coupling_object", "The overlap coupling user object" );
     params.addRequiredParam< unsigned int >( "component", "The component of the DOF vector being constrained (indexes from 0)" );

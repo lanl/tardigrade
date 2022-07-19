@@ -14,9 +14,6 @@
 //Forward declarations
 class Xdmf;
 
-template <>
-InputParameters validParams<Xdmf>();
-
 /**
  * Class for output data to the XDMF format
  */

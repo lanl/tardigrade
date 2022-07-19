@@ -3,10 +3,10 @@
 //Register the object
 registerMooseObject( "tardigradeApp", CoupledDirichletBC );
 
-template<>
 InputParameters
-validParams< CoupledDirichletBC >( ){
-    InputParameters params = validParams<DirichletBCBase>( );
+CoupledDirichletBC::validParams( )
+{
+    InputParameters params = DirichletBCBase::validParams();
     params.addRequiredParam< UserObjectName >( "overlap_coupling_object", "The overlap coupling user object" );
     params.addRequiredParam< unsigned int >( "component", "The component of the DOF vector being constrained (indexes from 0)" );
     params.addRequiredParam< bool > ( "is_macroscale", "Flag for whether the domain is the macroscale or the micro-scale" );

@@ -4,14 +4,14 @@
 
 class DOFTimeDerivative;
 
-template <>
-InputParameters validParams<DOFTimeDerivative>();
 
 class DOFTimeDerivative : public AuxKernel
 {
 
     public:
         DOFTimeDerivative( const InputParameters & parameters );
+        
+        static InputParameters validParams();
 
     protected:
         virtual Real computeValue( ) override;

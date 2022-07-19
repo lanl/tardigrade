@@ -1,6 +1,7 @@
 [Tests]
   [./test]
     type = 'Exodiff'
+    use_old_floor = true
     input = 'stretch_y_plastic.i'
     exodiff = 'stretch_y_plastic_out.e'
   [../]

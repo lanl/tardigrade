@@ -20,11 +20,11 @@
 //We define the valid parameters for this kernel and their default values
 registerMooseObject("tardigradeApp", InternalCouple);
 
-template<>
 InputParameters
-validParams<InternalCouple>(){
+InternalCouple::validParams()
+{
 //    std::cout << "In InputParameters InternalCouple\n";
-    InputParameters params = validParams<Kernel>();
+    InputParameters params = Kernel::validParams();
     params.set< bool >( "use_displaced_mesh" ) = false;
     params.addRequiredParam<int>("component_i", "The i component of the internal couple tensor");
     params.addRequiredParam<int>("component_j", "The j component of the internal couple tensor");

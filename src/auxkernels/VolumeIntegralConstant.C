@@ -2,8 +2,6 @@
 
 registerMooseObject("tardigradeApp", VolumeIntegralConstant );
 
-defineLegacyParams( VolumeIntegralConstant );
-
 InputParameters
 VolumeIntegralConstant::validParams()
 {

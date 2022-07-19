@@ -5,10 +5,8 @@
 
 class CouplingForce;
 
-template <>
-InputParameters validParams<CouplingForce>();
-
-class CouplingForce : public NodalKernel{
+class CouplingForce : public NodalKernel
+{
 
     public:
 
