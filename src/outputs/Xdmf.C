@@ -19,10 +19,10 @@
 
 registerMooseObject( "tardigradeApp", Xdmf );
 
-template<>
 InputParameters
-validParams<Xdmf>(){
-    InputParameters params = validParams<AdvancedOutput>();
+Xdmf::validParams()
+{
+    InputParameters params = AdvancedOutput::validParams();
     params.addClassDescription( "Output of system in XDMF format" );
 
     return params;

@@ -14,10 +14,10 @@
 
 registerMooseObject( "tardigradeApp", OverlapCoupling );
 
-template<>
 InputParameters
-validParams< OverlapCoupling >( ){
-    InputParameters params = validParams< GeneralUserObject >( );
+OverlapCoupling::validParams()
+{
+    InputParameters params = GeneralUserObject::validParams( );
     params.addRequiredParam< bool > ( "is_macroscale", "Flag for whether the coupling object is in the macroscale or not" );
     params.addParam< std::string >( "overlap_configuration_filename", "_none_", "The overlap configuration YAML filename" );
     return params;

@@ -322,72 +322,84 @@
 [BCs]
   [./all_x]
     type = FunctionDirichletBC
+    preset = true
     variable = disp_x
     boundary = 'left right bottom top back front'
     function = u1_fxn
   [../]
   [./all_y]
     type = FunctionDirichletBC
+    preset = true
     variable = disp_y
     boundary = 'left right bottom top back front'
     function = u2_fxn
   [../]
   [./all_z]
     type = FunctionDirichletBC
+    preset = true
     variable = disp_z
     boundary = 'left right bottom top back front'
     function = u3_fxn
   [../]
   [./all_phi_xx]
     type = FunctionDirichletBC
+    preset = true
     variable = phi_xx
     boundary = 'left right bottom top back front'
     function = phi_11_fxn
   [../]
   [./all_phi_yy]
     type = FunctionDirichletBC
+    preset = true
     variable = phi_yy
     boundary = 'left right bottom top back front'
     function = phi_22_fxn
   [../]
   [./all_phi_zz]
     type = FunctionDirichletBC
+    preset = true
     variable = phi_zz
     boundary = 'left right bottom top back front'
     function = phi_33_fxn
   [../]
   [./all_phi_yz]
     type = FunctionDirichletBC
+    preset = true
     variable = phi_yz
     boundary = 'left right bottom top back front'
     function = phi_23_fxn
   [../]
   [./all_phi_xz]
     type = FunctionDirichletBC
+    preset = true
     variable = phi_xz
     boundary = 'left right bottom top back front'
     function = phi_13_fxn
   [../]
   [./all_phi_xy]
      type = FunctionDirichletBC
+     preset = true
      variable = phi_xy
      boundary = 'left right bottom top back front'
      function = phi_12_fxn
   [../]
   [./all_phi_zy]
      type = FunctionDirichletBC
+     preset = true
      variable = phi_zy
      boundary = 'left right bottom top back front'
      function = phi_32_fxn
   [../]
   [./all_phi_zx]
      type = FunctionDirichletBC
+     preset = true
      variable = phi_zx
      boundary = 'left right bottom top back front'
      function = phi_31_fxn
   [../]
   [./all_phi_yx]
      type = FunctionDirichletBC
+     preset = true
      variable = phi_yx
      boundary = 'left right bottom top back front'
      function = phi_21_fxn
@@ -438,61 +450,61 @@
 [Functions]
   [./u1_fxn]
     type  = ParsedFunction
-    value = 1.721
+    value = 1.721*t
   [../]
   [./u2_fxn]
     type  = ParsedFunction
-    value = 0.321
+    value = 0.321*t
   [../]
   [./u3_fxn]
     type  = ParsedFunction
-    value = -0.981
+    value = -0.981*t
   [../]
   [./phi_11_fxn]
     type = ParsedFunction
 #    value = -.2152
-    value = 0.054142
+    value = 0.054142*t
   [../]
   [./phi_22_fxn]
     type = ParsedFunction
 #    value = 1.31
-    value = 0.07059678
+    value = 0.07059678*t
   [../]
   [./phi_33_fxn]
     type = ParsedFunction
     #value = 2.142
 #    value = -.521
-    value = 0.04161017
+    value = 0.04161017*t
   [../]
   [./phi_23_fxn]
     type = ParsedFunction
 #    value = -0.177
-    value = -0.00516283
+    value = -0.00516283*t
   [../]
   [./phi_13_fxn]
     type = ParsedFunction
 #    value = 0.606
-    value = -0.0056683
+    value = -0.0056683*t
   [../]
   [./phi_12_fxn]
     type = ParsedFunction
 #    value = 3.72
-    value = 0.00955174
+    value = 0.00955174*t
   [../]
   [./phi_32_fxn]
     type = ParsedFunction
 #    value = .827
-    value = 0.01006055
+    value = 0.01006055*t
   [../]
   [./phi_31_fxn]
     type = ParsedFunction
 #    value = .718
-    value = 0.00635417
+    value = 0.00635417*t
   [../]
   [./phi_21_fxn]
     type = ParsedFunction
 #    value = 2.271
-    value = -0.00823092
+    value = -0.00823092*t
   [../]
 []
 
@@ -507,8 +519,8 @@
 [Executioner]
 #  type = Steady
   type = Transient
-  num_steps = 1
-  dt = 1.0
+  num_steps = 2
+  dt = 0.5
   solve_type = 'PJFNK'
 #  solve_type = 'NEWTON'
 #  nl_rel_tol = 1e-8

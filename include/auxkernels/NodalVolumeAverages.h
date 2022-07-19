@@ -5,14 +5,13 @@
 
 class NodalVolumeAverages;
 
-template <>
-InputParameters validParams<NodalVolumeAverages>();
-
 class NodalVolumeAverages : public AuxKernel
 {
 
     public:
         NodalVolumeAverages( const InputParameters & parameters );
+        
+        static InputParameters validParams();
 
     protected:
         virtual Real computeValue( ) override;

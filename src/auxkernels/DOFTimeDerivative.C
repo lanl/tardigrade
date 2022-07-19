@@ -2,11 +2,10 @@
 
 registerMooseObject( "tardigradeApp", DOFTimeDerivative );
 
-template <>
 InputParameters
-validParams<DOFTimeDerivative>()
+DOFTimeDerivative::validParams()
 {
-    InputParameters params = validParams<AuxKernel>();
+    InputParameters params = AuxKernel::validParams();
     params.addParam< int >( "derivative_order", 1, "The order of the temporal derivative 1 or 2 is supported ( defaults to 1 )" );
     params.addRequiredCoupledVar( "coupled", "The variable to compute the temporal derivative of" );
     return params;

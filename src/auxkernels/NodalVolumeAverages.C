@@ -2,11 +2,10 @@
 
 registerMooseObject( "tardigradeApp", NodalVolumeAverages );
 
-template <>
 InputParameters
-validParams<NodalVolumeAverages>()
+NodalVolumeAverages::validParams()
 {
-    InputParameters params = validParams<AuxKernel>();
+    InputParameters params = AuxKernel::validParams();
     params.addRequiredParam<UserObjectName>( "ElementIntegrateUserObject", "The coupled element integrate user object" );
     params.addParam<bool>( "compute_nodal_volume", false, "Flag for whether the nodal volume should be returned or not" );
     return params;

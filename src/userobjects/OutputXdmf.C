@@ -19,10 +19,10 @@
 
 registerMooseObject( "tardigradeApp", OutputXdmf );
 
-template<>
 InputParameters
-validParams<OutputXdmf>(){
-    InputParameters params = validParams<GeneralUserObject>();
+OutputXdmf::validParams()
+{
+    InputParameters params = GeneralUserObject::validParams();
     params.addClassDescription( "Output of system in XDMF format" );
     params.addRequiredParam< std::string >( "filename", "The name of the file to write to" );
 

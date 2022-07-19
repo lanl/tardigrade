@@ -25,10 +25,8 @@
 //Forward declarations
 class InternalCouple;
 
-template <>
-InputParameters validParams<InternalCouple>();
-
-class InternalCouple : public Kernel{
+class InternalCouple : public Kernel
+{
     /*!
     ------------------------------------------
     |    InternalCouple kernel definition    |
@@ -47,6 +45,8 @@ class InternalCouple : public Kernel{
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         //The constructor definition
         InternalCouple(const InputParameters & parameters);
+        
+        static InputParameters validParams();
 
     protected:
         //The residual at a quadrature point.
