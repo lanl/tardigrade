@@ -18,10 +18,10 @@
 
 registerMooseObject("tardigradeApp", MicromorphicMaterial);
 
-template<>
 InputParameters
-validParams<MicromorphicMaterial>(){
-    InputParameters params = validParams<Material>();
+MicromorphicMaterial::validParams()
+{
+    InputParameters params = Material::validParams();
 
     // Vectors of material properties
     params.addRequiredParam<std::vector<Real>>(
@@ -79,6 +79,10 @@ validParams<MicromorphicMaterial>(){
     params.addRequiredCoupledVar(
         "phi_21", "The 21 component of the phi tensor.");
 
+    // The state variable array
+    params.addParam< int >(
+        "number_SDVS", 0, "The number of solution-dependent state variables" );
+
     // Functions for method of manufactured solutions
     params.addParam<FunctionName>(
         "u1_fxn", "0", "The function for displacement in the 1 direction.");
@@ -119,6 +123,16 @@ validParams<MicromorphicMaterial>(){
     return params;
 }
 
+void MicromorphicMaterial::initQpStatefulProperties(){
+    /*!
+     * Initialize the internal state variable array
+     */
+
+    _SDVS[ _qp ] = std::vector< Real >(_n_SDVS, 0 );
+
+    return;
+}
+
 MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
     : Material(parameters),
     // Declare that this material is going to provide Eigen matrices containing the PK2 stress and 
@@ -129,6 +143,7 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
     _n_ADD_JACOBIANS(getParam<int>("number_ADD_JACOBIANS")),
     _model_name(getParam<std::string>("model_name")),
     _MMS(getParam<bool>("MMS")),
+    _n_SDVS( getParam< int >( "number_SDVS" ) ),
     _u1(coupledValue("u1")),
     _u2(coupledValue("u2")),
     _u3(coupledValue("u3")),
@@ -153,8 +168,32 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
     _grad_phi_32(coupledGradient("phi_32")),
     _grad_phi_31(coupledGradient("phi_31")),
     _grad_phi_21(coupledGradient("phi_21")),
-    _deformation_gradient(declareProperty<std::vector<std::vector<double>>>("MM_deformation_gradient")),
-    _micro_displacement(declareProperty<std::vector<std::vector<double>>>("micro_displacement")),
+    _old_u1(coupledValueOld("u1")),
+    _old_u2(coupledValueOld("u2")),
+    _old_u3(coupledValueOld("u3")),
+    _old_grad_u1(coupledGradientOld("u1")),
+    _old_grad_u2(coupledGradientOld("u2")),
+    _old_grad_u3(coupledGradientOld("u3")),
+    _old_phi_11(coupledValueOld("phi_11")),
+    _old_phi_22(coupledValueOld("phi_22")),
+    _old_phi_33(coupledValueOld("phi_33")),
+    _old_phi_23(coupledValueOld("phi_23")),
+    _old_phi_13(coupledValueOld("phi_13")),
+    _old_phi_12(coupledValueOld("phi_12")),
+    _old_phi_32(coupledValueOld("phi_32")),
+    _old_phi_31(coupledValueOld("phi_31")),
+    _old_phi_21(coupledValueOld("phi_21")),
+    _old_grad_phi_11(coupledGradientOld("phi_11")),
+    _old_grad_phi_22(coupledGradientOld("phi_22")),
+    _old_grad_phi_33(coupledGradientOld("phi_33")),
+    _old_grad_phi_23(coupledGradientOld("phi_23")),
+    _old_grad_phi_13(coupledGradientOld("phi_13")),
+    _old_grad_phi_12(coupledGradientOld("phi_12")),
+    _old_grad_phi_32(coupledGradientOld("phi_32")),
+    _old_grad_phi_31(coupledGradientOld("phi_31")),
+    _old_grad_phi_21(coupledGradientOld("phi_21")),
+    _deformation_gradient(declareProperty<std::vector<double>>("MM_deformation_gradient")),
+    _micro_deformation(declareProperty<std::vector<double>>("micro_deformation")),
     _gradient_micro_displacement(declareProperty<std::vector<std::vector<double>>>("gradient_micro_displacement")),
     _cauchy(declareProperty<std::vector<double>>("cauchy")),
     _s(declareProperty<std::vector<double>>("s")),
@@ -173,6 +212,8 @@ MicromorphicMaterial::MicromorphicMaterial(const InputParameters & parameters)
     _DMDgrad_phi(declareProperty<std::vector<std::vector<double>>>("DMDgrad_phi")),
     _ADD_TERMS(declareProperty<std::vector<std::vector<double>>>("ADD_TERMS")),
     _ADD_JACOBIANS(declareProperty<std::vector<std::vector<std::vector<double>>>>("ADD_JACOBIANS")),
+    _SDVS( declareProperty< std::vector< double > > ( "SDVS" ) ),
+    _old_SDVS( getMaterialPropertyOld< std::vector< double > >( "SDVS" ) ),
     _u1_fxn(getFunction("u1_fxn")),
     _u2_fxn(getFunction("u2_fxn")),
     _u3_fxn(getFunction("u3_fxn")),
@@ -305,69 +346,87 @@ void MicromorphicMaterial::computeQpProperties(){
     //Define required DOF values for the
     //balance of linear momentum and first moment of momentum
 
-    double __grad_u[3][3];
-    double __phi[9];
-    double __grad_phi[9][3];
+    double __grad_u[ 3 ][ 3 ], __old_grad_u[ 3 ][ 3 ];
+    double __phi[ 9 ], __old_phi[ 9 ];
+    double __grad_phi[ 9 ][ 3 ], __old_grad_phi[ 9 ][ 3 ];
 
     RealVectorValue tmp_grad;
-
-    //std::cout << "coords: " << _q_point[_qp](0) << " " << _q_point[_qp](1) << " " << _q_point[_qp](2) << "\n";
-    //std::cout << "u:      " << _u1[_qp] << " " << _u2[_qp] << " " << _u3[_qp] << "\n";
 
     //Copy over the gradient of u
     for (int i=0; i<3; i++){__grad_u[0][i] = _grad_u1[_qp](i);}
     for (int i=0; i<3; i++){__grad_u[1][i] = _grad_u2[_qp](i);}
     for (int i=0; i<3; i++){__grad_u[2][i] = _grad_u3[_qp](i);}
+
+    //Copy over the old gradient of u
+    for (int i=0; i<3; i++){__old_grad_u[0][i] = _old_grad_u1[_qp](i);}
+    for (int i=0; i<3; i++){__old_grad_u[1][i] = _old_grad_u2[_qp](i);}
+    for (int i=0; i<3; i++){__old_grad_u[2][i] = _old_grad_u3[_qp](i);}
     
     //Copy over phi
     __phi[0] = _phi_11[_qp];
-    __phi[1] = _phi_22[_qp];
-    __phi[2] = _phi_33[_qp];
-    __phi[3] = _phi_23[_qp];
-    __phi[4] = _phi_13[_qp];
-    __phi[5] = _phi_12[_qp];
-    __phi[6] = _phi_32[_qp];
-    __phi[7] = _phi_31[_qp];
-    __phi[8] = _phi_21[_qp];
+    __phi[1] = _phi_12[_qp];
+    __phi[2] = _phi_13[_qp];
+    __phi[3] = _phi_21[_qp];
+    __phi[4] = _phi_22[_qp];
+    __phi[5] = _phi_23[_qp];
+    __phi[6] = _phi_31[_qp];
+    __phi[7] = _phi_32[_qp];
+    __phi[8] = _phi_33[_qp];
+
+    //Copy over the old phi
+    __old_phi[0] = _old_phi_11[_qp];
+    __old_phi[1] = _old_phi_12[_qp];
+    __old_phi[2] = _old_phi_13[_qp];
+    __old_phi[3] = _old_phi_21[_qp];
+    __old_phi[4] = _old_phi_22[_qp];
+    __old_phi[5] = _old_phi_23[_qp];
+    __old_phi[6] = _old_phi_31[_qp];
+    __old_phi[7] = _old_phi_32[_qp];
+    __old_phi[8] = _old_phi_33[_qp];
 
     //Copy over grad_phi
     for (int i=0; i<3; i++){__grad_phi[0][i] = _grad_phi_11[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[1][i] = _grad_phi_22[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[2][i] = _grad_phi_33[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[3][i] = _grad_phi_23[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[4][i] = _grad_phi_13[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[5][i] = _grad_phi_12[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[6][i] = _grad_phi_32[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[7][i] = _grad_phi_31[_qp](i);}
-    for (int i=0; i<3; i++){__grad_phi[8][i] = _grad_phi_21[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[1][i] = _grad_phi_12[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[2][i] = _grad_phi_13[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[3][i] = _grad_phi_21[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[4][i] = _grad_phi_22[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[5][i] = _grad_phi_23[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[6][i] = _grad_phi_31[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[7][i] = _grad_phi_32[_qp](i);}
+    for (int i=0; i<3; i++){__grad_phi[8][i] = _grad_phi_33[_qp](i);}
+
+    //Copy over the old grad_phi
+    for (int i=0; i<3; i++){__old_grad_phi[0][i] = _old_grad_phi_11[_qp](i);}
+    for (int i=0; i<3; i++){__old_grad_phi[1][i] = _old_grad_phi_12[_qp](i);}
+    for (int i=0; i<3; i++){__old_grad_phi[2][i] = _old_grad_phi_13[_qp](i);}
+    for (int i=0; i<3; i++){__old_grad_phi[3][i] = _old_grad_phi_21[_qp](i);}
+    for (int i=0; i<3; i++){__old_grad_phi[4][i] = _old_grad_phi_22[_qp](i);}
+    for (int i=0; i<3; i++){__old_grad_phi[5][i] = _old_grad_phi_23[_qp](i);}
+    for (int i=0; i<3; i++){__old_grad_phi[6][i] = _old_grad_phi_31[_qp](i);}
+    for (int i=0; i<3; i++){__old_grad_phi[7][i] = _old_grad_phi_32[_qp](i);}
+    for (int i=0; i<3; i++){__old_grad_phi[8][i] = _old_grad_phi_33[_qp](i);}
 
     //Store deformation values for use by other kernels
 
     //Copy the deformation gradient
-    _deformation_gradient[_qp].resize(3);
+    _deformation_gradient[_qp].resize(9);
     for (int i=0; i<3; i++){
-        _deformation_gradient[_qp][i].resize(3);
         for (int j=0; j<3; j++){
-            _deformation_gradient[_qp][i][j] = __grad_u[i][j];
+            _deformation_gradient[_qp][ 3 * i + j ] = __grad_u[i][j];
         }
     }
+    _deformation_gradient[ _qp ][ 0 ] += 1;
+    _deformation_gradient[ _qp ][ 4 ] += 1;
+    _deformation_gradient[ _qp ][ 8 ] += 1;
 
-    for (int i=0; i<3; i++){_deformation_gradient[_qp][i][i] += 1.;}
-
-    //Copy the micro-displacement
-    int sot_to_voigt_map[3][3] = {{0,5,4},
-                                  {8,1,3},
-                                  {7,6,2}};
-
-    _micro_displacement[_qp].resize(3);
-    for (int i=0; i<3; i++){
-        _micro_displacement[_qp][i].resize(3);
-        for (int j=0; j<3; j++){
-            _micro_displacement[_qp][i][j] = __phi[sot_to_voigt_map[i][j]];
-        }
+    //Copy the micro-deformation
+    _micro_deformation[_qp].resize(9);
+    for ( int i=0; i<9; i++ ){
+        _micro_deformation[ _qp ][ i ] = __phi[ i ];
     }
-
-    for (int i=0; i<3; i++){_micro_displacement[_qp][i][i] += 1.;}
+    _micro_deformation[ _qp ][ 0 ] += 1;
+    _micro_deformation[ _qp ][ 4 ] += 1;
+    _micro_deformation[ _qp ][ 8 ] += 1;
 
     //Copy the gradient of the micro-displacement
     _gradient_micro_displacement[_qp].resize(9);
@@ -390,14 +449,18 @@ void MicromorphicMaterial::computeQpProperties(){
     time[1] = _dt;
 
     //TODO: Remove these hardcoded values
-    std::vector<double> SDVS;
-    SDVS.resize(0);
+    if ( _n_ADD_DOF > 0 ){
+        mooseError( "MicromorphicMaterial does not support additional degrees of freedom" );
+    }
 
-    std::vector<double> ADD_DOF;
-    ADD_DOF.resize(_n_ADD_DOF);
+    std::vector<double> ADD_DOF, old_ADD_DOF;
+    ADD_DOF.resize( _n_ADD_DOF );
+    old_ADD_DOF.resize( _n_ADD_DOF );
 
-    std::vector<std::vector<double>> ADD_grad_DOF;
-    ADD_grad_DOF.resize(_n_ADD_DOF);
+    std::vector<std::vector<double>> ADD_grad_DOF, old_ADD_grad_DOF;
+    ADD_grad_DOF.resize( _n_ADD_DOF );
+    old_ADD_grad_DOF.resize( _n_ADD_DOF );
+
     //END of hardcoded values
 
     //Set the sizes of the additional term vectors
@@ -405,13 +468,119 @@ void MicromorphicMaterial::computeQpProperties(){
     _ADD_JACOBIANS[_qp].resize(_n_ADD_JACOBIANS);
 
     //Evaluate the model
-    material->evaluate_model(time, _fparams, __grad_u, __phi, __grad_phi,
-                              SDVS,                ADD_DOF,           ADD_grad_DOF,
-                             _PK2[_qp],           _SIGMA[_qp],        _M[_qp],
-                             _DPK2Dgrad_u[_qp],   _DPK2Dphi[_qp],     _DPK2Dgrad_phi[_qp],
-                             _DSIGMADgrad_u[_qp], _DSIGMADphi[_qp],   _DSIGMADgrad_phi[_qp],
-                             _DMDgrad_u[_qp],     _DMDphi[_qp],       _DMDgrad_phi[_qp],
-                             _ADD_TERMS[_qp],     _ADD_JACOBIANS[_qp]);
+    std::string output_message;
+
+#ifdef DEBUG_MODE
+    std::map<std::string, std::map<std::string, std::map<std::string, std::vector<double>>>> debug;
+#endif
+
+    //Set the state variables to the previously converged values
+    _SDVS[ _qp ] = _old_SDVS[ _qp ];
+
+//    if ( _qp == 0 ){
+//        std::cout << "SDVS pre model evaluation:\n";
+//        vectorTools::print( _SDVS[ _qp ] );
+//    }
+
+    int errorCode = material->evaluate_model( time, _fparams,
+                                              __grad_u, __phi, __grad_phi,
+                                              __old_grad_u, __old_phi, __old_grad_phi,
+                                              _SDVS[ _qp ],
+                                              ADD_DOF,            ADD_grad_DOF,
+                                              old_ADD_DOF,        old_ADD_grad_DOF,
+                                              _PK2[_qp],           _SIGMA[_qp],        _M[_qp],
+                                              _DPK2Dgrad_u[_qp],   _DPK2Dphi[_qp],     _DPK2Dgrad_phi[_qp],
+                                              _DSIGMADgrad_u[_qp], _DSIGMADphi[_qp],   _DSIGMADgrad_phi[_qp],
+                                              _DMDgrad_u[_qp],     _DMDphi[_qp],       _DMDgrad_phi[_qp],
+                                              _ADD_TERMS[_qp],     _ADD_JACOBIANS[_qp], output_message
+#ifdef DEBUG_MODE
+                                              , debug
+#endif  
+                    );
+
+    if ( errorCode == 1 ){
+        std::string error_message = "Convergence not achieved in material model. Requesting timestep cutback.\n";
+        error_message += output_message;
+        mooseException( error_message.c_str() );
+    }
+
+    if ( errorCode == 2 ){
+        std::string error_message = "FATAL ERROR IN MICROMORPHIC MATERIAL MODEL\n";
+        error_message += output_message;
+        mooseError( error_message.c_str() );
+    }
+
+//    if ( _qp == 0 ){
+//        std::cout << "time:\n";
+//        for ( unsigned int i = 0; i < 2; i++ ){ std::cout << time[ i ] << ", "; }
+//        std::cout << "\n";
+//        std::cout << "fparams:\n";
+//        for ( unsigned int i = 0; i < _fparams.size(); i++ ){ std::cout << _fparams[ i ] << ", "; };
+//        std::cout << "\n";
+//        std::cout << "_u:     " << _u1[ _qp ] << ", " << _u2[ _qp ] << ", " << _u3[ _qp ] << "\n";
+//        std::cout << "_old_u: " << _old_u1[ _qp ] << ", " << _old_u2[ _qp ] << ", " << _old_u3[ _qp ] << "\n";
+//        std::cout << "__grad_u:\n";
+//        for ( unsigned int i = 0; i < 3; i++ ){
+//            for ( unsigned int j = 0; j < 3; j++ ){
+//                std::cout << __grad_u[ i ][ j ] << ", ";
+//            }
+//            std::cout << "\n";
+//        }
+//
+//        std::cout << "__old_grad_u:\n";
+//        for ( unsigned int i = 0; i < 3; i++ ){
+//            for ( unsigned int j = 0; j < 3; j++ ){
+//                std::cout << __old_grad_u[ i ][ j ] << ", ";
+//            }
+//            std::cout << "\n";
+//        }
+//
+//        std::cout << "__phi:\n";
+//        for ( unsigned int i = 0; i < 9; i++ ){ std::cout << __phi[ i ] << ", "; }
+//        std::cout << "\n";
+//        std::cout << "__old_phi:\n";
+//        for ( unsigned int i = 0; i < 9; i++ ){ std::cout << __old_phi[ i ] << ", "; }
+//        std::cout << "\n";
+//
+//        std::cout << "__grad_phi:\n";
+//        for ( unsigned int i = 0; i < 9; i++ ){
+//            for ( unsigned int j = 0; j < 3; j++ ){
+//                std::cout << __grad_phi[ i ][ j ] << ", ";
+//            }
+//            std::cout << "\n";
+//        }
+//
+//        std::cout << "__old_grad_phi:\n";
+//        for ( unsigned int i = 0; i < 9; i++ ){
+//            for ( unsigned int j = 0; j < 3; j++ ){
+//                std::cout << __old_grad_phi[ i ][ j ] << ", ";
+//            }
+//            std::cout << "\n";
+//        }
+//
+//
+//        std::cout << "    _old_SDVS[ _qp ]: "; vectorTools::print( _old_SDVS[ _qp ] );
+//        std::cout << "    _SDVS[ _qp ]: "; vectorTools::print( _SDVS[ _qp ] );
+//
+//        mooseWarning( output_message );
+//
+//        for ( auto step = debug.begin(); step != debug.end(); step++ ){
+//            std::cout << step->first << "\n";
+//            for ( auto iteration = step->second.begin(); iteration != step->second.end(); iteration++ ){
+//                std::cout << "    " << iteration->first << "\n";
+//                for ( auto iteration2 = iteration->second.begin(); iteration2 != iteration->second.end(); iteration2++ ){
+//                    std::cout << "        " << iteration2->first << "\n";
+//                    if ( iteration2->second.size() <= 27 ){
+//                        std::cout << "            "; vectorTools::print( iteration2->second );
+//                    }
+//                }
+//            }
+//        }
+//
+//        if ( ( std::fabs( _SDVS[ _qp ][ 0 ] ) > 1e-3 ) && ( _t >= 0.045 ) ){
+//            mooseError( output_message.c_str() );
+//        }
+//    }
 
 /*    //Jacobian debugging routines to follow uncomment only if absolutely necessary!
     std::vector<double> __PK2;
@@ -527,65 +696,168 @@ void MicromorphicMaterial::computeQpProperties(){
     }
 */
     //Evaluate method of manufactured solutions stresses
-    double mms_grad_u[3][3];
-    double mms_phi[9];
-    double mms_grad_phi[9][3];
+    double mms_grad_u[ 3 ][ 3 ], mms_old_grad_u[ 3 ][ 3 ];
+    double mms_phi[ 9 ], mms_old_phi[ 9 ];
+    double mms_grad_phi[ 9 ][ 3 ], mms_old_grad_phi[ 9 ][ 3 ];
     if(_MMS){
 
-        //Compute and copy the gradient of u
-        tmp_grad = _u1_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_u[0][i] = tmp_grad(i);}
-        tmp_grad = _u2_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_u[1][i] = tmp_grad(i);}
-        tmp_grad = _u3_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_u[2][i] = tmp_grad(i);}
+        //compute and copy the gradient of u
+        tmp_grad = _u1_fxn.gradient( _t, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++ ){
+            mms_grad_u[ 0 ][ i ] = tmp_grad( i );
+        }
 
-        //Compute and copy phi
-        mms_phi[0] = _phi_11_fxn.value(_t,_q_point[_qp]);
-        mms_phi[1] = _phi_22_fxn.value(_t,_q_point[_qp]);
-        mms_phi[2] = _phi_33_fxn.value(_t,_q_point[_qp]);
-        mms_phi[3] = _phi_23_fxn.value(_t,_q_point[_qp]);
-        mms_phi[4] = _phi_13_fxn.value(_t,_q_point[_qp]);
-        mms_phi[5] = _phi_12_fxn.value(_t,_q_point[_qp]);
-        mms_phi[6] = _phi_32_fxn.value(_t,_q_point[_qp]);
-        mms_phi[7] = _phi_31_fxn.value(_t,_q_point[_qp]);
-        mms_phi[8] = _phi_21_fxn.value(_t,_q_point[_qp]);
+        tmp_grad = _u2_fxn.gradient( _t, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++ ){
+            mms_grad_u[ 1 ][ i ] = tmp_grad( i );
+        }
 
-        //Compute and copy grad_phi
-        tmp_grad = _phi_11_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[0][i] = tmp_grad(i);}
-        tmp_grad = _phi_22_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[1][i] = tmp_grad(i);}
-        tmp_grad = _phi_33_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[2][i] = tmp_grad(i);}
-        tmp_grad = _phi_23_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[3][i] = tmp_grad(i);}
-        tmp_grad = _phi_13_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[4][i] = tmp_grad(i);}
-        tmp_grad = _phi_12_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[5][i] = tmp_grad(i);}
-        tmp_grad = _phi_32_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[6][i] = tmp_grad(i);}
-        tmp_grad = _phi_31_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[7][i] = tmp_grad(i);}
-        tmp_grad = _phi_21_fxn.gradient(_t,_q_point[_qp]);
-        for (int i=0; i<3; i++){mms_grad_phi[8][i] = tmp_grad(i);}
+        tmp_grad = _u3_fxn.gradient( _t, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++ ){
+            mms_grad_u[ 2 ][ i ] = tmp_grad( i );
+        }
+
+        //compute and copy phi
+        mms_phi[0] = _phi_11_fxn.value( _t, _q_point[ _qp ] );
+        mms_phi[1] = _phi_12_fxn.value( _t, _q_point[ _qp ] );
+        mms_phi[2] = _phi_13_fxn.value( _t, _q_point[ _qp ] );
+        mms_phi[3] = _phi_21_fxn.value( _t, _q_point[ _qp ] );
+        mms_phi[4] = _phi_22_fxn.value( _t, _q_point[ _qp ] );
+        mms_phi[5] = _phi_23_fxn.value( _t, _q_point[ _qp ] );
+        mms_phi[6] = _phi_31_fxn.value( _t, _q_point[ _qp ] );
+        mms_phi[7] = _phi_32_fxn.value( _t, _q_point[ _qp ] );
+        mms_phi[8] = _phi_33_fxn.value( _t, _q_point[ _qp ] );
+
+        //compute and copy grad_phi
+        tmp_grad = _phi_11_fxn.gradient( _t, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_grad_phi[ 0 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_12_fxn.gradient( _t, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_grad_phi[ 1 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_13_fxn.gradient( _t, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_grad_phi[ 2 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_21_fxn.gradient( _t, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_grad_phi[ 3 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_22_fxn.gradient( _t, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_grad_phi[ 4 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_23_fxn.gradient( _t, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_grad_phi[ 5 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_31_fxn.gradient( _t, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_grad_phi[ 6 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_32_fxn.gradient( _t, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_grad_phi[ 7 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_33_fxn.gradient( _t, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_grad_phi[ 8 ][ i ] = tmp_grad( i );
+        }
+
+        //Compute the old values
+        //compute and copy the gradient of u
+        tmp_grad = _u1_fxn.gradient( _t - _dt, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++ ){
+            mms_old_grad_u[ 0 ][ i ] = tmp_grad( i );
+        }
+
+        tmp_grad = _u2_fxn.gradient( _t - _dt, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++ ){
+            mms_old_grad_u[ 1 ][ i ] = tmp_grad( i );
+        }
+
+        tmp_grad = _u3_fxn.gradient( _t - _dt, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++ ){
+            mms_old_grad_u[ 2 ][ i ] = tmp_grad( i );
+        }
+
+        //compute and copy phi
+        mms_old_phi[0] = _phi_11_fxn.value( _t - _dt, _q_point[ _qp ] );
+        mms_old_phi[1] = _phi_12_fxn.value( _t - _dt, _q_point[ _qp ] );
+        mms_old_phi[2] = _phi_13_fxn.value( _t - _dt, _q_point[ _qp ] );
+        mms_old_phi[3] = _phi_21_fxn.value( _t - _dt, _q_point[ _qp ] );
+        mms_old_phi[4] = _phi_22_fxn.value( _t - _dt, _q_point[ _qp ] );
+        mms_old_phi[5] = _phi_23_fxn.value( _t - _dt, _q_point[ _qp ] );
+        mms_old_phi[6] = _phi_31_fxn.value( _t - _dt, _q_point[ _qp ] );
+        mms_old_phi[7] = _phi_32_fxn.value( _t - _dt, _q_point[ _qp ] );
+        mms_old_phi[8] = _phi_33_fxn.value( _t - _dt, _q_point[ _qp ] );
+
+        //compute and copy grad_phi
+        tmp_grad = _phi_11_fxn.gradient( _t - _dt, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_old_grad_phi[ 0 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_12_fxn.gradient( _t - _dt, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_old_grad_phi[ 1 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_13_fxn.gradient( _t - _dt, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_old_grad_phi[ 2 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_21_fxn.gradient( _t - _dt, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_old_grad_phi[ 3 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_22_fxn.gradient( _t - _dt, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_old_grad_phi[ 4 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_23_fxn.gradient( _t - _dt, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_old_grad_phi[ 5 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_31_fxn.gradient( _t - _dt, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_old_grad_phi[ 6 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_32_fxn.gradient( _t - _dt, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_old_grad_phi[ 7 ][ i ] = tmp_grad( i );
+        }
+        tmp_grad = _phi_33_fxn.gradient( _t - _dt, _q_point[ _qp ] );
+        for ( int i = 0; i < 3; i++){
+            mms_old_grad_phi[ 8 ][ i ] = tmp_grad( i );
+        }
 
         //TODO: Add in function support for the additional DOF and their gradients.        
 
         //Evaluate the method of manufactured solutions stresses
-        material->evaluate_model(time, _fparams, mms_grad_u, mms_phi, mms_grad_phi,
-                                 SDVS,             ADD_DOF,     ADD_grad_DOF,
-                                 _PK2_MMS[_qp], _SIGMA_MMS[_qp], _M_MMS[_qp], _ADD_TERMS_MMS[_qp]);
-/*        std::cout << "_PK2_MMS[_qp]: ";
-        for (int i=0; i<9; i++){std::cout << _PK2_MMS[_qp][i] << " ";}
-        std::cout << "\n";
-        std::cout << "_s_MMS[_qp]: ";
-        for (int i=0; i<9; i++){std::cout << _s_MMS[_qp][i] << " ";}
-        std::cout << "\n";
-        std::cout << "_m_MMS[_qp]: ";
-        for (int i=0; i<27; i++){std::cout << _m_MMS[_qp][i] << " ";}
-        std::cout << "\n";*/
+        std::vector< double > mms_SDVS = _old_SDVS[ _qp ];
+
+#ifdef DEBUG_MODE
+        debug.clear();
+#endif
+
+        errorCode = material->evaluate_model( time, _fparams,
+                                              mms_grad_u, mms_phi, mms_grad_phi,
+                                              mms_old_grad_u, mms_old_phi, mms_old_grad_phi,
+                                              mms_SDVS,
+                                              ADD_DOF,     ADD_grad_DOF,
+                                              old_ADD_DOF, old_ADD_grad_DOF,
+                                              _PK2_MMS[_qp], _SIGMA_MMS[_qp], _M_MMS[_qp], _ADD_TERMS_MMS[_qp], output_message
+#ifdef DEBUG_MODE
+                                              , debug
+#endif      
+                        );
+
+        if ( errorCode == 1 ){
+            std::string error_message = "Convergence not achieved in method of manufactured solutions evaluation";
+            error_message += output_message;
+            mooseException( error_message.c_str() );
+        }
     }
 
 }

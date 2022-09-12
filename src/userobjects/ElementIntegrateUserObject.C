@@ -9,17 +9,16 @@
 
 #include "ElementIntegrateUserObject.h"
 
-#include "libmesh/bounding_box.h"
-#include "libmesh/mesh_tools.h"
-#include "libmesh/quadrature.h"
+//#include "libmesh/bounding_box.h"
+//#include "libmesh/mesh_tools.h"
+//#include "libmesh/quadrature.h"
 
 registerMooseObject("tardigradeApp", ElementIntegrateUserObject);
 
-template <>
 InputParameters
-validParams<ElementIntegrateUserObject>()
+ElementIntegrateUserObject::validParams()
 {
-    InputParameters params = validParams<ElementUserObject>();
+    InputParameters params = ElementUserObject::validParams();
     params.addRequiredCoupledVar("variable", "A dummy variable. Use one of the displacements.");
     params.addParam<MaterialPropertyName>("density", 1., "The name of the property providing density.");
     return params;
@@ -41,8 +40,12 @@ ElementIntegrateUserObject::ElementIntegrateUserObject(const InputParameters & p
 void
 ElementIntegrateUserObject::initialize()
 {
-    mooseWarning("Initializing Element Overlap");
-    _console << "Initializing Element Overlap UserObject: " << name() << std::endl;
+//    mooseWarning("Initializing Element Overlap");
+//    _console << "Initializing Element Overlap UserObject: " << name() << std::endl;
+
+    integrated_volumes.clear();
+    integrated_weights.clear();
+    integrated_weighted_densities.clear();
 }
 
 void
@@ -61,11 +64,14 @@ ElementIntegrateUserObject::computeIntegral()
     std::vector< double > nodal_densities(_test.size(), 0);
 
     //Integrate the functions
+    std::vector< double > testsum( _qrule->n_points( ), 0 );
     for (_qp = 0; _qp < _qrule->n_points(); _qp++){
         for (_i = 0; _i < _test.size(); _i++){
             nodal_volumes[_i] += _JxW[_qp]*_coord[_qp]*_test[_i][_qp];
             nodal_weights[_i] += _JxW[_qp]*_coord[_qp]*_test[_i][_qp];
             nodal_densities[_i] += _JxW[_qp]*_coord[_qp]*_test[_i][_qp]*_density[_qp];
+
+            testsum[ _qp ] += _test[ _i ][ _qp ];
         }
     }
 
@@ -157,15 +163,64 @@ void
 ElementIntegrateUserObject::threadJoin(const UserObject & y)
 {
 
+    const ElementIntegrateUserObject & eiuo = dynamic_cast< const ElementIntegrateUserObject & >( y );
+
+    for ( auto yit = eiuo.integrated_volumes.begin(); yit != eiuo.integrated_volumes.end(); yit++ ){
+
+        auto this_it = this->integrated_volumes.find( yit->first );
+
+        if ( this_it == this->integrated_volumes.end( ) ){
+
+            this->integrated_volumes.emplace( std::make_pair( yit->first, yit->second ) );
+
+        }
+        else{
+
+            this->integrated_volumes[ yit->first ] += yit->second;
+
+        }
+
+    }
+
+    for ( auto yit = eiuo.integrated_weights.begin(); yit != eiuo.integrated_weights.end(); yit++ ){
+
+        auto this_it = this->integrated_weights.find( yit->first );
+
+        if ( this_it == this->integrated_weights.end( ) ){
+
+            this->integrated_weights.emplace( std::make_pair( yit->first, yit->second ) );
+
+        }
+        else{
+
+            this->integrated_weights[ yit->first ] += yit->second;
+
+        }
+
+    }
+
+    for ( auto yit = eiuo.integrated_weighted_densities.begin(); yit != eiuo.integrated_weighted_densities.end(); yit++ ){
+
+        auto this_it = this->integrated_weighted_densities.find( yit->first );
+
+        if ( this_it == this->integrated_weighted_densities.end( ) ){
+
+            this->integrated_weighted_densities.emplace( std::make_pair( yit->first, yit->second ) );
+
+        }
+        else{
+
+            this->integrated_weighted_densities[ yit->first ] += yit->second;
+
+        }
+
+    }
+
+    return;
 }
 
 void
 ElementIntegrateUserObject::finalize()
 {
-    std::cout << "Finalizing Element Overlap\n";
-//    for (unsigned int i=0; i<integrated_weights.size(); i++){
-//        std::cout << integrated_weights[i] << ", " << integrated_weighted_densities[i] << ", " << integrated_weighted_densities[i]/integrated_weights[i]  << "\n";
-//    }
-//    mooseError("derp");
-    std::cout << "End of Element Overlap\n\n";
+//    std::cout << "finalize of ElementIntegrateUserObject\n";
 }

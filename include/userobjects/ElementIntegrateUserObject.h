@@ -13,23 +13,22 @@
 // MOOSE includes
 #include "ElementUserObject.h"
 #include "MooseVariableInterface.h"
-#include "NodalOverlapUserObject.h"
-#include "libmesh/fe.h"
-#include "libmesh/mesh_base.h"
-#include "libmesh/mesh_tools.h"
-#include "libmesh/bounding_box.h"
-#include "libmesh/fe_interface.h"
+//#include "NodalOverlapUserObject.h"
+//#include "libmesh/fe.h"
+//#include "libmesh/mesh_base.h"
+//#include "libmesh/mesh_tools.h"
+//#include "libmesh/bounding_box.h"
+//#include "libmesh/fe_interface.h"
 
 // Forward Declarations
 class ElementIntegrateUserObject;
-
-template <>
-InputParameters validParams<ElementIntegrateUserObject>();
 
 class ElementIntegrateUserObject : public ElementUserObject,
                                  public MooseVariableInterface<Real>{
     public:
         ElementIntegrateUserObject(const InputParameters & parameters);
+
+        static InputParameters validParams();
 
         virtual void initialize() override;
         virtual void execute() override;

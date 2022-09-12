@@ -30,7 +30,7 @@ CHEMICAL_REACTIONS  := no
 CONTACT             := no
 FLUID_PROPERTIES    := no
 HEAT_CONDUCTION     := no
-MISC                := no
+MISC                := yes
 NAVIER_STOKES       := no
 PHASE_FIELD         := no
 RDG                 := no
@@ -46,8 +46,10 @@ include $(MOOSE_DIR)/modules/modules.mk
 
 # dep apps
 APPLICATION_DIR    := $(CURDIR)
-SUPPORT_DIR        := /projects/nathanm/micromorphic/micromorphic_library/lib
-INCLUDE_DIR        := /projects/nathanm/micromorphic/micromorphic_library/include
+MICROMORPHIC_DIR   := $(CURDIR)/..
+#MICROMORPHIC_COMPILER_PATH := /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/
+ANACONDA_INCLUDE   := $(CONDA_PREFIX)/include
+ANACONDA_LIB       := $(CONDA_PREFIX)/lib
 APPLICATION_NAME   := tardigrade
 BUILD_EXEC         := yes
 GEN_REVISION       := no
@@ -56,11 +58,33 @@ include            $(FRAMEWORK_DIR)/app.mk
 ###############################################################################
 # Additional special case targets should be added here
 
-ADDITIONAL_INCLUDES += -I$(SUPPORT_DIR) -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/voro++ -I$(INCLUDE_DIR)/micro_element -I$(INCLUDE_DIR)/overlap -I$(INCLUDE_DIR)/quickhull
-ADDITIONAL_CPPFLAGS += -I$(SUPPORT_DIR) -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/voro++ -I$(INCLUDE_DIR)/micro_element -I$(INCLUDE_DIR)/overlap -I$(INCLUDE_DIR)/quickhull
-ADDITIONAL_LIBS     += -L$(SUPPORT_DIR) -L$(SUPPORT_DIR)/voro++ -L$(SUPPORT_DIR)/micro_element -L$(SUPPORT_DIR)/overlap
-ADDITIONAL_LIBS     += -lmicromat -lmicrobalance -lvoro++ -loverlap
-#
-#ADDITIONAL_CPPFLAGS := -lmicromat -lmicrobalance -fmax-errors=5
-#ADDITIONAL_CPPFLAGS += -I$(SUPPORT_DIR)
-#EXTERNAL_FLAGS      += -L$(SUPPORT_DIR) -lmicromat -lmicrobalance
+#ADDITIONAL_INCLUDES += -I$(MICROMORPHIC_DIR)/voro++ -I$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+#ADDITIONAL_INCLUDES += -I$(MICROMORPHIC_DIR)/vector_tools/src/cpp
+#ADDITIONAL_INCLUDES += -I$(MICROMORPHIC_DIR)/overlap -I$(MICROMORPHIC_DIR)/quickhull
+
+#ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/voro++/voro++-0.4.6/src -I$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/voro/src -I$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/vector_tools/src/cpp -I$(MICROMORPHIC_DIR)/error_tools/src/cpp
+ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/overlap_coupling/src/cpp -I$(MICROMORPHIC_DIR)
+ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/solver_tools/src/cpp
+ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/xdmf -I$(MICROMORPHIC_DIR)/xdmf/build
+ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/xdmf/core -I$(MICROMORPHIC_DIR)/xdmf/build/core
+ADDITIONAL_CPPFLAGS += -I$(ANACONDA_INCLUDE)/libxml2
+ADDITIONAL_CPPFLAGS += -I$(BOOST_ROOT)
+ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/yaml-cpp/include
+
+#ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/voro++/voro++-0.4.6/src -L$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/voro/src -L$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/overlap_coupling/src/cpp
+ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/solver_tools/src/cpp
+ADDITIONAL_LIBS     += -lmicromat -lmicrobalance -lvoro++ -loverlap -lyaml-cpp
+#ADDITIONAL_LIBS     += -L$(MICROMORPHIC_COMPILER_PATH) -lresolv -DDEBUG_MODE
+ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/xdmf/build/lib -lXdmf -lXdmfCore -lXdmfUtils
+ADDITIONAL_LIBS     += -L$(ANACONDA_LIB)/libxml2 -lxml2
+ADDITIONAL_LIBS     += -L$(ANACONDA_LIB) -lhdf5 -ltiff
+ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/yaml-cpp/build
+
+ifeq ($(METHOD),dbg)
+    ADDITIONAL_CPPFLAGS += -DDEBUG_MODE
+    ADDITIONAL_LIBS += -DDEBUG_MODE
+endif

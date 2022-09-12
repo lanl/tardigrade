@@ -7,50 +7,46 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MICROMORPHICDOFUSEROBJECT_H
-#define MICROMORPHICDOFUSEROBJECT_H
+#ifndef DNSDOFUSEROBJECT_H
+#define DNSDOFUSEROBJECT_H
 
 // MOOSE includes
-#include "NodalUserObject.h"
-#include "NodalOverlapUserObject.h"
+//#include "NodalUserObject.h"
+//#include "NodalOverlapUserObject.h"
 #include "ProjectorUserObject.h"
+#include "MicromorphicDOFUserObject.h"
 
 // Forward Declarations
-class MicromorphicDOFUserObject;
+class DNSDOFUserObject;
 class ContainedNode;
 
 template <>
-InputParameters validParams<MicromorphicDOFUserObject>();
+InputParameters validParams<DNSDOFUserObject>();
 
-class MicromorphicDOFUserObject : public NodalUserObject{
+class DNSDOFUserObject : public NodalUserObject{
     public:
-        MicromorphicDOFUserObject(const InputParameters & parameters);
+        DNSDOFUserObject(const InputParameters & parameters);
 
         virtual void initialize() override;
         virtual void execute() override;
         virtual void threadJoin(const UserObject & y) override;
         virtual void finalize() override;
 
-        const std::vector< double >* get_D() const;
+        const std::vector< double >* get_Dh() const;
+        const std::vector< double >* get_Qh() const;
 
     protected:
 
         //!The number of macro degrees of freedom
         unsigned int num_macro_dof = 12;
 
+        //!The number of micro degrees of freedom
+        unsigned int num_micro_dof = 3;
+
         //!The variables to project
         const VariableValue& _u1;
         const VariableValue& _u2;
         const VariableValue& _u3;
-        const VariableValue& _phi11;
-        const VariableValue& _phi22;
-        const VariableValue& _phi33;
-        const VariableValue& _phi23;
-        const VariableValue& _phi13;
-        const VariableValue& _phi12;
-        const VariableValue& _phi32;
-        const VariableValue& _phi31;
-        const VariableValue& _phi21;
 
         //!The nodal overlap userobject
         const NodalOverlapUserObject & _nodal_overlap;
@@ -58,17 +54,27 @@ class MicromorphicDOFUserObject : public NodalUserObject{
         //!The projector userobject
         const ProjectorUserObject & _projector;
 
+        //!The micromorphic DOF userobject
+        const MicromorphicDOFUserObject & _micromorphic_DOF;
+
         //Projection information
         unsigned int num_macro_ghost;
         unsigned int num_macro_free;
         unsigned int num_micro_ghost;
         unsigned int num_micro_free;
 
+//        //Projection Matrices and solvers
+//        const overlap::QRsolver* BDhQsolver;
+
         //Maps from the node number to the order in the projection matrices
-        const std::map< dof_id_type, unsigned int >* macro_node_to_col;
+        const std::map< dof_id_type, unsigned int >* micro_node_to_row;
 
         //The degree of freedom vectors
-        std::vector< double > D;
+        std::vector< double > Q; 
+
+        //The computed contributions to the degree of freedom vectors
+        std::vector< double > Dh;
+        std::vector< double > Qh;
 
 };
 
