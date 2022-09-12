@@ -20,11 +20,12 @@
 //We define the valid parameters for this kernel and their default values
 registerMooseObject("tardigradeApp", InternalCouple);
 
-template<>
 InputParameters
-validParams<InternalCouple>(){
+InternalCouple::validParams()
+{
 //    std::cout << "In InputParameters InternalCouple\n";
-    InputParameters params = validParams<Kernel>();
+    InputParameters params = Kernel::validParams();
+    params.set< bool >( "use_displaced_mesh" ) = false;
     params.addRequiredParam<int>("component_i", "The i component of the internal couple tensor");
     params.addRequiredParam<int>("component_j", "The j component of the internal couple tensor");
     params.addRequiredParam<int>("dof_num",   "The degree of freedom to use for the diagonal jacobian calculation");
@@ -75,8 +76,8 @@ InternalCouple::InternalCouple(const InputParameters & parameters)
                                         : 100),
         _phi_21_int(isCoupled("phi_21") ? coupled("phi_21")
                                         : 100),
-        _deformation_gradient(getMaterialProperty<std::vector<std::vector<double>>>("MM_deformation_gradient")),
-        _micro_displacement(getMaterialProperty<std::vector<std::vector<double>>>("micro_displacement")),
+        _deformation_gradient(getMaterialProperty<std::vector<double>>("MM_deformation_gradient")),
+        _micro_deformation(getMaterialProperty<std::vector<double>>("micro_deformation")),
         _gradient_micro_displacement(getMaterialProperty<std::vector<std::vector<double>>>("gradient_micro_displacement")),
         _PK2(getMaterialProperty<std::vector<double>>("PK2")),
         _SIGMA(getMaterialProperty<std::vector<double>>("SIGMA")),
@@ -129,18 +130,17 @@ Real InternalCouple::computeQpResidual(){
     for (int indx=0; indx<3; indx++){dNdX[indx] = _grad_test[_i][_qp](indx);}
     
     balance_equations::compute_internal_couple(_component_i,               _component_j,             _test[_i][_qp], dNdX,
-                                               _deformation_gradient[_qp], _micro_displacement[_qp],   
+                                               _deformation_gradient[_qp], _micro_deformation[_qp],   
                                                _PK2[_qp],                  _SIGMA[_qp],              _M[_qp],
                                                cint);
 
     if(_MMS){
         
         balance_equations::compute_internal_couple(_component_i,               _component_j,             _test[_i][_qp], dNdX,
-                                                   _deformation_gradient[_qp], _micro_displacement[_qp],
+                                                   _deformation_gradient[_qp], _micro_deformation[_qp],
                                                    _PK2_MMS[_qp],              _SIGMA_MMS[_qp],          _M_MMS[_qp],
                                                    cint_MMS);
         cint -= cint_MMS;
-//        std::cout << "cint - cint_MMS: " << cint << "\n";
     }
     return cint;
 }
@@ -155,7 +155,6 @@ Real InternalCouple::computeQpJacobian(){
 
     */
     Real dcdUint;
-    //mooseError("fail");
     //Copy the test and interpolation functions so that the balance equation function can read it
     double dNdX[3];
     double detadX[3];
@@ -164,14 +163,16 @@ Real InternalCouple::computeQpJacobian(){
         detadX[indx] = _grad_phi[_j][_qp](indx);
     }
 
-    balance_equations::compute_internal_couple_jacobian(_component_i,               _component_j,             _dof_num, 
-                                                        _test[_i][_qp],             dNdX,                     _phi[_j][_qp],          detadX,
-                                                        _deformation_gradient[_qp], _micro_displacement[_qp],
-                                                        _PK2[_qp],                  _SIGMA[_qp],              _M[_qp],
-                                                        _DPK2Dgrad_u[_qp],          _DPK2Dphi[_qp],           _DPK2Dgrad_phi[_qp],
-                                                        _DSIGMADgrad_u[_qp],        _DSIGMADphi[_qp],         _DSIGMADgrad_phi[_qp],
-                                                        _DMDgrad_u[_qp],            _DMDphi[_qp],             _DMDgrad_phi[_qp],
-                                                        dcdUint);
+    balance_equations::compute_internal_couple_jacobian( _dim * _component_i + _component_j, _dof_num, 
+                                                         _test[_i][_qp],             dNdX,
+                                                         _phi[_j][_qp],              detadX,
+                                                         _deformation_gradient[_qp], _micro_deformation[_qp],
+                                                         _PK2[_qp],                  _SIGMA[_qp],              _M[_qp],
+                                                         _DPK2Dgrad_u[_qp],          _DPK2Dphi[_qp],           _DPK2Dgrad_phi[_qp],
+                                                         _DSIGMADgrad_u[_qp],        _DSIGMADphi[_qp],         _DSIGMADgrad_phi[_qp],
+                                                         _DMDgrad_u[_qp],            _DMDphi[_qp],             _DMDgrad_phi[_qp],
+                                                         dcdUint);
+
     return dcdUint;
 }
 
@@ -200,28 +201,28 @@ Real InternalCouple::computeQpOffDiagJacobian(unsigned int jvar){
     else if(jvar == _phi_11_int){
         _off_diag_dof_num = 3;
     }
-    else if(jvar == _phi_22_int){
+    else if(jvar == _phi_12_int){
         _off_diag_dof_num = 4;
     }
-    else if(jvar == _phi_33_int){
+    else if(jvar == _phi_13_int){
         _off_diag_dof_num = 5;
     }
-    else if(jvar == _phi_23_int){
+    else if(jvar == _phi_21_int){
         _off_diag_dof_num = 6;
     }
-    else if(jvar == _phi_13_int){
+    else if(jvar == _phi_22_int){
         _off_diag_dof_num = 7;
     }
-    else if(jvar == _phi_12_int){
+    else if(jvar == _phi_23_int){
         _off_diag_dof_num = 8;
     }
-    else if(jvar == _phi_32_int){
+    else if(jvar == _phi_31_int){
         _off_diag_dof_num = 9;
     }
-    else if(jvar == _phi_31_int){
+    else if(jvar == _phi_32_int){
         _off_diag_dof_num = 10;
     }
-    else if(jvar == _phi_21_int){
+    else if(jvar == _phi_33_int){
         _off_diag_dof_num = 11;
     }
 
@@ -233,14 +234,16 @@ Real InternalCouple::computeQpOffDiagJacobian(unsigned int jvar){
     }
 
     if(_off_diag_dof_num >= 0){
-        balance_equations::compute_internal_couple_jacobian(_component_i,               _component_j,         _off_diag_dof_num, 
-                                                            _test[_i][_qp],             dNdX,                     _phi[_j][_qp],          detadX,
-                                                            _deformation_gradient[_qp], _micro_displacement[_qp],
-                                                            _PK2[_qp],                  _SIGMA[_qp],              _M[_qp],
-                                                            _DPK2Dgrad_u[_qp],          _DPK2Dphi[_qp],           _DPK2Dgrad_phi[_qp],
-                                                            _DSIGMADgrad_u[_qp],        _DSIGMADphi[_qp],         _DSIGMADgrad_phi[_qp],
-                                                            _DMDgrad_u[_qp],            _DMDphi[_qp],             _DMDgrad_phi[_qp],
-                                                            dcdUint);
+        balance_equations::compute_internal_couple_jacobian( _dim * _component_i +  _component_j,         _off_diag_dof_num, 
+                                                             _test[_i][_qp],             dNdX,
+                                                             _phi[_j][_qp],              detadX,
+                                                             _deformation_gradient[_qp], _micro_deformation[_qp],
+                                                             _PK2[_qp],                  _SIGMA[_qp],              _M[_qp],
+                                                             _DPK2Dgrad_u[_qp],          _DPK2Dphi[_qp],           _DPK2Dgrad_phi[_qp],
+                                                             _DSIGMADgrad_u[_qp],        _DSIGMADphi[_qp],         _DSIGMADgrad_phi[_qp],
+                                                             _DMDgrad_u[_qp],            _DMDphi[_qp],             _DMDgrad_phi[_qp],
+                                                             dcdUint);
+
         return dcdUint;
     }
     else{

@@ -25,10 +25,8 @@
 //Forward declarations
 class InternalCouple;
 
-template <>
-InputParameters validParams<InternalCouple>();
-
-class InternalCouple : public Kernel{
+class InternalCouple : public Kernel
+{
     /*!
     ------------------------------------------
     |    InternalCouple kernel definition    |
@@ -47,6 +45,8 @@ class InternalCouple : public Kernel{
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         //The constructor definition
         InternalCouple(const InputParameters & parameters);
+        
+        static InputParameters validParams();
 
     protected:
         //The residual at a quadrature point.
@@ -61,6 +61,9 @@ class InternalCouple : public Kernel{
 
         //The off-diagonal members of the jacobian at the quadrature point.
         virtual Real computeQpOffDiagJacobian(unsigned int jvar) override; 
+
+        //Assume 3D
+        const unsigned int _dim = 3;
 
         //Parameters
         const int _component_i;
@@ -83,8 +86,8 @@ class InternalCouple : public Kernel{
         unsigned int _phi_21_int;
 
         //Deformation measures
-        const MaterialProperty<std::vector<std::vector<double>>> &_deformation_gradient;        //The gradient of the displacement
-        const MaterialProperty<std::vector<std::vector<double>>> &_micro_displacement;          //The micro-displacement
+        const MaterialProperty<std::vector<double>> &_deformation_gradient;                     //The deformation gradient
+        const MaterialProperty<std::vector<double>> &_micro_deformation;                        //The micro-deformation
         const MaterialProperty<std::vector<std::vector<double>>> &_gradient_micro_displacement; //The gradient of the micro-displacement
 
         //Stress measures and their gradients

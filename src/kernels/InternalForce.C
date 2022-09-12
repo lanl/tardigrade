@@ -20,10 +20,11 @@
 //We define the valid parameters for this kernel and their default values
 registerMooseObject("tardigradeApp", InternalForce);
 
-template<>
 InputParameters
-validParams<InternalForce>(){
-    InputParameters params = validParams<Kernel>();
+InternalForce::validParams()
+{
+    InputParameters params = Kernel::validParams();
+    params.set< bool >( "use_displaced_mesh" ) = false;
     params.addRequiredParam<int>("component", "The component of the internal force vector");
     params.addRequiredParam<int>("dof_num",   "The degree of freedom to use for the diagonal jacobian calculation");
     params.addParam<bool>("MMS", false,       "The flag for whether the run will be using the method of manufactured solutions");
@@ -72,8 +73,8 @@ InternalForce::InternalForce(const InputParameters & parameters)
                                         : 100),
         _phi_21_int(isCoupled("phi_21") ? coupled("phi_21")
                                         : 100),
-        _deformation_gradient(getMaterialProperty<std::vector<std::vector<double>>>("MM_deformation_gradient")),
-        _micro_displacement(getMaterialProperty<std::vector<std::vector<double>>>("micro_displacement")),
+        _deformation_gradient(getMaterialProperty<std::vector<double>>("MM_deformation_gradient")),
+        _micro_deformation(getMaterialProperty<std::vector<double>>("micro_deformation")),
         _gradient_micro_displacement(getMaterialProperty<std::vector<std::vector<double>>>("gradient_micro_displacement")),
         _PK2(getMaterialProperty<std::vector<double>>("PK2")),
         _DPK2Dgrad_u(getMaterialProperty<std::vector<std::vector<double>>>("DPK2Dgrad_u")),
@@ -117,12 +118,10 @@ Real InternalForce::computeQpResidual(){
     for (int indx=0; indx<3; indx++){dNdX[indx] = _grad_test[_i][_qp](indx);}//p+i);}
 
     balance_equations::compute_internal_force(_component, dNdX, _deformation_gradient[_qp], _PK2[_qp], fint);
-    //std::cout << "fint: " << fint << "\n";
 
     if(_MMS){
         balance_equations::compute_internal_force(_component, dNdX, _deformation_gradient[_qp], _PK2_MMS[_qp], fint_MMS);
         fint -= fint_MMS;
-        //std::cout << "fint - fint_MMS: " << fint << "\n";
     }
 
     return fint;
@@ -181,31 +180,30 @@ Real InternalForce::computeQpOffDiagJacobian(unsigned int jvar){
     else if(jvar == _phi_11_int){
         _off_diag_dof_num = 3;
     }
-    else if(jvar == _phi_22_int){
+    else if(jvar == _phi_12_int){
         _off_diag_dof_num = 4;
     }
-    else if(jvar == _phi_33_int){
+    else if(jvar == _phi_13_int){
         _off_diag_dof_num = 5;
     }
-    else if(jvar == _phi_23_int){
+    else if(jvar == _phi_21_int){
         _off_diag_dof_num = 6;
     }
-    else if(jvar == _phi_13_int){
+    else if(jvar == _phi_22_int){
         _off_diag_dof_num = 7;
     }
-    else if(jvar == _phi_12_int){
+    else if(jvar == _phi_23_int){
         _off_diag_dof_num = 8;
     }
-    else if(jvar == _phi_32_int){
+    else if(jvar == _phi_31_int){
         _off_diag_dof_num = 9;
     }
-    else if(jvar == _phi_31_int){
+    else if(jvar == _phi_32_int){
         _off_diag_dof_num = 10;
     }
-    else if(jvar == _phi_21_int){
+    else if(jvar == _phi_33_int){
         _off_diag_dof_num = 11;
     }
-
 
     //Copy the test and interpolation functions so that the balance equation function can read it
     double dNdX[3];
@@ -215,13 +213,14 @@ Real InternalForce::computeQpOffDiagJacobian(unsigned int jvar){
         detadX[indx] = _grad_phi[_j][_qp](indx);
     }
 
+    int errorCode;
     if(_off_diag_dof_num>=0){
-        balance_equations::compute_internal_force_jacobian(                _component, _off_diag_dof_num, 
-                                                                       _test[_i][_qp],              dNdX,       _phi[_j][_qp], detadX,
-                                                           _deformation_gradient[_qp],
-                                                                            _PK2[_qp],
-                                                                    _DPK2Dgrad_u[_qp],    _DPK2Dphi[_qp], _DPK2Dgrad_phi[_qp],
-                                                                             dfdUint);
+        errorCode = balance_equations::compute_internal_force_jacobian(      _component, _off_diag_dof_num, 
+                                                                         _test[_i][_qp],              dNdX,       _phi[_j][_qp], detadX,
+                                                             _deformation_gradient[_qp],
+                                                                              _PK2[_qp],
+                                                                      _DPK2Dgrad_u[_qp],    _DPK2Dphi[_qp], _DPK2Dgrad_phi[_qp],
+                                                                               dfdUint);
         return dfdUint;
     }
     else{

@@ -216,54 +216,12 @@
     phi_31 = phi_zx
     phi_21 = phi_yx
   [../]
-  [./couple_22]
+  [./couple_12]
     type = InternalCouple
-    component_i = 1
+    component_i = 0
     component_j = 1
     dof_num     = 4
-    variable    = phi_yy
-
-    #Coupled variables
-    u1     = disp_x
-    u2     = disp_y
-    u3     = disp_z
-    phi_11 = phi_xx
-    phi_22 = phi_yy
-    phi_33 = phi_zz
-    phi_23 = phi_yz
-    phi_13 = phi_xz
-    phi_12 = phi_xy
-    phi_32 = phi_zy
-    phi_31 = phi_zx
-    phi_21 = phi_yx
-  [../]
-  [./couple_33]
-    type = InternalCouple
-    component_i = 2
-    component_j = 2
-    dof_num     = 5
-    variable    = phi_zz
-
-    #Coupled variables
-    u1     = disp_x
-    u2     = disp_y
-    u3     = disp_z
-    phi_11 = phi_xx
-    phi_22 = phi_yy
-    phi_33 = phi_zz
-    phi_23 = phi_yz
-    phi_13 = phi_xz
-    phi_12 = phi_xy
-    phi_32 = phi_zy
-    phi_31 = phi_zx
-    phi_21 = phi_yx
-  [../]
-  [./couple_23]
-    type = InternalCouple
-    component_i = 1
-    component_j = 2
-    dof_num     = 6
-    variable    = phi_yz
+    variable    = phi_xy
 
     #Coupled variables
     u1     = disp_x
@@ -283,71 +241,8 @@
     type = InternalCouple
     component_i = 0
     component_j = 2
-    dof_num     = 7
+    dof_num     = 5
     variable    = phi_xz
-
-    #Coupled variables
-    u1     = disp_x
-    u2     = disp_y
-    u3     = disp_z
-    phi_11 = phi_xx
-    phi_22 = phi_yy
-    phi_33 = phi_zz
-    phi_23 = phi_yz
-    phi_13 = phi_xz
-    phi_12 = phi_xy
-    phi_32 = phi_zy
-    phi_31 = phi_zx
-    phi_21 = phi_yx
-  [../]
-  [./couple_12]
-    type = InternalCouple
-    component_i = 0
-    component_j = 1
-    dof_num     = 8
-    variable    = phi_xy
-
-    #Coupled variables
-    u1     = disp_x
-    u2     = disp_y
-    u3     = disp_z
-    phi_11 = phi_xx
-    phi_22 = phi_yy
-    phi_33 = phi_zz
-    phi_23 = phi_yz
-    phi_13 = phi_xz
-    phi_12 = phi_xy
-    phi_32 = phi_zy
-    phi_31 = phi_zx
-    phi_21 = phi_yx
-  [../]
-  [./couple_32]
-    type = InternalCouple
-    component_i = 2
-    component_j = 1
-    dof_num     = 9
-    variable    = phi_zy
-
-    #Coupled variables
-    u1     = disp_x
-    u2     = disp_y
-    u3     = disp_z
-    phi_11 = phi_xx
-    phi_22 = phi_yy
-    phi_33 = phi_zz
-    phi_23 = phi_yz
-    phi_13 = phi_xz
-    phi_12 = phi_xy
-    phi_32 = phi_zy
-    phi_31 = phi_zx
-    phi_21 = phi_yx
-  [../]
-  [./couple_31]
-    type = InternalCouple
-    component_i = 2
-    component_j = 0
-    dof_num     = 10
-    variable    = phi_zx
 
     #Coupled variables
     u1     = disp_x
@@ -367,8 +262,113 @@
     type = InternalCouple
     component_i = 1
     component_j = 0
-    dof_num     = 11
+    dof_num     = 6
     variable    = phi_yx
+
+    #Coupled variables
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
+    phi_11 = phi_xx
+    phi_22 = phi_yy
+    phi_33 = phi_zz
+    phi_23 = phi_yz
+    phi_13 = phi_xz
+    phi_12 = phi_xy
+    phi_32 = phi_zy
+    phi_31 = phi_zx
+    phi_21 = phi_yx
+  [../]
+  [./couple_22]
+    type = InternalCouple
+    component_i = 1
+    component_j = 1
+    dof_num     = 7
+    variable    = phi_yy
+
+    #Coupled variables
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
+    phi_11 = phi_xx
+    phi_22 = phi_yy
+    phi_33 = phi_zz
+    phi_23 = phi_yz
+    phi_13 = phi_xz
+    phi_12 = phi_xy
+    phi_32 = phi_zy
+    phi_31 = phi_zx
+    phi_21 = phi_yx
+  [../]
+  [./couple_23]
+    type = InternalCouple
+    component_i = 1
+    component_j = 2
+    dof_num     = 8
+    variable    = phi_yz
+
+    #Coupled variables
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
+    phi_11 = phi_xx
+    phi_22 = phi_yy
+    phi_33 = phi_zz
+    phi_23 = phi_yz
+    phi_13 = phi_xz
+    phi_12 = phi_xy
+    phi_32 = phi_zy
+    phi_31 = phi_zx
+    phi_21 = phi_yx
+  [../]
+  [./couple_31]
+    type = InternalCouple
+    component_i = 2
+    component_j = 0
+    dof_num     = 9
+    variable    = phi_zx
+
+    #Coupled variables
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
+    phi_11 = phi_xx
+    phi_22 = phi_yy
+    phi_33 = phi_zz
+    phi_23 = phi_yz
+    phi_13 = phi_xz
+    phi_12 = phi_xy
+    phi_32 = phi_zy
+    phi_31 = phi_zx
+    phi_21 = phi_yx
+  [../]
+  [./couple_32]
+    type = InternalCouple
+    component_i = 2
+    component_j = 1
+    dof_num     = 10
+    variable    = phi_zy
+
+    #Coupled variables
+    u1     = disp_x
+    u2     = disp_y
+    u3     = disp_z
+    phi_11 = phi_xx
+    phi_22 = phi_yy
+    phi_33 = phi_zz
+    phi_23 = phi_yz
+    phi_13 = phi_xz
+    phi_12 = phi_xy
+    phi_32 = phi_zy
+    phi_31 = phi_zx
+    phi_21 = phi_yx
+  [../]
+  [./couple_33]
+    type = InternalCouple
+    component_i = 2
+    component_j = 2
+    dof_num     = 11
+    variable    = phi_zz
 
     #Coupled variables
     u1     = disp_x
@@ -386,44 +386,133 @@
   [../]
 []
 
+
+[AuxVariables]
+  [./pk2_11]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./pk2_22]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./pk2_33]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./sigma_11]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./sigma_22]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./sigma_33]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [./pk2_11]
+    type = MaterialStdVectorAux
+    property = PK2
+    index = 0
+    variable = pk2_11
+  [../]
+[]
+
+[AuxKernels]
+  [./pk2_22]
+    type = MaterialStdVectorAux
+    property = PK2
+    index = 4
+    variable = pk2_22
+  [../]
+[]
+
+[AuxKernels]
+  [./pk2_33]
+    type = MaterialStdVectorAux
+    property = PK2
+    index = 8
+    variable = pk2_33
+  [../]
+[]
+
+[AuxKernels]
+  [./sigma_11]
+    type = MaterialStdVectorAux
+    property = SIGMA
+    index = 0
+    variable = sigma_11
+  [../]
+[]
+
+[AuxKernels]
+  [./sigma_22]
+    type = MaterialStdVectorAux
+    property = SIGMA
+    index = 4
+    variable = sigma_22
+  [../]
+[]
+
+[AuxKernels]
+  [./sigma_33]
+    type = MaterialStdVectorAux
+    property = SIGMA
+    index = 8
+    variable = sigma_33
+  [../]
+[]
+
 [BCs]
-  active = 'left_x back_z bottom_y bottom_x top_y top_x'
+  active = 'left_x back_z bottom_y top_y'
+#  active = 'left_x back_z bottom_y bottom_x top_y top_x'
   [./left_x]
-    #type = DirichletBC
-    type = PresetBC
+    type = DirichletBC
+    #type = PresetBC
     variable = disp_x
     boundary = 'left'
     #boundary = 'left right bottom top front back'
+    preset = true
     value = 0
   [../]
   [./back_z]
-    #type = DirichletBC
-    type = PresetBC
+    type = DirichletBC
+    #type = PresetBC
     variable = disp_z
     boundary = 'back'
     #boundary = 'left right bottom top front back'
+    preset = true
     value = 0
   [../]
   [./bottom_x]
-    #type = DirichletBC
-    type = PresetBC
+    type = DirichletBC
+    #type = PresetBC
     variable = disp_x
     boundary = 'bottom'
     #boundary = 'left right bottom top front back'
+    preset = true
     value = 0
   [../]
   [./bottom_y]
-    #type = DirichletBC
-    type = PresetBC
+    type = DirichletBC
+    #type = PresetBC
     variable = disp_y
     boundary = 'bottom'
     #boundary = 'left right bottom top front back'
+    preset = true
     value = 0
   [../]
   [./top_x]
-    type     = PresetBC
+    type     = DirichletBC
+    #type     = PresetBC
     variable = disp_x
     boundary = 'top'
+    preset = true
     value    = 0
   [../]
   [./top_y]
@@ -433,6 +522,7 @@
     variable = disp_y
     boundary = 'top'
     #boundary = 'left right bottom top front back'
+    preset = true
     function = top_bc
   [../]
 []
@@ -451,7 +541,9 @@
 #    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0. 0. 0. 0. 0. 0. 0.769 0. 0. 0. 0.'
 #    material_fparameters = '8e3 11e3 2e3 1.538e3 -1e3 -1.39e3 -2.11e3 0.12 0.51 0.72 0.84 0.443 0.62 0.769 0.945 0.47 0.63 0.58'
 #    material_fparameters = '29.48e3 25.48e3 1e3 0.4e3 -1.5e3 -1.4e3 -3e3 0 0 0 0 0 0 10e5 0. 0. 0. 0.'
-    material_fparameters = '29. 7. 60. 10. 10. 8. 5. 0. 0. 0. 0. 0. 0. 8. 0. 0. 0. 0.'
+#    material_fparameters = '29. 7. 60. 10. 10. 8. 5. 0. 0. 0. 0. 0. 0. 8. 0. 0. 0. 0.'
+    material_fparameters = '2 29.48e3 25.48e3 5 1e3 0.4e3 -1.5e3 -1.4e3 -3e3 11 0 0 0 0 0 0 10e5 0 0 0 0 2 .4e3 -3e3' 
+#    material_fparameters = '2. 696.47 65.84 5. -7.69 -51.92 38.61 -27.31 5.13 11. 1.85 -0.19 -1.08 -1.57 2.29 -0.61 5.97 -2.02 2.38 -0.32 -3.25 2. -51.92 5.13'
     model_name = "LinearElasticity"
 
     #Coupled variables
@@ -473,7 +565,7 @@
 [Preconditioning]
   [./SMP]
     type = SMP
-    #type = FDP
+#    type = FDP
     full = true
   [../]
 []
@@ -485,9 +577,9 @@
   dt        = 0.1
   solve_type = 'PJFNK'
 #  solve_type = 'NEWTON'
-#  nl_rel_tol = 1e-8
-#  nl_abs_tol = 1e-8
-#  nl_max_its = 100
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-8
+  nl_max_its = 100
   #Terms for debugging
 #  petsc_options = '-ksp_monitor_true_residual -ksp_compute_singularvalues' 
 #  petsc_options = '-snes_converged_reason -ksp_converged_reason'
@@ -497,12 +589,15 @@
 #  petsc_options_iname = '-ksp_gmres_restart'
 #  petsc_options_value = '100'
 #  petsc_options = '-snes_ksp_ew -ksp_monitor_true_residual -ksp_compute_singularvalues'# -pc_svd_monitor'
-  petsc_options = '-ksp_monitor_true_residual -ksp_compute_singularvalues'# -pc_svd_monitor'
-  petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart -print_linear_residuals'# -ksp_view_mat'
-  petsc_options_value = 'asm      lu           1               101                false                  '# binary'
+#  petsc_options = '-ksp_monitor_true_residual -ksp_compute_singularvalues'# -pc_svd_monitor'
+#  petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart -print_linear_residuals'# -ksp_view_mat'
+#  petsc_options_value = 'asm      lu           1               101                false                  '# binary'
 []
 
 [Outputs]
   exodus = true
   perf_graph = true
+  [./xdmf]
+    type = Xdmf
+  [../]
 []
