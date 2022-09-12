@@ -23,10 +23,8 @@
 //Forward declarations
 class MicromorphicInertialCouple;
 
-template <>
-InputParameters validParams<MicromorphicInertialCouple>();
-
-class MicromorphicInertialCouple : public Kernel{
+class MicromorphicInertialCouple : public Kernel
+{
     /*!
     ------------------------------------------
     |    MicromorphicInertialCouple kernel definition    |
@@ -47,6 +45,8 @@ class MicromorphicInertialCouple : public Kernel{
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         //The constructor definition
         MicromorphicInertialCouple(const InputParameters & parameters);
+        
+        static InputParameters validParams();
 
     protected:
         //The residual at a quadrature point.

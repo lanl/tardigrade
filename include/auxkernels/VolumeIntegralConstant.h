@@ -4,9 +4,6 @@
 
 class VolumeIntegralConstant;
 
-template <>
-InputParameters validParams<VolumeIntegralConstant>();
-
 class VolumeIntegralConstant : public AuxKernel
 {
 

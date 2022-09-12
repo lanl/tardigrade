@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'const_mms.i'
+    exodiff = 'const_mms_out.e'
+  [../]
+[]

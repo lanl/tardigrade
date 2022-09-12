@@ -21,10 +21,8 @@
 //Forward declarations
 class MicromorphicInertialForce;
 
-template <>
-InputParameters validParams<MicromorphicInertialForce>();
-
-class MicromorphicInertialForce : public Kernel{
+class MicromorphicInertialForce : public Kernel
+{
     /*!
     -----------------------------------------------------
     |    MicromorphicInertialForce kernel definition    |
@@ -41,6 +39,8 @@ class MicromorphicInertialForce : public Kernel{
     public:
         //The constructor definition
         MicromorphicInertialForce(const InputParameters & parameters);
+        
+        static InputParameters validParams();
 
     protected:
         //The residual at a quadrature point.

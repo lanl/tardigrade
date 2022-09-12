@@ -15,11 +15,10 @@
 
 registerMooseObject("tardigradeApp", ElementIntegrateUserObject);
 
-template <>
 InputParameters
-validParams<ElementIntegrateUserObject>()
+ElementIntegrateUserObject::validParams()
 {
-    InputParameters params = validParams<ElementUserObject>();
+    InputParameters params = ElementUserObject::validParams();
     params.addRequiredCoupledVar("variable", "A dummy variable. Use one of the displacements.");
     params.addParam<MaterialPropertyName>("density", 1., "The name of the property providing density.");
     return params;

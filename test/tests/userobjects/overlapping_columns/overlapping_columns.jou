@@ -1,0 +1,182 @@
+#Journal file for the creation of a unit cube centered at
+#the origin
+
+Reset
+
+#
+# VARIABLE DEFINITIONS
+#
+
+#Geometric variables
+
+#Micromorphic geometric variables
+#{M_xmin = 0}
+#{M_xmax = 1}
+#{M_ymin = 0}
+#{M_ymax = 3}
+#{M_zmin = 0}
+#{M_zmax = 1}
+
+#DNS geometric variables
+#{D_xmin = 0}
+#{D_xmax = 1}
+#{D_ymin = 1.5}
+#{D_ymax = 4.5}
+#{D_zmin = 0}
+#{D_zmax = 1}
+
+#Meshing variables
+
+#Micromorphic mesh variables
+#{M_size = 1}
+
+#DNS mesh variables
+#{ratio  = 10}
+#{D_size = M_size/ratio}
+
+#
+# GEOMETRY DEFINITON
+#
+
+#Vertex Creation
+
+#Micromorphic mesh vertices
+create vertex {M_xmin}, {M_ymin}, {M_zmin}
+create vertex {M_xmax}, {M_ymin}, {M_zmin}
+create vertex {M_xmax}, {M_ymax}, {M_zmin}
+create vertex {M_xmin}, {M_ymax}, {M_zmin}
+create vertex {M_xmin}, {M_ymin}, {M_zmax}
+create vertex {M_xmax}, {M_ymin}, {M_zmax}
+create vertex {M_xmax}, {M_ymax}, {M_zmax}
+create vertex {M_xmin}, {M_ymax}, {M_zmax}
+
+#Create micromorphic edges
+
+#Create bottom square
+create curve 1 2
+create curve 2 3
+create curve 3 4
+create curve 1 4
+
+#Create top square
+create curve 5 6
+create curve 6 7
+create curve 7 8
+create curve 8 5
+
+#Join top and bottom squares
+create curve 1 5
+create curve 2 6
+create curve 3 7
+create curve 4 8
+
+#Create the micromorphic surfaces
+create surface 1 2 3  4
+create surface 5 6 7  8
+create surface 1 5 9  10
+create surface 2 6 10 11
+create surface 3 7 11 12
+create surface 4 8 12 9
+
+#Create the micromorphic volume
+create volume surface 1 to 6
+
+#DNS mesh vertices
+create vertex {D_xmin}, {D_ymin}, {D_zmin}
+create vertex {D_xmax}, {D_ymin}, {D_zmin}
+create vertex {D_xmax}, {D_ymax}, {D_zmin}
+create vertex {D_xmin}, {D_ymax}, {D_zmin}
+create vertex {D_xmin}, {D_ymin}, {D_zmax}
+create vertex {D_xmax}, {D_ymin}, {D_zmax}
+create vertex {D_xmax}, {D_ymax}, {D_zmax}
+create vertex {D_xmin}, {D_ymax}, {D_zmax}
+
+#Create DNS edges
+
+#Create bottom square
+create curve 36 37
+create curve 37 38
+create curve 38 39
+create curve 39 36
+
+#Create the top square
+create curve 40 41
+create curve 41 42
+create curve 42 43
+create curve 43 40
+
+#Join the top and bottom squares
+create curve 36 40
+create curve 37 41
+create curve 38 42
+create curve 39 43
+
+#Create the DNS surfaces
+create surface 25 26 27 28
+create surface 29 30 31 32
+create surface 25 29 33 34
+create surface 26 30 34 35
+create surface 27 31 35 36
+create surface 28 32 36 33
+
+#Create the DNS volume
+create volume surface 7 to 12
+
+#
+# SET DEFINITIONS
+#
+
+#Micromorphic set definitions
+Nodeset 1 Surface 1
+Nodeset 2 Surface 2
+Nodeset 3 Surface 3
+Nodeset 4 Surface 4
+Nodeset 6 Surface 5
+Nodeset 5 Surface 6
+
+Sideset 1 Surface 1
+Sideset 2 Surface 2
+Sideset 3 Surface 3
+Sideset 4 Surface 4
+Sideset 6 Surface 5
+Sideset 5 Surface 6
+
+Block 1 Volume 6
+
+#DNS set definitions
+
+Nodeset  7 Surface  7
+Nodeset  8 Surface  8
+Nodeset  9 Surface  9
+Nodeset 10 Surface 10
+Nodeset 12 Surface 11
+Nodeset 11 Surface 12
+
+Sideset  7 Surface  7
+Sideset  8 Surface  8
+Sideset  9 Surface  9
+Sideset 10 Surface 10
+Sideset 12 Surface 11
+Sideset 11 Surface 12
+
+Block 2 Volume 12
+
+#
+# MESH DEFINITION
+#
+
+#Define the micromorphic mesh
+Volume 6 Scheme Map
+Volume 6 size {M_size}
+Mesh Volume 6
+
+#Define the DNS mesh
+Volume 12 Scheme Map
+Volume 12 size {D_size}
+Mesh Volume 12
+
+#
+# EXPORT THE MESH
+#
+
+Export Genesis "overlapping_columns.g" Block 1 2 overwrite

@@ -7,14 +7,14 @@
 
 class CoupledDirichletBC;
 
-template <>
-InputParameters validParams<CoupledDirichletBC>();
-
-class CoupledDirichletBC : public DirichletBCBase{
+class CoupledDirichletBC : public DirichletBCBase
+{
 
     public:
 
         CoupledDirichletBC( const InputParameters &parameters );
+        
+        static InputParameters validParams();
 
     protected:
 
