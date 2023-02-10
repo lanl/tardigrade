@@ -144,7 +144,7 @@ Real MicromorphicInertialCouple::computeQpResidual(){
 
     double _chi[ 9 ] = { 1 + _phi11[ _qp ],     _phi12[ _qp ],     _phi13[ _qp ],
                              _phi21[ _qp ], 1 + _phi22[ _qp ],     _phi23[ _qp ],
-                             _phi31[ _qp ],     _phi32[ _qp ],     _phi33[ _qp ]  };
+                             _phi31[ _qp ],     _phi32[ _qp ], 1 + _phi33[ _qp ]  };
 
     double _dotDotChi[ 9 ] = { _dotDotChi11[ _qp ], _dotDotChi12[ _qp ], _dotDotChi13[ _qp ],
                                _dotDotChi21[ _qp ], _dotDotChi22[ _qp ], _dotDotChi23[ _qp ],
