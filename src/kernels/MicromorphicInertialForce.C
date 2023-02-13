@@ -173,7 +173,7 @@ Real MicromorphicInertialForce::computeQpOffDiagJacobian(unsigned int jvar){
     //Copy the test and interpolation functions so that the balance equation function can read it
     if ( _off_diag_dof_num >= 0 ){
 
-        int errorCode = balance_equations::compute_inertia_force_jacobian( _component, _component,
+        int errorCode = balance_equations::compute_inertia_force_jacobian( _component, _off_diag_dof_num,
                                                                            _test[ _i ][ _qp ], _phi[ _j ][ _qp ], _density,
                                                                            _acceleration, DaDu_i, dfinertiadU_ij ); 
     
