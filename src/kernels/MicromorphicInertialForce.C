@@ -97,6 +97,15 @@ Real MicromorphicInertialForce::computeQpResidual(){
         mooseError( "Error code: " + std::to_string( errorCode ) + " returned from computation of the inertia force for component " + std::to_string( _component ) );
     }
 
+    /*
+    To compute the tangent for our current residual, i.e., finertia,
+    read the paragraph near "(see their definition)" at the link:
+    https://www.dealii.org/current/doxygen/deal.II/step_8.html
+
+    In other words, finertia implicitly contains a dirac delta
+    function which evaluates to 1 (as _i shares the same physical
+    component as _component, by definition).
+    */
     return finertia;
 }
 
@@ -125,6 +134,11 @@ Real MicromorphicInertialForce::computeQpJacobian(){
                     std::to_string( _component ) );
     }
 
+    /*
+    In computeQpJacobian, dfinertiadU_ij implicitly contains two dirac 
+    delta functions which both evaluate to 1, as _i and _j share the same 
+    physical component as _component.
+    */
     return dfinertiadU_ij;
 }
 
@@ -137,6 +151,12 @@ Real MicromorphicInertialForce::computeQpOffDiagJacobian(unsigned int jvar){
     Compute the off-diagonal terms of the jacobian
     */
 
+    /*
+    By off-diagonality, _j does not share the physical component of _i.
+    Since current residual finertia only conjugates _test[ _i ] with the
+    acceleration component of _i, all block off-diagonal tangents are zero.
+    */
+    return 0;
 
     int  _off_diag_dof_num = -1;
 
