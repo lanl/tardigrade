@@ -102,7 +102,7 @@ Real MicromorphicInertialForce::computeQpResidual(){
     read the paragraph near "(see their definition)" at the link:
     https://www.dealii.org/current/doxygen/deal.II/step_8.html
 
-    In other words, finertia implicitly contains a dirac delta
+    In other words, finertia implicitly contains a Kronecker delta
     function which evaluates to 1 (as _i shares the same physical
     component as _component, by definition).
     */
@@ -135,7 +135,7 @@ Real MicromorphicInertialForce::computeQpJacobian(){
     }
 
     /*
-    In computeQpJacobian, dfinertiadU_ij implicitly contains two dirac 
+    In computeQpJacobian, dfinertiadU_ij implicitly contains two Kronecker 
     delta functions which both evaluate to 1, as _i and _j share the same 
     physical component as _component.
     */
