@@ -151,8 +151,6 @@ Real MicromorphicInertialForce::computeQpOffDiagJacobian(unsigned int jvar){
     acceleration component of _i, all off-diagonal tangents are zero.
     */
 
-    return 0;
-
     int  _off_diag_dof_num = -1;
 
     if(jvar == _u1_int){
