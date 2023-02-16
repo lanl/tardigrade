@@ -122,7 +122,17 @@ Real MicromorphicInertialForce::computeQpJacobian(){
     Real dfinertiadU_ij;
 
     double _acceleration[ 3 ] = { _a1[ _qp ], _a2[ _qp ], _a3[ _qp ] };
-    std::vector< double > DaDu_i = { _da1du[ _qp ], _da2du[ _qp ], _da3du[ _qp ] };
+    std::vector< double > DaDu_i = { 0, 0, 0 };
+
+    if(_component == 0){
+        DaDu_i[_component] = _da1du[ _qp ];
+    }
+    else if(_component == 1){
+        DaDu_i[_component] = _da2du[ _qp ];
+    }
+    else if(_component == 2){
+        DaDu_i[_component] = _da3du[ _qp ];
+    }
 
     //Copy the test and interpolation functions so that the balance equation function can read it
     int errorCode = balance_equations::compute_inertia_force_jacobian( _component, _component,
@@ -166,7 +176,17 @@ Real MicromorphicInertialForce::computeQpOffDiagJacobian(unsigned int jvar){
     Real dfinertiadU_ij;
 
     double _acceleration[ 3 ] = { _a1[ _qp ], _a2[ _qp ], _a3[ _qp ] };
-    std::vector< double > DaDu_i = { _da1du[ _qp ], _da2du[ _qp ], _da3du[ _qp ] };
+    std::vector< double > DaDu_i = { 0, 0, 0 };
+
+    if(_component == 0){
+        DaDu_i[_component] = _da1du[ _qp ];
+    }
+    else if(_component == 1){
+        DaDu_i[_component] = _da2du[ _qp ];
+    }
+    else if(_component == 2){
+        DaDu_i[_component] = _da3du[ _qp ];
+    }
 
     //Copy the test and interpolation functions so that the balance equation function can read it
     if ( _off_diag_dof_num >= 0 ){
