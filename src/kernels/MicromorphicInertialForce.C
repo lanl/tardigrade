@@ -84,13 +84,6 @@ Real MicromorphicInertialForce::computeQpResidual(){
 
     where i = _component
 
-    To compute the tangent for our current residual, i.e., finertia,
-    read the paragraph near "(see their definition)" at the link:
-    https://www.dealii.org/current/doxygen/deal.II/step_8.html
-
-    In other words, finertia implicitly contains a Kronecker delta
-    function which evaluates to 1 (as _i shares the same physical
-    component as _component, by definition).
     */
 
     Real finertia;
@@ -113,11 +106,8 @@ Real MicromorphicInertialForce::computeQpJacobian(){
     |    computeQpJacobian    |
     ===========================
 
-    Compute the block diagonal jacobian term.
+    Compute the diagonal jacobian term.
 
-    By "diagonal," dfinertiadU_ij implicitly contains two Kronecker 
-    delta functions which both evaluate to 1, as _i and _j share the same 
-    physical component as _component.
     */
     Real dfinertiadU_ij;
 
@@ -154,11 +144,13 @@ Real MicromorphicInertialForce::computeQpOffDiagJacobian(unsigned int jvar){
     |    computeQpOffDiagJacobian    |
     ==================================
 
-    Compute the block off-diagonal terms of the jacobian
+    Compute the off-diagonal terms of the jacobian
 
-    By "off-diagonal," _j does not share the physical component of _i.
-    Since current residual finertia only conjugates _test[ _i ] with the
-    acceleration component of _i, all off-diagonal tangents are zero.
+    Note that every off-diagonal term of the jacobian is zero-valued.
+    By "off-diagonal," dof _j does not share the physical component as
+    dof _i. Since residual finertia only conjugates _test[ _i ] with the
+    acceleration component of _i, all off-diagonal terms are thus zero.
+ 
     */
 
     int  _off_diag_dof_num = -1;
