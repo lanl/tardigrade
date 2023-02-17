@@ -149,7 +149,9 @@ Real MicromorphicInertialForce::computeQpOffDiagJacobian(unsigned int jvar){
     Note that every off-diagonal term of the jacobian is zero-valued.
     By "off-diagonal," dof _j does not share the physical component as
     dof _i. Since residual finertia only conjugates _test[ _i ] with the
-    acceleration component of _i, all off-diagonal terms are thus zero.
+    acceleration component of _i, all off-diagonal terms are thus zero
+    where the discrete solution for components u_1, u_2, u_3 are written
+    in an orthonormal basis.
  
     */
 
