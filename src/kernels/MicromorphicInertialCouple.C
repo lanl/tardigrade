@@ -187,10 +187,6 @@ Real MicromorphicInertialCouple::computeQpJacobian(){
                                _dotDotChi21[ _qp ], _dotDotChi22[ _qp ], _dotDotChi23[ _qp ],
                                _dotDotChi31[ _qp ], _dotDotChi32[ _qp ], _dotDotChi33[ _qp ] };
 
-    std::vector< double > _dDotDotChiDu = { _dDotDotChi11Du[ _qp ], _dDotDotChi12Du[ _qp ], _dDotDotChi13Du[ _qp ],
-                                            _dDotDotChi21Du[ _qp ], _dDotDotChi22Du[ _qp ], _dDotDotChi23Du[ _qp ],
-                                            _dDotDotChi31Du[ _qp ], _dDotDotChi32Du[ _qp ], _dDotDotChi33Du[ _qp ] };
-
     double _inertia[ 9 ] = { _I11, _I12, _I13,
                              _I12, _I22, _I23,
                              _I13, _I23, _I33 };
@@ -198,6 +194,38 @@ Real MicromorphicInertialCouple::computeQpJacobian(){
     //Encode the indices to the ordering of the output
     int _I = 3 * _component_i + _component_j;
     int _J = _I;
+
+    std::vector< double > _dDotDotChiDu = { 0, 0, 0,
+                                            0, 0, 0,
+                                            0, 0, 0 };
+
+    if ( _J == 0 ){
+        _dDotDotChiDu[_J] = _dDotDotChi11Du[ _qp ];
+    }
+    else if( _J == 1 ){
+        _dDotDotChiDu[_J] = _dDotDotChi12Du[ _qp ];
+    }
+    else if( _J == 2 ){
+        _dDotDotChiDu[_J] = _dDotDotChi13Du[ _qp ];
+    }
+    else if( _J == 3 ){
+        _dDotDotChiDu[_J] = _dDotDotChi21Du[ _qp ];
+    }
+    else if( _J == 4 ){
+        _dDotDotChiDu[_J] = _dDotDotChi22Du[ _qp ];
+    }
+    else if( _J == 5 ){
+        _dDotDotChiDu[_J] = _dDotDotChi23Du[ _qp ];
+    }
+    else if( _J == 6 ){
+        _dDotDotChiDu[_J] = _dDotDotChi31Du[ _qp ];
+    }
+    else if( _J == 7 ){
+        _dDotDotChiDu[_J] = _dDotDotChi32Du[ _qp ];
+    }
+    else if( _J == 8 ){
+        _dDotDotChiDu[_J] = _dDotDotChi33Du[ _qp ];
+    }
 
     //Copy the test and interpolation functions so that the balance equation function can read it
     int errorCode = balance_equations::compute_inertia_couple_jacobian( _I, _J,
@@ -233,10 +261,6 @@ Real MicromorphicInertialCouple::computeQpOffDiagJacobian(unsigned int jvar){
                                _dotDotChi21[ _qp ], _dotDotChi22[ _qp ], _dotDotChi23[ _qp ],
                                _dotDotChi31[ _qp ], _dotDotChi32[ _qp ], _dotDotChi33[ _qp ] };
 
-    std::vector< double > _dDotDotChiDu = { _dDotDotChi11Du[ _qp ], _dDotDotChi12Du[ _qp ], _dDotDotChi13Du[ _qp ],
-                                            _dDotDotChi21Du[ _qp ], _dDotDotChi22Du[ _qp ], _dDotDotChi23Du[ _qp ],
-                                            _dDotDotChi31Du[ _qp ], _dDotDotChi32Du[ _qp ], _dDotDotChi33Du[ _qp ] };
-
     double _inertia[ 9 ] = { _I11, _I12, _I13,
                              _I12, _I22, _I23,
                              _I13, _I23, _I33 };
@@ -271,6 +295,38 @@ Real MicromorphicInertialCouple::computeQpOffDiagJacobian(unsigned int jvar){
     }
     else if(jvar == _phi33_int){
         _J = 8;
+    }
+
+    std::vector< double > _dDotDotChiDu = { 0, 0, 0,
+                                            0, 0, 0,
+                                            0, 0, 0 };
+
+    if ( _J == 0 ){
+        _dDotDotChiDu[_J] = _dDotDotChi11Du[ _qp ];
+    }
+    else if( _J == 1 ){
+        _dDotDotChiDu[_J] = _dDotDotChi12Du[ _qp ];
+    }
+    else if( _J == 2 ){
+        _dDotDotChiDu[_J] = _dDotDotChi13Du[ _qp ];
+    }
+    else if( _J == 3 ){
+        _dDotDotChiDu[_J] = _dDotDotChi21Du[ _qp ];
+    }
+    else if( _J == 4 ){
+        _dDotDotChiDu[_J] = _dDotDotChi22Du[ _qp ];
+    }
+    else if( _J == 5 ){
+        _dDotDotChiDu[_J] = _dDotDotChi23Du[ _qp ];
+    }
+    else if( _J == 6 ){
+        _dDotDotChiDu[_J] = _dDotDotChi31Du[ _qp ];
+    }
+    else if( _J == 7 ){
+        _dDotDotChiDu[_J] = _dDotDotChi32Du[ _qp ];
+    }
+    else if( _J == 8 ){
+        _dDotDotChiDu[_J] = _dDotDotChi33Du[ _qp ];
     }
 
     //Copy the test and interpolation functions so that the balance equation function can read it
