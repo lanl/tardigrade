@@ -20,7 +20,7 @@ registerMooseObject("tardigradeApp", MicromorphicInertialForce);
 InputParameters
 MicromorphicInertialForce::validParams()
 {
-    InputParameters params = Kernel::validParams();
+    InputParameters params = TimeKernel::validParams();
     params.set< bool >( "use_displaced_mesh" ) = false;
     params.addRequiredParam< int >( "component", "The component of the inertial force vector" );
     params.addRequiredParam< int >( "dof_num",   "The degree of freedom to use for the diagonal jacobian calculation" );
@@ -34,7 +34,7 @@ MicromorphicInertialForce::validParams()
 
 MicromorphicInertialForce::MicromorphicInertialForce( const InputParameters & parameters )
     : // We have to call the constructor for the base class first
-        Kernel( parameters ),
+        TimeKernel( parameters ),
         _component( getParam< int >( "component" ) ),
         _dof_num( getParam< int >( "dof_num" ) ),
         _MMS( getParam< bool >( "MMS" ) ),

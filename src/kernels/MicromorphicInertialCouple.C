@@ -21,7 +21,7 @@ registerMooseObject("tardigradeApp", MicromorphicInertialCouple);
 InputParameters
 MicromorphicInertialCouple::validParams()
 {
-    InputParameters params = Kernel::validParams();
+    InputParameters params = TimeKernel::validParams();
     params.set< bool >( "use_displaced_mesh" ) = false;
     params.addRequiredParam< int >( "component_i", "The i component of the inertial couple tensor" );
     params.addRequiredParam< int >( "component_j", "The j component of the inertial couple tensor" );
@@ -48,7 +48,7 @@ MicromorphicInertialCouple::validParams()
 
 MicromorphicInertialCouple::MicromorphicInertialCouple( const InputParameters & parameters )
     : // We have to call the constructor for the base class first
-        Kernel( parameters ),
+        TimeKernel( parameters ),
         _component_i( getParam< int >( "component_i" ) ),
         _component_j( getParam< int >( "component_j" ) ),
         _dof_num( getParam< int >( "dof_num" ) ),

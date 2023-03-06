@@ -17,13 +17,13 @@
 #ifndef MICROMORPHICINERTIALCOUPLE_H
 #define MICROMORPHICINERTIALCOUPLE_H
 
-#include "Kernel.h"
+#include "TimeKernel.h"
 #include <balance_equations.h> //The Micromorphic balance equations
 
 //Forward declarations
 class MicromorphicInertialCouple;
 
-class MicromorphicInertialCouple : public Kernel
+class MicromorphicInertialCouple : public TimeKernel
 {
     /*!
     ------------------------------------------
