@@ -15,13 +15,13 @@
 #ifndef MICROMORPHICINERTIALFORCE_H
 #define MICROMORPHICINERTIALFORCE_H
 
-#include "Kernel.h"
+#include "TimeKernel.h"
 #include <balance_equations.h> //The Micromorphic balance equations
 
 //Forward declarations
 class MicromorphicInertialForce;
 
-class MicromorphicInertialForce : public Kernel
+class MicromorphicInertialForce : public TimeKernel
 {
     /*!
     -----------------------------------------------------
