@@ -13,11 +13,10 @@
 #include "MooseSyntax.h"
 #include "ModulesApp.h"
 
-template <>
 InputParameters
-validParams<tardigradeTestApp>()
+tardigradeTestApp::validParams()
 {
-  InputParameters params = validParams<tardigradeApp>();
+  InputParameters params = tardigradeApp::validParams();
   return params;
 }
 

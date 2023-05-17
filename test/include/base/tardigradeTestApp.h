@@ -13,14 +13,13 @@
 
 class tardigradeTestApp;
 
-template <>
-InputParameters validParams<tardigradeTestApp>();
-
 class tardigradeTestApp : public MooseApp
 {
 public:
   tardigradeTestApp(InputParameters parameters);
   virtual ~tardigradeTestApp();
+  
+  static InputParameters validParams();
 
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);
