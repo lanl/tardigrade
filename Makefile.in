@@ -1,0 +1,87 @@
+###############################################################################
+################### MOOSE Application Standard Makefile #######################
+###############################################################################
+#
+# Optional Environment variables
+# MOOSE_DIR        - Root directory of the MOOSE project
+#
+###############################################################################
+# Use the MOOSE submodule if it exists and MOOSE_DIR is not set
+MOOSE_SUBMODULE    := $(CURDIR)/moose
+ifneq ($(wildcard $(MOOSE_SUBMODULE)/framework/Makefile),)
+  MOOSE_DIR        ?= $(MOOSE_SUBMODULE)
+else
+  MOOSE_DIR        ?= $(shell dirname `pwd`)/moose
+endif
+
+# framework
+FRAMEWORK_DIR      := $(MOOSE_DIR)/framework
+include $(FRAMEWORK_DIR)/build.mk
+include $(FRAMEWORK_DIR)/moose.mk
+
+################################## MODULES ####################################
+# To use certain physics included with MOOSE, set variables below to
+# yes as needed.  Or set ALL_MODULES to yes to turn on everything (overrides
+# other set variables).
+
+ALL_MODULES         := no
+
+CHEMICAL_REACTIONS  := no
+CONTACT             := no
+FLUID_PROPERTIES    := no
+HEAT_CONDUCTION     := no
+MISC                := yes
+NAVIER_STOKES       := no
+PHASE_FIELD         := no
+RDG                 := no
+RICHARDS            := no
+SOLID_MECHANICS     := no
+STOCHASTIC_TOOLS    := no
+TENSOR_MECHANICS    := yes
+XFEM                := no
+POROUS_FLOW         := no
+
+include $(MOOSE_DIR)/modules/modules.mk
+###############################################################################
+
+# dep apps
+APPLICATION_DIR    := $(CURDIR)
+#MICROMORPHIC_COMPILER_PATH := /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/
+ANACONDA_INCLUDE   := $(CONDA_PREFIX)/include
+ANACONDA_LIB       := $(CONDA_PREFIX)/lib
+APPLICATION_NAME   := tardigrade
+BUILD_EXEC         := yes
+GEN_REVISION       := no
+include            $(FRAMEWORK_DIR)/app.mk
+
+###############################################################################
+# Additional special case targets should be added here
+
+#ADDITIONAL_INCLUDES += -I$(MICROMORPHIC_DIR)/voro++ -I$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+#ADDITIONAL_INCLUDES += -I$(MICROMORPHIC_DIR)/vector_tools/src/cpp
+#ADDITIONAL_INCLUDES += -I$(MICROMORPHIC_DIR)/overlap -I$(MICROMORPHIC_DIR)/quickhull
+
+#ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/voro++/voro++-0.4.6/src -I$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+ADDITIONAL_CPPFLAGS += -I@VORO_INCLUDE_DIR@ -I@micromorphic_element_INCLUDE_DIR@
+ADDITIONAL_CPPFLAGS += -I@vector_tools_INCLUDE_DIR@ -I@error_tools_INCLUDE_DIR@
+ADDITIONAL_CPPFLAGS += -I@overlap_coupling_INCLUDE_DIR@# -I$(MICROMORPHIC_DIR)
+ADDITIONAL_CPPFLAGS += -I@solver_tools_INCLUDE_DIR@
+ADDITIONAL_CPPFLAGS += -I@XDMF_INCLUDE_DIRS@# -I$(MICROMORPHIC_DIR)/xdmf/build
+#ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/xdmf/core -I$(MICROMORPHIC_DIR)/xdmf/build/core
+ADDITIONAL_CPPFLAGS += -I@LIBXML2_INCLUDE_DIR@#$(ANACONDA_INCLUDE)/libxml2
+ADDITIONAL_CPPFLAGS += -I@BOOST_INCLUDE_DIR@#(BOOST_ROOT)
+ADDITIONAL_CPPFLAGS += -I@YAML-CPP_INCLUDE_DIR@#$(MICROMORPHIC_DIR)/yaml-cpp/include
+
+#ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/voro++/voro++-0.4.6/src -L$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+for dir in @LINK_DIRECTORIES@
+    ADDITIONAL_LIBS     += -L$$dir
+done
+ADDITIONAL_LIBS     += -lmicromat -lmicrobalance -lvoro++ -loverlap -lyaml-cpp
+#ADDITIONAL_LIBS     += -L$(MICROMORPHIC_COMPILER_PATH) -lresolv -DDEBUG_MODE
+ADDITIONAL_LIBS     += -lXdmf -lXdmfCore -lXdmfUtils
+ADDITIONAL_LIBS     += -lxml2
+
+ifeq ($(METHOD),dbg)
+    ADDITIONAL_CPPFLAGS += -DDEBUG_MODE
+    ADDITIONAL_LIBS += -DDEBUG_MODE
+endif

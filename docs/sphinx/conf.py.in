@@ -1,0 +1,88 @@
+# Configuration file for the Sphinx documentation builder.
+#
+# This file only contains a selection of the most common options. For a full
+# list see the documentation:
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
+
+# -- Path setup --------------------------------------------------------------
+# If extensions (or modules to document with autodoc) are in another directory,
+# add these directories to sys.path here. If the directory is relative to the
+# documentation root, use os.path.abspath to make it absolute, like shown here.
+#
+# import sys
+# sys.path.insert(0, os.path.abspath('.'))
+import os
+
+# -- Project information -----------------------------------------------------
+# Meta data from CMake configure()
+project = '@PROJECT_NAME@'
+RECENT_GIT_TAG = '@tardigrade_RECENT_GIT_TAG@'
+VERSION_STRING_FULL = '@tardigrade_VERSION_STRING_FULL@'
+VERSION = '@tardigrade_VERSION@'
+VERSION_MAJOR = '@tardigrade_VERSION_MAJOR@'
+VERSION_MINOR = '@tardigrade_VERSION_MINOR@'
+VERSION_PATCH = '@tardigrade_VERSION_PATCH@'
+VERSION_TWEAK = '@tardigrade_VERSION_TWEAK@'
+VERSION_AHEAD = '@tardigrade_VERSION_AHEAD@'
+VERSION_GIT_SHA = '@tardigrade_VERSION_GIT_SHA@'
+
+# Hardcoded project information
+copyright = '2020, Nathan A. Miller and Kyle A. Brindley'
+author = 'Nathan A. Miller and Kyle A. Brindley'
+
+# Set version to clean Git tag or else use meta data in version
+release = VERSION
+if int(VERSION_AHEAD) == 0:  # Git tag describes current commit
+    version = release
+else:
+    version = VERSION_STRING_FULL
+
+# -- Project Variables -------------------------------------------------------
+rst_prolog = f'.. |project| replace:: {project}\n.. include:: targets.txt'
+
+# -- General configuration ---------------------------------------------------
+# Add custom style sheet to make the html docs wider
+def setup(app):
+    app.add_css_file('custom.css')
+
+# Add any Sphinx extension module names here, as strings.
+extensions = ["breathe", 'sphinxcontrib.bibtex', 'sphinx.ext.extlinks']
+bibtex_bibfiles = ['software.bib']
+
+# Breathe Configuration
+breathe_projects = {project: "../doxygen/xml"}
+breathe_default_project = project
+
+# Links to PRs, Jira issues.
+extlinks = {
+     "merge": ("https://re-git.lanl.gov/aea/stub-repositories/tardigrade/-/merge_requests/%s", "MERGE-%s"),
+     "issue": ("https://re-git.lanl.gov/aea/stub-repositories/tardigrade/-/issues/%s", "ISSUE-%s"),
+     # Maintain the old Atlassian links until the servers don't exist. Required for changelog entries.
+     "pull": ("https://xcp-stash.lanl.gov/projects/MM/repos/tardigrade/pull-requests/%s/overview", "PR%s"),
+     "jira": ("https://xcp-jira.lanl.gov/browse/VIP-%s", "VIP-%s"),
+}
+
+# Add any paths that contain templates here, relative to this directory.
+templates_path = ['_templates']
+
+# The suffix(es) of source filenames.
+source_suffix = [
+    '.rst',
+    '.md'
+]
+
+# List of patterns, relative to source directory, that match files and
+# directories to ignore when looking for source files.
+# This pattern also affects html_static_path and html_extra_path.
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+
+# -- Options for HTML output -------------------------------------------------
+# The theme to use for HTML and HTML Help pages.  See the documentation for
+# a list of builtin themes.
+#
+html_theme = 'sphinx_rtd_theme'
+
+# Add any paths that contain custom static files (such as style sheets) here,
+# relative to this directory. They are copied after the builtin static files,
+# so a file named "default.css" will overwrite the builtin "default.css".
+html_static_path = ['_static']
