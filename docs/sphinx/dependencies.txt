@@ -1,0 +1,64 @@
+************
+Dependencies
+************
+
+.. include:: md2rst.txt
+
+Compilers
+=========
+
+* c++11 compiler (listed version number has been tested at some point)
+
+  * g++ >= GNU 4.8.5
+
+Executables
+===========
+
+* `CMake`_ >= 3.14
+* `Doxygen`_ >= 1.8.5
+* `LaTeX`_ >= 2017
+
+Python Modules (for documentation)
+==================================
+
+For convenience, the minimal Python environment requirements for the
+documentation build are included in ``configuration_files/environment.yaml``.
+This file was created from the `pipreqs`_ command line tool and Sphinx
+configuration inspection, e.g. the extension packages.
+
+.. code:: bash
+
+   $ pwd
+   path/to/tardigrade/
+   $ pipreqs --use-local --print --no-pin .
+
+A minimal anaconda environment for building the documentation can be created
+from an existing anaconda installation with the following commands.
+
+.. code:: bash
+
+   $ conda env create --file environment.yaml
+
+You can learn more about Anaconda Python environment creation and management in
+the `Anaconda Documentation`_.
+
+C++ Libraries
+=============
+
+.. note:: 
+
+   **Non-admin installations for Eigen and Boost are no longer required.** This project is built and deployed against C++
+   libraries managed in Conda. See the Conda environment file and discussion for non-admin environment management.
+
+* `Eigen`_ >= 3.3.7
+* `BOOST`_ >= 1.59.0
+* error\_tools: https://re-git.lanl.gov/aea/material-models/error_tools
+* vector\_tools: https://re-git.lanl.gov/aea/material-models/vector_tools
+* abaqus\_tools: https://re-git.lanl.gov/aea/material-models/abaqus_tools
+* constitutive\_tools: https://re-git.lanl.gov/aea/material-models/constitutive_tools
+* stress\_tools: https://re-git.lanl.gov/aea/material-models/stress_tools
+* solver\_tools: https://re-git.lanl.gov/aea/material-models/solver_tools
+
+All of the ``{error,vector,stress,solver,constitutive}_tools`` libraries are
+pulled from their git repos by branch name and built with their respective cmake
+files as part of the cmake build for this project.

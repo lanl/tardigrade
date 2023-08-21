@@ -1,0 +1,169 @@
+***********************
+Contribution Guidelines
+***********************
+
+W-13 python projects, including the |project| project, use the `Gitlab Flow`_ workflow model.
+
+Git Commit Message
+==================
+
+Begin Git commit messages with one of the following headings:
+
+* BUG: bug fix
+* DOC: documentation
+* FEAT: feature
+* MAINT: maintenance
+* TST: tests
+* REL: release
+* WIP: work-in-progress
+
+For example:
+
+.. code:: bash
+
+   git commit -m "FEAT: short intent of new feature"
+   git commit -m "BUG: fixes nasty bug"
+   git commit -m "DOC: adds documentation for feature"
+
+Git Branch Names
+================
+
+When creating branches use one of the following naming conventions. When in
+doubt use ``feature/<description>``.
+
+* bugfix/\<description>
+* feature/\<description>
+* release/\<description>
+
+reStructured Text
+=================
+
+`Sphinx`_ reads in docstrings and other special portions of the code as
+reStructured text. Developers should follow styles in this `Sphinx style
+guide`_.
+
+Style Guide
+===========
+
+.. include:: md2rst.txt
+
+This project does not yet have a full style guide. Generally, wherever a style can't be inferred from surrounding code
+this project falls back to `PEP-8`_-like styles. There are two notable exceptions to the notional PEP-8 fall back:
+
+1. `Doxygen style docstrings`_ are required for automated, API from source documentation.
+2. This project prefers expansive whitespace surrounding parentheses, braces, and brackets.
+
+   * No leading space between a function and the argument list.
+   * One space following an open paranthesis ``(``, brace ``{``, or bracket
+     ``[``
+   * One space leading a close paranthesis ``)``, brace ``}``, or bracket ``]``
+
+An example of the whitespace style:
+
+.. code:: c++
+
+   my_function( arg1, { arg2, arg3 }, arg4 );
+
+The following ``sed`` commands may be useful for updating white space, but must
+be used with care. The developer is recommended to use a unique git commit
+between each command with a corresponding review of the changes and a unit test
+run.
+
+* Trailing space for open paren/brace/bracket
+
+.. code:: bash
+
+   sed -i 's/\([({[]\)\([^ ]\)/\1 \2/g' <list of files to update>
+
+* Leading space for close paren/brace/bracket
+
+.. code:: bash
+
+   sed -i 's/\([^ ]\)\([)}\]]\)/\1 \2/g' <list of files to update>
+
+* White space between adjacent paren/brace/bracket
+
+.. code:: bash
+
+   sed -i 's/\([)}\]]\)\([)}\]]\)/\1 \2/g' <list of files to update>
+
+Pull Request Review Criteria
+============================
+
+When adding a new feature (with moderate to high complexity), even before
+creating a pull request, the developer should:
+
+1. Decide on and document intended behavior before creating any branches used
+   for pull requests. Depending upon complexity, the `Gitlab project issues`_ or
+   `xcp-confluence`_ can be used, where `xcp-confluence`_ is recommended for
+   broader discussion prior to implementation.
+2. Discuss challenging features with other developers before implementation in
+   a merge request.
+
+Merge request reviewers are advised to
+
+1. Schedule a Skype/WebEx meeting with |project| developers to discuss improvement
+   before negatively commenting on the online pull request.
+2. Use general guidelines (below) to help structure edifying criticisms.
+
+The following items are general topic recommendations for pull request reviews:
+
+* High-level needs
+
+   - Verify that PR is tied to correct Jira task
+   - User story assumptions make sense
+
+* Documentation
+
+   - The HTML documentation matches feature additions, changes, or updates
+   - New modules have doc strings
+   - Changes to methods, and especially classes, have updated doc strings that parse well
+     to html pages
+   - Comments applied for complex blocks
+   - Missing tutorials or tests in code are documented by a relevant `Gitlab
+     project issues`_
+
+* Regression and integration (unit) testing
+
+   - Pytests and/or BOOST tests implemented and updated for corresponding feature
+   - Mocker objects in tests where appropriate 
+   - Integration tests for new models acceptable
+
+* Platform independence
+
+   - Paths are OS agnostic
+   - No new warnings on aea-release and aea-beta environments
+
+* Code performance
+
+   - Check for appropriate algorithmic efficiency (e.g., O(N log N) vs O(N^3))
+   - Vectorization used instead of spurious loops
+   - Use of Python built-in functions or common packages as appropriate
+
+* Reasonable style
+
+   - C++ style matching existing code
+   - "Pythonic" code
+   - PEP8 formatting
+   - No executable code is commented out
+   - No hardcoded variables outside of settings/configuration
+
+* General questions to ask
+
+   - Is this minimal code?
+   - Are there additional Jira tasks needed for follow-on work?
+   - Are there enough tests to ensure the code does what is expected?
+
+* Making breaking changes
+
+   - Is the breaking change necessary?
+   - Is backwards compatibility maintained?
+   - Will the old behavior be deprecated? In what version?
+   - Is there a Jira issue with details on how to deprecate the old behavior?
+   - Is the deprecation Jira issue linked to the appropriate unreleased version?
+
+* Appropriate entry in :ref:`changelog`
+
+   - Is entry under correct heading?
+   - Does it include a short description?
+   - Is the pull request number and link included?

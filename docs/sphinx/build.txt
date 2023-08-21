@@ -1,0 +1,271 @@
+.. _build:
+
+************************
+Build, Test, and Install
+************************
+
+.. include:: md2rst.txt
+
+This project is built with `CMake`_ and uses `Sphinx`_ to build the documentation with `Doxygen`_ + `Breathe`_ for the
+c++ API.
+
+Build on sstelmo
+================
+
+1) Activate the correct python environment
+
+   .. code:: bash
+
+      $ module load python/2019.10-python-3.7
+      $ sv3r
+
+2) Create a build directory
+
+   .. code:: bash
+
+      $ pwd
+      /path/to/tardigrade/
+
+      $ mkdir build
+      $ cd build
+
+3) Configure ``cmake3``
+
+   .. note::
+
+      This step only needs to be performed once unless you need to specify a new CMake configuration for a re-build. Most
+      command line arguments and environment variables are stored in the CMake cache. Anything found in cache will not be
+      re-configured unless you remove the cache file or clobber the build directory.
+
+   .. code:: bash
+
+      $ pwd
+      /path/to/tardigrade/build
+      $ cmake3 ..
+
+4) Build various portions of the project
+
+   .. note::
+
+      Most of the project will re-build only as necessary after source updates. Some portions of the documentation
+      require a ``make clean`` after documentation source file updates to force a re-build.
+
+   .. code:: bash
+
+      $ pwd
+      /path/to/tardigrade/build
+
+      # Build everything
+      $ cmake3 --build .
+
+      # Build only the c++ primary libraries
+      $ cmake3 --build src/cpp
+
+5) Locate build files
+
+   .. note::
+
+      The build directory structure may change between version releases. Developers and users are encouraged to become
+      familiar with the bash ``find``, ``grep``, and ``tree`` commands to locate build files.
+
+   .. code:: bash
+
+      $ pwd
+      /path/to/tardigrade/build
+
+      # find c++ libraries and ignore intermediate files with similar extensions
+      $ find . \( -name "*.o" -o -name "*.so" -o -name "*.a" \) | grep -vE "\.cpp\."
+
+6) Clean build directory to force a re-build
+
+   .. warning::
+
+      The abaqus input files and bash scripts used for integration testing are built with the `CMake
+      add\_custom\_target`_ feature. Consequently, the integration test target is *always considered out of date*. The
+      integration test target copies all registered input files and the integration test bash script from source to build
+      directory. This means the file copy operation is always performed when the integration test target is requested in the
+      cmake build command, e.g. ``cmake --build .`` or ``cmake --build src/abaqus/tests``. This operation is computationally
+      inexpensive with respect to building the ``tardigrade`` source code.
+
+   .. code:: bash
+
+      $ pwd
+      /path/to/tardigrade/build
+
+      $ make clean
+
+Test on sstelmo
+===============
+
+4) Build tests of the project
+
+   .. code:: bash
+
+      $ pwd
+      /path/to/tardigrade/build
+
+      # Build c++ tests
+      $ cmake3 --build src/cpp/tests
+
+5) Run the tests
+
+   .. code:: bash
+
+      $ pwd
+      /path/to/tardigrade/build
+
+      # Run ctest
+      $ ctest
+
+      # Results print to screen
+      # View details of most recent test execution including failure messages
+      $ less Testing/Temporary/LastTest.log
+
+Convenience build wrappers
+==========================
+
+Two build scripts have been created for convenience, ``new_build.sh`` and
+``build_docs.sh``. The first will build everything including the library binary,
+the test binary, and the documentation. This is the same build script used by
+``CD.sh`` for Gitlab CD builds and testing. The ``build_docs.sh`` script
+only builds the documentation. Both build scripts clobber existing build
+directories, reset any bash environment variables, and run the cmake
+configuration from scratch.
+
+2) Build everything and run tests
+
+   .. code:: bash
+
+      $ pwd
+      /path/to/tardigrade/
+
+      # Just perform the build (pick one)
+      $ ./new_build.sh <cmake build type>
+      $ ./new_build.sh  None
+      $ ./new_build.sh  None
+      $ ./new_build.sh  None
+
+      # Perform tests from PWD
+      $ ./build/src/cpp/tests/test_tardigrade
+
+      # Build and perform tests
+      $ ./BUILD.sh
+      $ ./TEST.sh
+
+3) View test results
+
+   .. code:: bash
+
+      # As built directly to PWD
+      $ cat results.tex
+
+      # As built by BUILD.sh and TEST.sh
+      $ cat build/src/cpp/tests/*_results.tex
+      $ cat *results.tex
+
+4) Display docs
+
+   .. code:: bash
+
+      # Sphinx
+      $ firefox build/docs/sphinx/index.html &
+
+      # Doxygen
+      $ firefox build/docs/doxygen/html/index.html &
+
+Building the documentation
+==========================
+
+.. note::
+
+   **API Health Note**: The sphinx API docs are a work-in-progress. The doxygen
+   API is much more useful.
+
+The documentation can be built with ``build_docs.sh``. The steps used in that
+shell script are repeated here.
+
+To build just the documentation pick up the steps here:
+
+2) Create the build directory and move there
+
+   .. code:: bash
+
+      $ pwd
+      /path/to/tardigrade/
+      $ mkdir build/
+      $ cd build/
+
+3) Run cmake3 configuration
+
+   .. code:: bash
+
+      $ pwd
+      /path/to/tardigrade/build/
+      $ cmake3 ..
+
+4) Build the docs
+
+   .. code:: bash
+
+      $ cmake3 --build docs/sphinx
+
+5) Documentation builds to:
+
+   .. code:: bash
+
+      tardigrade/build/docs/sphinx/index.html
+
+6) Display docs
+
+   .. code:: bash
+
+      $ pwd
+      /path/to/tardigrade/build/
+      $ firefox docs/sphinx/index.html &
+
+7) While the Sphinx API is still a WIP, try the doxygen API
+
+   .. code:: bash
+
+      $ pwd
+      /path/to/tardigrade/build/
+      $ firefox docs/doxygen/html/index.html &
+
+Install
+=======
+
+In addition to the CMake build and test configuration, this project has a CMake install configuration. Users will most
+likely never need to perform a project installation from source. The project's CI/CD scripts deploy updates
+automatically to supported `W-13 Python Environments`_. Developers using this repository as a template for projects
+outside W-13 may be interested in the template ``{BUILD,TEST,INSTALL}.sh`` scripts used by the CI/CD jobs.
+
+After building, the project can be installed with the CMake ``--install`` option.
+
+.. code:: bash
+
+   $ pwd
+   /path/to/tardigrade/build/
+   $ cmake3 --install .
+
+Because CMake defaults to the system installation directories, the above command will probably require administrator
+privileges. For non-default installation directories, use the CMake ``--prefix`` option.
+
+.. code:: bash
+
+   $ pwd
+   /path/to/tardigrade/build/
+   $ cmake3 --install . --prefix /path/to/custom/install
+
+A common choice for non-admin installs on Linux systems is ``/home/$USER/.local/``. However, this project is intended to
+be built and deployed to Conda Python environments. The CI/CD build for this project deploys to the `W-13 Python
+Environments`_ with the ``INSTALL.sh`` script. Developers building and deploying from source may use that script for
+active conda environment installations or as a template for custom installations.
+
+.. code:: bash
+
+   $ pwd
+   /path/to/tardigrade/
+   $ grep "install\|conda_env_path" INSTALL.sh
+   conda_env_path=$(conda info | grep "active env location" | cut -f 2 -d :)
+   # Change to build directory and run cmake install
+   ${cmake_exec} --install . --prefix ${conda_env_path}
