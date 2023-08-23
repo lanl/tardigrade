@@ -54,7 +54,6 @@ include $(MOOSE_DIR)/modules/modules.mk
 
 # dep apps
 APPLICATION_DIR    := $(CURDIR)
-#MICROMORPHIC_COMPILER_PATH := /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/
 ANACONDA_INCLUDE   := $(CONDA_PREFIX)/include
 ANACONDA_LIB       := $(CONDA_PREFIX)/lib
 APPLICATION_NAME   := tardigrade
@@ -65,25 +64,19 @@ include            $(FRAMEWORK_DIR)/app.mk
 ###############################################################################
 # Additional special case targets should be added here
 
-#ADDITIONAL_INCLUDES += -I$(MICROMORPHIC_DIR)/voro++ -I$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
-#ADDITIONAL_INCLUDES += -I$(MICROMORPHIC_DIR)/vector_tools/src/cpp
-#ADDITIONAL_INCLUDES += -I$(MICROMORPHIC_DIR)/overlap -I$(MICROMORPHIC_DIR)/quickhull
-
-#ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/voro++/voro++-0.4.6/src -I$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
 ADDITIONAL_CPPFLAGS += -I$(ANACONDA_INCLUDE)
 ifeq (@xdmf_FOUND@,1)
-    ADDITIONAL_CPPFLAGS += -I@XDMF_INCLUDE_DIRS@# -I$(MICROMORPHIC_DIR)/xdmf/build
-endif
-#ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/xdmf/core -I$(MICROMORPHIC_DIR)/xdmf/build/core
-ifeq (@xdmf_FOUND@,1) # CURRENTLY overlap_coupling requires XDMF
-    ADDITIONAL_CPPFLAGS += -I@LIBXML2_INCLUDE_DIR@#$(ANACONDA_INCLUDE)/libxml2
-    ADDITIONAL_CPPFLAGS += -I@BOOST_INCLUDE_DIR@#(BOOST_ROOT)
-    ADDITIONAL_CPPFLAGS += -I@YAML-CPP_INCLUDE_DIR@#$(MICROMORPHIC_DIR)/yaml-cpp/include
+    ADDITIONAL_CPPFLAGS += -I@XDMF_INCLUDE_DIRS@
+    ADDITIONAL_CPPFLAGS += -I@LIBXML2_INCLUDE_DIR@
+    ADDITIONAL_CPPFLAGS += -I@BOOST_INCLUDE_DIR@
 endif
 
-#ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/voro++/voro++-0.4.6/src -L$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
+ifeq (@overlap_coupling_FOUND@,1)
+    ADDITIONAL_CPPFLAGS += -I@YAML-CPP_INCLUDE_DIR@
+endif
+
 ADDITIONAL_LIBS     += -lmicromat -lmicrobalance
-#ADDITIONAL_LIBS     += -L$(MICROMORPHIC_COMPILER_PATH) -lresolv -DDEBUG_MODE
+
 ifeq (@overlap_coupling_FOUND@,1)
     for lib in @overlap_coupling_REQUIRED_LIBRARIES@; do\
         ADDITIONAL_LIBS     += -l$$lib
