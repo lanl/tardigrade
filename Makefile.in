@@ -30,14 +30,22 @@ CHEMICAL_REACTIONS  := no
 CONTACT             := no
 FLUID_PROPERTIES    := no
 HEAT_CONDUCTION     := no
-MISC                := yes
+ifeq (@overlap_coupling_FOUND@,1)
+  MISC                := yes
+else
+  MISC                := no
+endif
 NAVIER_STOKES       := no
 PHASE_FIELD         := no
 RDG                 := no
 RICHARDS            := no
 SOLID_MECHANICS     := no
 STOCHASTIC_TOOLS    := no
-TENSOR_MECHANICS    := yes
+ifeq (@overlap_coupling_FOUND@,1)
+    TENSOR_MECHANICS    := yes
+else
+    TENSOR_MECHANICS    := no
+endif
 XFEM                := no
 POROUS_FLOW         := no
 
@@ -67,20 +75,26 @@ ifeq (@xdmf_FOUND@,1)
     ADDITIONAL_CPPFLAGS += -I@XDMF_INCLUDE_DIRS@# -I$(MICROMORPHIC_DIR)/xdmf/build
 endif
 #ADDITIONAL_CPPFLAGS += -I$(MICROMORPHIC_DIR)/xdmf/core -I$(MICROMORPHIC_DIR)/xdmf/build/core
-ADDITIONAL_CPPFLAGS += -I@LIBXML2_INCLUDE_DIR@#$(ANACONDA_INCLUDE)/libxml2
-ADDITIONAL_CPPFLAGS += -I@BOOST_INCLUDE_DIR@#(BOOST_ROOT)
 ifeq (@xdmf_FOUND@,1) # CURRENTLY overlap_coupling requires XDMF
+    ADDITIONAL_CPPFLAGS += -I@LIBXML2_INCLUDE_DIR@#$(ANACONDA_INCLUDE)/libxml2
+    ADDITIONAL_CPPFLAGS += -I@BOOST_INCLUDE_DIR@#(BOOST_ROOT)
     ADDITIONAL_CPPFLAGS += -I@YAML-CPP_INCLUDE_DIR@#$(MICROMORPHIC_DIR)/yaml-cpp/include
 endif
 
 #ADDITIONAL_LIBS     += -L$(MICROMORPHIC_DIR)/voro++/voro++-0.4.6/src -L$(MICROMORPHIC_DIR)/micromorphic_element/src/cpp
-for dir in @LINK_DIRECTORIES@
-    ADDITIONAL_LIBS     += -L$$dir
-done
-ADDITIONAL_LIBS     += -lmicromat -lmicrobalance -lvoro++ -loverlap -lyaml-cpp
+ADDITIONAL_LIBS     += -lmicromat -lmicrobalance
 #ADDITIONAL_LIBS     += -L$(MICROMORPHIC_COMPILER_PATH) -lresolv -DDEBUG_MODE
-ADDITIONAL_LIBS     += -lXdmf -lXdmfCore -lXdmfUtils
-ADDITIONAL_LIBS     += -lxml2
+ifeq (@overlap_coupling_FOUND@,1)
+    for lib in @overlap_coupling_REQUIRED_LIBRARIES@; do\
+        ADDITIONAL_LIBS     += -l$$lib
+    done
+endif
+
+ifeq (@xdmf_FOUND@,1)
+    for lib in @xdmf_REQUIRED_LIBRARIES@; do\
+        ADDITIONAL_LIBS     += -l$$lib
+    done
+endif
 
 ifeq ($(METHOD),dbg)
     ADDITIONAL_CPPFLAGS += -DDEBUG_MODE

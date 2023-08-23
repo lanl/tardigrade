@@ -10,6 +10,7 @@ set(CPP_TEST_PATH "test/tests")
 set(CMAKE_SRC_PATH "src/cmake")
 set(DOXYGEN_SRC_PATH "docs/doxygen")
 set(SPHINX_SRC_PATH "docs/sphinx")
+set(BUILD_WORKING_DIR "working_directory")
 
 # Add the cmake folder to locate project CMake module(s)
 set(XDMF_INSTALL_DIR "/path/to/Xdmf-config.cmake" CACHE PATH "The location of the Xdmf-config.cmake or XdmfConfig.cmake file")
@@ -80,11 +81,7 @@ include(FetchContent)
 set(upstream_packages "tardigrade_error_tools" "tardigrade_vector_tools" "tardigrade_micromorphic_element")
 # Add overlap coupling if required. At this time, using overlap_coupling requires
 # that xdmf is installed. This requirement may change in time
-if(xdmf_FOUND)
-    set(upstream_packages ${upstream_packages} "overlap_coupling")
-else()
-    message(WARNING "Overlap coupling utilities will not be built because xdmf was not found")
-endif()
+set(optional_upstream_packages "overlap_coupling")
 foreach(package ${upstream_packages})
     string(TOUPPER "${package}" package_upper)
     find_package(${package} ${upstream_required} CONFIG)
@@ -100,6 +97,17 @@ foreach(package ${upstream_packages})
             GIT_TAG        origin/dev
         )
         FetchContent_MakeAvailable(${package})
+    endif()
+endforeach(package)
+
+foreach(package ${optional_upstream_packages})
+    string(TOUPPER "${package}" package_upper)
+    find_package(${package} CONFIG)
+    if(${package}_FOUND)
+        message(STATUS "Found ${package}: ${${package}_DIR}")
+    else()
+        # Find related, but external, projects using FetchContent and building locally
+        message(WARNING "Did not find an installed ${package} package. This package is optional.")
     endif()
 endforeach(package)
 
@@ -170,15 +178,18 @@ foreach(source_directory ${FILE_DIRECTORIES})
 endforeach(source_directory)
 
 foreach(src_file ${tardigrade_SRC_FILES})
-    configure_file(${src_file} ${src_file})
+    configure_file(${src_file} "${BUILD_WORKING_DIR}/${src_file}")
 endforeach(src_file)
 
 foreach(inc_file ${tardigrade_INC_FILES})
-    configure_file(${inc_file} ${inc_file})
+    configure_file(${inc_file} "${BUILD_WORKING_DIR}/${inc_file}")
 endforeach(inc_file)
 
+set(overlap_coupling_REQUIRED_LIBRARIES "lvoro++" "loverlap" "lyaml-cpp")
+set(xdmf_REQUIRED_LIBRARIES "lXdmf" "lXdmfCore lXdmfUtils lxml2")
+
 # Configure the tardigrade makefile
-configure_file(Makefile.in Makefile)
+configure_file(Makefile.in "${BUILD_WORKING_DIR}/Makefile")
 
 #==================================================================================== SETUP INSTALLATION CMAKE FILES ===
 foreach(package ${PROJECT_NAME})
