@@ -7,6 +7,7 @@ conflict waves-env
 conflict tardigrade_error_tools-env
 conflict tardigrade_vector_tools-env
 conflict tardigrade_micromorphic_element-env
+conflict moose-dev
 
 # Set AEA standard software version and environment names
 set anaconda_version "2021.11"
