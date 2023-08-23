@@ -5,8 +5,8 @@ set(PROJECT_EXECUTABLE_NAME "tardigrade")
 
 # Set common project paths relative to project root directory
 set(CPP_SRC_PATH "src")
-set(CPP_INCLUDE_PATH "include")
-set(CPP_TEST_PATH "${CPP_SRC_PATH}/tests")
+set(CPP_INC_PATH "include")
+set(CPP_TEST_PATH "test/tests")
 set(CMAKE_SRC_PATH "src/cmake")
 set(DOXYGEN_SRC_PATH "docs/doxygen")
 set(SPHINX_SRC_PATH "docs/sphinx")
@@ -56,6 +56,8 @@ link_directories("${XDMF_CMAKE_INSTALL_FULL_LIBDIR}/../lib") #XDMF seems to be i
 if(xdmf_FOUND)
     message(STATUS "Found Xdmf: ${XDMF_INCLUDE_DIRS}")
 
+    # voro++ is only used if the overlap coupling module is used which can only be built
+    # if xdmf is found
     find_package(VORO REQUIRED)
     include_directories(${VORO_INCLUDE_DIR})
     if(VORO_FOUND)
@@ -63,7 +65,7 @@ if(xdmf_FOUND)
     endif()
 
 else()
-    message(STATUS "Xdmf not found. Building without Xdmf components.")
+    message(WARNING "Xdmf not found. Building without Xdmf components.")
 endif()
 
 # Set build type checks
@@ -75,7 +77,14 @@ endif()
 
 # Find related, but external, projects in installed environment
 include(FetchContent)
-set(upstream_packages "tardigrade_error_tools" "tardigrade_vector_tools" "tardigrade_micromorphic_element" "overlap_coupling")
+set(upstream_packages "tardigrade_error_tools" "tardigrade_vector_tools" "tardigrade_micromorphic_element")
+# Add overlap coupling if required. At this time, using overlap_coupling requires
+# that xdmf is installed. This requirement may change in time
+if(xdmf_FOUND)
+    set(upstream_packages ${upstream_packages} "overlap_coupling")
+else()
+    message(WARNING "Overlap coupling utilities will not be built because xdmf was not found")
+endif()
 foreach(package ${upstream_packages})
     string(TOUPPER "${package}" package_upper)
     find_package(${package} ${upstream_required} CONFIG)
@@ -107,8 +116,7 @@ endforeach(package)
 ##=============================================================================================== ADD PROJECT TARGETS ===
 # MUST COME AFTER DEPENDENCY LOCATING
 # Add project source directories
-include_directories(${CPP_SRC_PATH})
-add_subdirectory(${CPP_SRC_PATH})
+include_directories(${CPP_INC_PATH})
 
 ## Only add tests and documentation for current project builds. Protects downstream project builds.
 #if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -120,6 +128,56 @@ add_subdirectory(${CPP_SRC_PATH})
 #    add_subdirectory(${SPHINX_SRC_PATH})
 #endif()
 
+# Add all of the supporting files
+set(FILE_DIRECTORIES "auxkernels" "base" "bcs" "kernels" "materials" "nodalkernels" "outputs" "transfers" "userobjects")
+set(auxkernels_FILENAMES "DOFTimeDerivative" "NodalVolumeAverages" "VolumeIntegralConstant")
+set(base_FILENAMES "tardigradeApp")
+set(bcs_FILENAMES "CoupledDirichletBC")
+set(kernels_FILENAMES "InternalCouple" "InternalForce" "MicromorphicInertialCouple" "MicromorphicInertialForce")
+set(materials_FILENAMES "MicromorphicMaterial")
+set(nodalkernels_FILENAMES "CouplingForce" "MinimumExample")
+set(outputs_FILENAMES "Xdmf")
+set(transfers_FILENAMES "MultiAppOverlapCouplingTransfer")
+set(userobjects_FILENAMES "ElementIntegrateUserObject" "OutputXdmf" "OverlapCoupling")
+
+set(OVERLAP_COUPLING_DEPENDENT_FILENAMES "CoupledDirichletBC" "CouplingForce" "MinimumExample" "MultiAppOverlapCouplingTransfer")
+set(XDMF_DEPENDENT_FILENAMES "OutputXdmf" "Xdmf")
+
+# Build the files to be excluded
+set(EXCLUDE_FILENAMES "")
+if(xdmf_FOUND)
+else()
+  set(EXCLUDE_FILENAMES ${EXCLUDE_FILENAMES} ${XDMF_DEPENDENT_FILENAMES})
+endif()
+if(overlap_coupling_FOUND)
+else()
+  set(EXCLUDE_FILENAMES ${EXCLUDE_FILENAMES} ${OVERLAP_COUPLING_DEPENDENT_FILENAMES})
+endif()
+
+# Configure the target
+set(tardigrade_SRC_FILES "${CPP_SRC_PATH}/main.C")
+set(tardigrade_INC_FILES "")
+foreach(source_directory ${FILE_DIRECTORIES})
+    foreach(filename ${${source_directory}_FILENAMES})
+        if ("${filename}" IN_LIST EXCLUDE_FILENAMES)
+        else()
+            set(current_inc_path "${CPP_INC_PATH}/${source_directory}/${filename}.h")
+            set(current_src_path "${CPP_SRC_PATH}/${source_directory}/${filename}.C")
+            set(tardigrade_INC_FILES ${tardigrade_INC_FILES} ${current_inc_path})
+            set(tardigrade_SRC_FILES ${tardigrade_SRC_FILES} ${current_src_path})
+        endif()
+    endforeach(filename)
+endforeach(source_directory)
+
+foreach(src_file ${tardigrade_SRC_FILES})
+    configure_file(${src_file} ${src_file})
+endforeach(src_file)
+
+foreach(inc_file ${tardigrade_INC_FILES})
+    configure_file(${inc_file} ${inc_file})
+endforeach(inc_file)
+
+# Configure the tardigrade makefile
 configure_file(Makefile.in Makefile)
 
 #==================================================================================== SETUP INSTALLATION CMAKE FILES ===

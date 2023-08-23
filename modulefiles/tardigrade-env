@@ -6,10 +6,6 @@ conflict aea-beta
 conflict waves-env
 conflict tardigrade_error_tools-env
 conflict tardigrade_vector_tools-env
-conflict tardigrade_abaqus_tools-env
-conflict cpp_stub-env
-conflict tardigrade_solver_tools-env
-conflict tardigrade_constitutive_tools-env
 conflict tardigrade_micromorphic_element-env
 
 # Set AEA standard software version and environment names
