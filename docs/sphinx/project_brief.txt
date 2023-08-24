@@ -1,0 +1,18 @@
+A stub repository for C++ development projects in W-13.
+
+This repository will contain the necessary setup files to integrate C++ doc
+strings, `CMake`_, `Doxygen`_, `Sphinx`_, and `Breathe`_ for a complete build
+system with integrated documentation. It will also include the necessary hooks
+to commonly used C++ libraries for constitutive modeling. This stub repository
+also includes template hooks for integrating C++ code as Abaqus subroutines.
+
+.. note::
+
+   You can use this repo as a stub for fortran projects as well! A
+   step-by-step may never happen because c++ is the future of W-13 subroutines.
+   For now, refer to the following references:
+
+   * `CMake for Fortran example CMakeLists.txt`_
+   * `CMake documentation starting point`_
+   * `Stack Overflow thread`_
+   * `Doxygen comments for Fortran`_

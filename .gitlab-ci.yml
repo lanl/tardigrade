@@ -1,0 +1,226 @@
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: always
+
+stages:
+  - environment
+  - version
+  - test
+  - build
+  - deploy
+
+before_script:
+  # TODO: recover environment path from modulefile instead of assuming the sstelmo path(s)
+  # https://re-git.lanl.gov/aea/python-projects/waves/-/issues/7
+  - aea_projects='/projects'
+  - aea_compute_path="${aea_projects}/aea_compute"
+  - aea_conda_channel="${aea_compute_path}/aea-conda"
+  - aea_modulefiles=${aea_compute_path}/modulefiles
+  - module use ${aea_modulefiles}
+  - module use ${PWD}/modulefiles
+  # Prefer the CI environment and fall back to AEA environment(s)
+  - project_environment='tardigrade-env'
+  - environment_choices="${project_environment} aea-beta aea-release"
+  - for env in ${environment_choices}; do if [[ -d "${aea_compute_path}/${env}" ]]; then environment=${env}; break; fi; done
+  - echo ${environment}
+  - module load ${environment}
+  - conda info
+  # Build the Conda environment if it's missing
+  # TODO: kick off 'environment' job for missing environments instead of re-creating the environment build logic here
+  # https://re-git.lanl.gov/kbrindley/waves/-/issues/8
+  - environment_path="${aea_compute_path}/${project_environment}"
+  - conda_options="--yes --channel https://conda.software.inl.gov/public --channel ${aea_conda_channel} --channel conda-forge --override-channels"
+  - |
+      if [[ ! -d ${environment_path} ]]; then
+          export ALL_PROXY="proxyout.lanl.gov:8080"
+          export HTTP_PROXY="http://$ALL_PROXY"
+          export HTTPS_PROXY=$HTTP_PROXY
+          conda create --prefix ${environment_path} --file environment.txt ${conda_options};
+          chmod -R 755 ${environment_path}
+          unset ALL_PROXY
+          unset HTTP_PROXY
+          unset HTTPS_PROXY
+      fi
+  - if [[ ${project_environment} != ${environment} ]]; then module unload ${environment}; module load ${project_environment}; fi
+  - conda_artifacts_directory='conda-bld'
+  # FIXME: (1) Without setting this to false, Git webserver API calls to re-git.lanl.gov will throw errors about
+  # self-signed certificates. Work on CI server and Gitlab webserver configurations so that this is no longer
+  # necessary. There is a matching "FIXME: (1)" tag where the process is reversed that must also be removed when this
+  # is fixed.
+  - git config --local http.sslVerify false
+
+after_script:
+  # FIXME: (1) Reset the repository Git configuration to preserve ssl verifications. Remove when the server(s)
+  # configurations no longer require us to drop ssl verifications.
+  - git config --local http.sslVerify true
+
+environment:
+  stage: environment
+  variables:
+    GIT_STRATEGY: clone
+#  rules:
+#    - if: $CI_PIPELINE_SOURCE == "schedule" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
+#      changes:
+#        - "modulefiles/*"
+#        - "environment.txt"
+  script:
+    - export ALL_PROXY="proxyout.lanl.gov:8080"
+    - export HTTP_PROXY="http://$ALL_PROXY"
+    - export HTTPS_PROXY=$HTTP_PROXY
+    # Re-build the Conda environment on changes to environment files
+    - conda create --prefix ${environment_path} --file environment.txt ${conda_options}
+    # Remove write permissions from group to avoid accidental environment changes
+    - chmod -R 755 ${environment_path}
+    # place the common modulefiles in an accessible location
+    - cp ${PWD}/modulefiles/* ${aea_modulefiles}
+  tags:
+    - shell-aea
+
+microbump:
+  stage: version
+  variables:
+    GIT_STRATEGY: clone
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "main"
+  script:
+    # Conditionally "bump" micro version number. setuptools_scm already bumps number, just need to strip local version.
+    - old_version=$(python -m setuptools_scm)
+    # First capture group is the major.minor.micro numbers
+    # Second capture group is everything following micro
+    - version_regex='\([0-9]\+\.[0-9]\+\.[0-9]\+\)\(.*\)'
+    # Returns clean production tag regardless if tagged already
+    - production_version=$(echo ${old_version} | sed "s/${version_regex}/\1/g")
+    # Catch unexpected production version regex and exit with error if suffix is found
+    - suffix=$(echo ${production_version} | sed "s/${version_regex}/\2/g")
+    - |
+        if [ -n "${suffix}" ]; then
+            echo "Could not resolve the production version from ${old_version}. Left with ${production_version} and ${suffix}."
+            exit 1
+        fi
+    - developer_version=${production_version}+dev
+    # Tag production commit and previous developer commit. Continue if already tagged.
+    - git config user.name "${GITLAB_USER_NAME}"
+    - git config user.email "${GITLAB_USER_EMAIL}"
+    - git remote add oauth2-origin https://gitlab-ci-token:${GITLAB_ACCESS_TOKEN}@re-git.lanl.gov/${CI_PROJECT_PATH}.git
+    - git tag -a ${production_version} -m "production release ${production_version}" || true
+    # Assume last merge was dev->main. Pick previous.
+    - last_merge_hash=$(git log --pretty=format:"%H" --merges -n 2 | tail -n 1)
+    - git tag -a ${developer_version} -m "developer pre-release ${developer_version}" ${last_merge_hash} || true
+    - git push oauth2-origin --tags
+  tags:
+    - shell-aea
+
+fast-test:
+  stage: test
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  variables:
+    GIT_STRATEGY: clone
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "dev"
+  script:
+    - workdir=${PWD}
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=lib
+    - cmake --build . --target all --verbose
+    - ctest --verbose --output-log results.txt
+    - cd ${workdir}
+  artifacts:
+    when: always
+    paths:
+      - build/results.txt
+  tags:
+    - shell-aea
+
+conda-build:
+  stage: build
+  variables:
+    GIT_STRATEGY: clone
+  script:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "dev"
+  script:
+    # Only build one compiler variant during merge request testing
+    - libstdcxx="13"
+    - variants=""
+    - if [[ $CI_PIPELINE_SOURCE == "merge_request_event" ]]; then variants="--variants {'libstdcxx':['${libstdcxx}']}"; fi
+    # Set the LANL internal proxies
+    - export ALL_PROXY="proxyout.lanl.gov:8080"
+    - export HTTP_PROXY="http://$ALL_PROXY"
+    - export HTTPS_PROXY=$HTTP_PROXY
+    # Override default permissions. Set group to rx with no write permissions.
+    - umask 0022
+    - mkdir ${conda_artifacts_directory}
+    - croot="/scratch/$USER/$(basename $PWD)/${conda_artifacts_directory}"
+    - VERSION=$(python -m setuptools_scm) conda build recipe --channel file://${aea_conda_channel} --channel conda-forge --override-channels --no-anaconda-upload --croot ${croot} --output-folder ${conda_artifacts_directory} ${variants}
+    - conda build purge --croot ${croot}
+  artifacts:
+    expire_in: '2 hrs'
+    paths:
+      - conda-bld/linux-64/tardigrade-*-*.tar.bz2
+  tags:
+    - shell-aea
+
+deploy:
+  stage: deploy
+  variables:
+    GIT_STRATEGY: clone
+  dependencies:
+    - conda-build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "dev"
+  script:
+    # Override default permissions. Set group to rx with no write permissions.
+    - umask 0022
+    # Copy Conda package to AEA Conda Channel
+    - cp ${conda_artifacts_directory}/linux-64/tardigrade-*-*.tar.bz2 ${aea_conda_channel}/linux-64
+    # Change group for access by all W-13 staff and prevent accidental modification by institutional account in CI jobs
+    - chgrp w13users ${aea_conda_channel}/linux-64/tardigrade-*-*.tar.bz2 || true
+    - chmod 555 ${aea_conda_channel}/linux-64/tardigrade-*-*.tar.bz2 || true
+    # Update the AEA Conda Channel index
+    - conda index ${aea_conda_channel}
+    - conda search --channel file://${aea_conda_channel}/ --override-channels tardigrade
+  tags:
+    - shell-aea
+
+
+# It MUST be called pages
+pages:
+  stage: deploy
+  variables:
+    GIT_STRATEGY: clone
+  dependencies: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "main"
+  script:
+    - workdir=${PWD}
+    - mkdir -p public/doxygen
+    - mkdir build
+    - cd build
+    - cmake ..
+    - cmake --build . --target Sphinx
+    - cd ${workdir}
+    - cp -r build/docs/sphinx/html/* public/
+    - cp -r build/docs/doxygen/html/* public/doxygen
+  artifacts:
+    paths:
+      # It MUST be called public
+      - public
+  tags:
+    - shell-aea
