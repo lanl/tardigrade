@@ -60,11 +60,11 @@ environment:
   stage: environment
   variables:
     GIT_STRATEGY: clone
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
-      changes:
-        - "modulefiles/*"
-        - "environment.txt"
+#  rules:
+#    - if: $CI_PIPELINE_SOURCE == "schedule" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
+#      changes:
+#        - "modulefiles/*"
+#        - "environment.txt"
   script:
     - export ALL_PROXY="proxyout.lanl.gov:8080"
     - export HTTP_PROXY="http://$ALL_PROXY"
