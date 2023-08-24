@@ -1,0 +1,6 @@
+set(input_filename "stretch_y.i")
+set(output_filename "gold/stretch_y_out.e")
+file(RELATIVE_PATH relative_path ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+set(output_path "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/${relative_path}")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${input_filename}" "${output_path}/${input_filename}" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${output_filename}" "${output_path}/${output_filename}" COPYONLY)

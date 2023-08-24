@@ -16,8 +16,6 @@ foreach(package ${optional_upstream_packages})
     endif()
 endforeach(package)
 
-message("EXCLUDE_FILENAMES: ${EXCLUDE_FILENAMES}")
-
 set(${PROJECT_NAME}_regression_TESTS "")
 
 foreach(directory ${${PROJECT_NAME}_regression_tests_DIRECTORIES})
@@ -30,6 +28,8 @@ foreach(directory ${${PROJECT_NAME}_regression_tests_DIRECTORIES})
     endforeach(filename)
 endforeach(directory)
 
-foreach(test ${${PROJECT_NAME}_regression_TESTS})
-    add_subdirectory(${test})
-endforeach(test)
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    foreach(test ${${PROJECT_NAME}_regression_TESTS})
+        add_subdirectory(${test})
+    endforeach(test)
+endif()

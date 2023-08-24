@@ -22,10 +22,10 @@ foreach(source_directory ${tardigrade_test_FILE_DIRECTORIES})
 endforeach(source_directory)
 
 foreach(src_file ${tardigrade_test_SRC_FILES})
-    configure_file(${src_file} "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/${CPP_TEST_PATH}/${src_file}")
+    configure_file(${src_file} "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/${CPP_TEST_PATH}/${src_file}" COPYONLY)
 endforeach(src_file)
 
 foreach(inc_file ${tardigrade_test_INC_FILES})
-    configure_file(${inc_file} "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/${CPP_TEST_PATH}/${inc_file}")
+    configure_file(${inc_file} "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/${CPP_TEST_PATH}/${inc_file}" COPYONLY)
 endforeach(inc_file)
 
