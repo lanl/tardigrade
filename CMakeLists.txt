@@ -7,6 +7,7 @@ set(PROJECT_EXECUTABLE_NAME "tardigrade")
 set(CPP_SRC_PATH "src")
 set(CPP_INC_PATH "include")
 set(CPP_TEST_PATH "test")
+set(CPP_REGRESSION_TEST_PATH "test/tests")
 set(CMAKE_SRC_PATH "src/cmake")
 set(DOXYGEN_SRC_PATH "docs/doxygen")
 set(SPHINX_SRC_PATH "docs/sphinx")
@@ -170,6 +171,16 @@ endforeach(package)
 # Add project source directories
 include_directories(${CPP_INC_PATH})
 add_subdirectory(${CPP_TEST_PATH})
+
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    find_package(Boost 1.53.0 REQUIRED COMPONENTS unit_test_framework)
+    add_subdirectory(${CPP_REGRESSION_TEST_PATH})
+    # Add docs
+    if(${not_conda_test} STREQUAL "true")
+        add_subdirectory(${DOXYGEN_SRC_PATH})
+        add_subdirectory(${SPHINX_SRC_PATH})
+    endif()
+endif()
 
 ## Only add tests and documentation for current project builds. Protects downstream project builds.
 #if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
