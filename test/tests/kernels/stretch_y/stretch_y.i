@@ -597,7 +597,4 @@
 [Outputs]
   exodus = true
   perf_graph = true
-  [./xdmf]
-    type = Xdmf
-  [../]
 []
