@@ -1,7 +1,7 @@
 #===================================================================================================== PROJECT SETUP ===
 cmake_minimum_required(VERSION 3.14)
 project(tardigrade)
-set(PROJECT_EXECUTABLE_NAME "tardigrade")
+set(PROJECT_EXECUTABLE_NAME "tardigrade-opt")
 
 # Set common project paths relative to project root directory
 set(CPP_SRC_PATH "src")
@@ -169,7 +169,13 @@ endforeach(package)
 ##=============================================================================================== ADD PROJECT TARGETS ===
 # MUST COME AFTER DEPENDENCY LOCATING
 # Add project source directories
+add_custom_target(${PROJECT_NAME} ALL
+                  COMMAND MOOSE_DIR=$ENV{MOOSE_DIR} make -j4 -f "${PROJECT_NAME}_Makefile"
+                  WORKING_DIRECTORY ${PROJECT_BINARY_DIRECTORY})
+
 include_directories(${CPP_INC_PATH})
+add_subdirectory(${CPP_SRC_PATH})
+add_subdirectory(${CPP_INC_PATH})
 add_subdirectory(${CPP_TEST_PATH})
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -184,91 +190,38 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     endif()
 endif()
 
-## Only add tests and documentation for current project builds. Protects downstream project builds.
-#if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-#    # Find Boost. Required for tests
-#    find_package(Boost 1.53.0 REQUIRED COMPONENTS unit_test_framework)
-#    # Add c++ tests and docs
-#    add_subdirectory(${CPP_TEST_PATH})
-#    add_subdirectory(${DOXYGEN_SRC_PATH})
-#    add_subdirectory(${SPHINX_SRC_PATH})
-#endif()
-
-# Add all of the supporting source files
-set(FILE_DIRECTORIES "auxkernels" "base" "bcs" "kernels" "materials" "nodalkernels" "outputs" "transfers" "userobjects")
-set(auxkernels_FILENAMES "DOFTimeDerivative" "NodalVolumeAverages" "VolumeIntegralConstant")
-set(base_FILENAMES "tardigradeApp")
-set(bcs_FILENAMES "CoupledDirichletBC")
-set(kernels_FILENAMES "InternalCouple" "InternalForce" "MicromorphicInertialCouple" "MicromorphicInertialForce")
-set(materials_FILENAMES "MicromorphicMaterial")
-set(nodalkernels_FILENAMES "CouplingForce" "MinimumExample")
-set(outputs_FILENAMES "Xdmf")
-set(transfers_FILENAMES "MultiAppOverlapCouplingTransfer")
-set(userobjects_FILENAMES "ElementIntegrateUserObject" "OutputXdmf" "OverlapCoupling")
-
-set(OVERLAP_COUPLING_DEPENDENT_FILENAMES "CoupledDirichletBC" "CouplingForce" "MinimumExample" "MultiAppOverlapCouplingTransfer" "OverlapCoupling")
-set(XDMF_DEPENDENT_FILENAMES "OutputXdmf" "Xdmf")
-
-# Build the files to be excluded
-set(EXCLUDE_FILENAMES "")
-if(xdmf_FOUND)
-else()
-  set(EXCLUDE_FILENAMES ${EXCLUDE_FILENAMES} ${XDMF_DEPENDENT_FILENAMES})
-endif()
-if(overlap_coupling_FOUND)
-else()
-  set(EXCLUDE_FILENAMES ${EXCLUDE_FILENAMES} ${OVERLAP_COUPLING_DEPENDENT_FILENAMES})
-endif()
-
-# Configure the target
-set(tardigrade_SRC_FILES "${CPP_SRC_PATH}/main.C")
-set(tardigrade_INC_FILES "")
-foreach(source_directory ${FILE_DIRECTORIES})
-    foreach(filename ${${source_directory}_FILENAMES})
-        if ("${filename}" IN_LIST EXCLUDE_FILENAMES)
-        else()
-            set(current_inc_path "${CPP_INC_PATH}/${source_directory}/${filename}.h")
-            set(current_src_path "${CPP_SRC_PATH}/${source_directory}/${filename}.C")
-            set(tardigrade_INC_FILES ${tardigrade_INC_FILES} ${current_inc_path})
-            set(tardigrade_SRC_FILES ${tardigrade_SRC_FILES} ${current_src_path})
-        endif()
-    endforeach(filename)
-endforeach(source_directory)
-
-foreach(src_file ${tardigrade_SRC_FILES})
-    configure_file(${src_file} "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/${src_file}")
-endforeach(src_file)
-
-foreach(inc_file ${tardigrade_INC_FILES})
-    configure_file(${inc_file} "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/${inc_file}")
-endforeach(inc_file)
-
-set(overlap_coupling_REQUIRED_LIBRARIES "lvoro++" "loverlap" "lyaml-cpp")
-set(xdmf_REQUIRED_LIBRARIES "lXdmf" "lXdmfCore lXdmfUtils lxml2")
 
 # Configure the tardigrade makefile
-configure_file("${PROJECT_SOURCE_DIR}/Makefile.in" "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/Makefile")
+configure_file("${PROJECT_SOURCE_DIR}/Makefile.in" "${PROJECT_BINARY_DIR}/${PROJECT_NAME}_Makefile")
 
-#==================================================================================== SETUP INSTALLATION CMAKE FILES ===
-foreach(package ${PROJECT_NAME})
-    include(CMakePackageConfigHelpers)
-    write_basic_package_version_file("${package}ConfigVersion.cmake"
-                                     VERSION ${PROJECT_VERSION}
-                                     COMPATIBILITY SameMajorVersion)
-    configure_package_config_file(
-      "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}/Config.cmake.in"
-      "${PROJECT_BINARY_DIR}/${package}Config.cmake"
-      INSTALL_DESTINATION
-      ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+# Copy all of the projects source files to the build directory
+get_target_property(${PROJECT_NAME}_SOURCES ${PROJECT_NAME} SOURCES)
 
-    # CMake won't build the targets for local builds of upstream projects
-    if(cmake_build_type_lower STREQUAL release)
-        install(EXPORT ${package}_Targets
-                FILE ${package}Targets.cmake
-                DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-    endif()
+foreach(source_file ${${PROJECT_NAME}_SOURCES})
+    file(RELATIVE_PATH rel ${PROJECT_SOURCE_DIR} ${source_file})
+    configure_file("${source_file}" "${PROJECT_BINARY_DIR}/${rel}")
+endforeach(source_file)
 
-    install(FILES "${PROJECT_BINARY_DIR}/${package}Config.cmake"
-                  "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
-            DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-endforeach(package)
+###==================================================================================== SETUP INSTALLATION CMAKE FILES ===
+##foreach(package ${PROJECT_NAME})
+##    include(CMakePackageConfigHelpers)
+##    write_basic_package_version_file("${package}ConfigVersion.cmake"
+##                                     VERSION ${PROJECT_VERSION}
+##                                     COMPATIBILITY SameMajorVersion)
+##    configure_package_config_file(
+##      "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}/Config.cmake.in"
+##      "${PROJECT_BINARY_DIR}/${package}Config.cmake"
+##      INSTALL_DESTINATION
+##      ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+##
+##    # CMake won't build the targets for local builds of upstream projects
+##    if(cmake_build_type_lower STREQUAL release)
+##        install(EXPORT ${package}_Targets
+##                FILE ${package}Targets.cmake
+##                DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+##    endif()
+##
+##    install(FILES "${PROJECT_BINARY_DIR}/${package}Config.cmake"
+##                  "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
+##            DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+##endforeach(package)
