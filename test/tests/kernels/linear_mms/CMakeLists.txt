@@ -4,3 +4,4 @@ file(RELATIVE_PATH relative_path ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DI
 set(output_path "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/${relative_path}")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${input_filename}" "${output_path}/${input_filename}" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${output_filename}" "${output_path}/${output_filename}" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tests" "${output_path}/tests" COPYONLY)
