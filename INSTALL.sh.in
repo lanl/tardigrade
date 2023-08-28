@@ -1,4 +1,0 @@
-cd $ENV{MOOSE_DIR}
-./configure --prefix=@CMAKE_INSTALL_LIBDIR@
-cd @PROJECT_BINARY_DIR@
-make install

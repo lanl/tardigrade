@@ -172,6 +172,13 @@ endif()
 ##=============================================================================================== ADD PROJECT TARGETS ===
 # MUST COME AFTER DEPENDENCY LOCATING
 # Add project source directories
+
+# Configure MOOSE for installation
+if(cmake_build_type_lower STREQUAL release)
+    execute_process(COMMAND "./configure --prefix=${PREFIX}"
+                    WORKING_DIRECTORY $ENV{MOOSE_DIR})
+endif()
+
 add_custom_target(${PROJECT_NAME} ALL
                   COMMAND MOOSE_DIR=$ENV{MOOSE_DIR} make -j4 -f "${PROJECT_NAME}_Makefile"
                   WORKING_DIRECTORY ${PROJECT_BINARY_DIRECTORY})
@@ -222,21 +229,17 @@ foreach(package ${PROJECT_NAME})
       INSTALL_DESTINATION
       ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
 
-    # CMake won't build the targets for local builds of upstream projects
-    if(cmake_build_type_lower STREQUAL release)
-        install(EXPORT ${package}_Targets
-                FILE ${package}Targets.cmake
-                DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-    endif()
+#    # CMake won't build the targets for local builds of upstream projects
+#    if(cmake_build_type_lower STREQUAL release)
+#        install(EXPORT ${package}_Targets
+#                FILE ${package}Targets.cmake
+#                DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+#    endif()
 
     install(FILES "${PROJECT_BINARY_DIR}/${package}Config.cmake"
                   "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
             DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
 
-    message("INSTALL DATA: ${CMAKE_INSTALL_DATAROOTDIR}/${package}")
-
-    configure_file("INSTALL.sh.in" "${PROJECT_BINARY_DIR}/INSTALL.sh")
-
-    install(CODE "execute_process(COMMAND INSTALL.sh)")
+    install(CODE "execute_process(COMMAND make install)")
 
 endforeach(package)
