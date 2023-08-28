@@ -16,32 +16,6 @@ set(SPHINX_SRC_PATH "docs/sphinx")
 set(XDMF_INSTALL_DIR "/path/to/Xdmf-config.cmake" CACHE PATH "The location of the Xdmf-config.cmake or XdmfConfig.cmake file")
 set(VORO_INSTALL_DIR "/path/to/voro-config.cmake" CACHE PATH "The location of the voro-config.cmake or VOROConfig.cmake file")
 
-include(FetchContent)
-if(DEFINED ENV{MOOSE_DIR})
-    message(STATUS "MOOSE_DIR defined: $ENV{MOOSE_DIR}")
-elseif(EXISTS "${PROJECT_BINARY_DIR}/deps_/moose-src") #Prevents pulling the repo if we've already done that
-    message(STATUS "MOOSE_DIR not defined but a previously existing Git fetch discovered")
-    set(ENV{MOOSE_DIR} "${PROJECT_BINARY_DIR}/deps_/moose-src")
-    message(STATUS "  Setting MOOSE_DIR to: $ENV{MOOSE_DIR}")
-else()
-    message(STATUS "No Moose directory found. Will attempt to clone.")
-
-    set(MOOSE_REPO_URL "https://github.com/idaholab/moose.git")
-
-    message(STATUS "  Fetching from ${MOOSE_REPO_URL}")
-    set(FETCH_CONTENT_QUIET FALSE)
-    FetchContent_Declare(
-        moose
-        GIT_REPOSITORY ${MOOSE_REPO_URL}
-        GIT_PROGRESS TRUE
-        GIT_TAG origin/master
-    )
-
-    FetchContent_MakeAvailable(moose)
-    set(ENV{MOOSE_DIR} ${moose_SOURCE_DIR})
-    message("  Setting MOOSE_DIR to: $ENV{MOOSE_DIR}")
-endif()
-
 set(ADDITIONAL_INSTALL_DIRECTORIES ${XDMF_INSTALL_DIR} ${VORO_INSTALL_DIR})
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${ADDITIONAL_INSTALL_DIRECTORIES})
 
@@ -67,6 +41,7 @@ if(${not_conda_test} STREQUAL "true")
     # TODO: On osx-arm64 some c++ projects struggle to find $PREFIX/bin/python during conda-builds and others don't.
     # Trace the source and remove the hint when CMake configures with the correct python version during conda-build.
     if (DEFINED ENV{PREFIX})
+        message("PREFIX $ENV{PREFIX}")
         set(Python_ROOT_DIR "$ENV{PREFIX}/bin")
     endif()
     find_package(Python COMPONENTS Interpreter REQUIRED)
@@ -127,6 +102,7 @@ set(upstream_packages "tardigrade_error_tools" "tardigrade_vector_tools" "tardig
 # Add overlap coupling if required. At this time, using overlap_coupling requires
 # that xdmf is installed. This requirement may change in time
 set(optional_upstream_packages "overlap_coupling")
+include(FetchContent)
 foreach(package ${upstream_packages})
     string(TOUPPER "${package}" package_upper)
     find_package(${package} ${upstream_required} CONFIG)
@@ -155,6 +131,33 @@ foreach(package ${optional_upstream_packages})
         message(WARNING "Did not find an installed ${package} package. This package is optional.")
     endif()
 endforeach(package)
+
+if(DEFINED ENV{MOOSE_DIR})
+    message(STATUS "MOOSE_DIR defined: $ENV{MOOSE_DIR}")
+elseif(EXISTS "${PROJECT_BINARY_DIR}/deps_/moose-src") #Prevents pulling the repo if we've already done that
+    message(STATUS "MOOSE_DIR not defined but a previously existing Git fetch discovered")
+    set(ENV{MOOSE_DIR} "${PROJECT_BINARY_DIR}/deps_/moose-src")
+    message(STATUS "  Setting MOOSE_DIR to: $ENV{MOOSE_DIR}")
+else()
+    message(STATUS "No Moose directory found. Will attempt to clone.")
+
+    set(MOOSE_REPO_URL "https://github.com/idaholab/moose.git")
+
+    message(STATUS "  Fetching from ${MOOSE_REPO_URL}")
+    set(FETCH_CONTENT_QUIET FALSE)
+    FetchContent_Declare(
+        moose
+        GIT_REPOSITORY ${MOOSE_REPO_URL}
+        GIT_PROGRESS TRUE
+        GIT_TAG origin/master
+    )
+
+    FetchContent_MakeAvailable(moose)
+    set(ENV{MOOSE_DIR} ${moose_SOURCE_DIR})
+    message("  Setting MOOSE_DIR to: $ENV{MOOSE_DIR}")
+endif()
+
+
 
 ## Fetch additional header files
 #FetchContent_Declare(
