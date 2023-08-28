@@ -129,7 +129,13 @@ fast-test:
     - workdir=${PWD}
     - mkdir build
     - cd build
+    - export ALL_PROXY="proxyout.lanl.gov:8080"
+    - export HTTP_PROXY="http://$ALL_PROXY"
+    - export HTTPS_PROXY=$HTTP_PROXY
     - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=lib
+    - unset ALL_PROXY
+    - unset HTTP_PROXY
+    - unset HTTPS_PROXY
     - cmake --build . --target all --verbose
     - ctest --verbose --output-log results.txt
     - cd ${workdir}
