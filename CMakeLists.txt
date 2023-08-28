@@ -183,8 +183,11 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_subdirectory(${CPP_REGRESSION_TEST_PATH})
     target_sources(${PROJECT_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/testroot")
     target_sources(${PROJECT_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/run_tests")
-    add_test(NAME "${PROJECT_NAME}_Regression_Tests" COMMAND run_tests
+    add_test(NAME "${PROJECT_NAME}_Regression_Tests"
+             COMMAND run_tests
              WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+    set_tests_properties("${PROJECT_NAME}_Regression_Tests" PROPERTIES
+                         ENVIRONMENT MOOSE_DIR=$ENV{MOOSE_DIR} )
     # Add docs
     if(${not_conda_test} STREQUAL "true")
         add_subdirectory(${DOXYGEN_SRC_PATH})
