@@ -129,7 +129,6 @@ fast-test:
     - workdir=${PWD}
     - mkdir build
     - cd build
-    - export PREFIX=$CONDA_PREFIX
     - export ALL_PROXY="proxyout.lanl.gov:8080"
     - export HTTP_PROXY="http://$ALL_PROXY"
     - export HTTPS_PROXY=$HTTP_PROXY

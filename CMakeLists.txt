@@ -1,5 +1,5 @@
 #===================================================================================================== PROJECT SETUP ===
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.18)
 project(tardigrade)
 set(PROJECT_EXECUTABLE_NAME "tardigrade-opt")
 
