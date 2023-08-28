@@ -1,12 +1,13 @@
 #===================================================================================================== PROJECT SETUP ===
 cmake_minimum_required(VERSION 3.14)
 project(tardigrade)
-set(PROJECT_EXECUTABLE_NAME "tardigrade")
+set(PROJECT_EXECUTABLE_NAME "tardigrade-opt")
 
 # Set common project paths relative to project root directory
 set(CPP_SRC_PATH "src")
 set(CPP_INC_PATH "include")
 set(CPP_TEST_PATH "test")
+set(CPP_REGRESSION_TEST_PATH "test/tests")
 set(CMAKE_SRC_PATH "src/cmake")
 set(DOXYGEN_SRC_PATH "docs/doxygen")
 set(SPHINX_SRC_PATH "docs/sphinx")
@@ -14,32 +15,6 @@ set(SPHINX_SRC_PATH "docs/sphinx")
 # Add the cmake folder to locate project CMake module(s)
 set(XDMF_INSTALL_DIR "/path/to/Xdmf-config.cmake" CACHE PATH "The location of the Xdmf-config.cmake or XdmfConfig.cmake file")
 set(VORO_INSTALL_DIR "/path/to/voro-config.cmake" CACHE PATH "The location of the voro-config.cmake or VOROConfig.cmake file")
-
-include(FetchContent)
-if(DEFINED MOOSE_DIR)
-    message(STATUS "Existing Moose directory found: ${MOOSE_DIR}")
-elseif(EXISTS "${PROJECT_BINARY_DIR}/moose") #Prevents pulling the repo if we've already done that
-    set(MOOSE_DIR "${PROJECT_BINARY_DIR}/moose")
-    message(STATUS "Existing Moose directory found: ${MOOSE_DIR}")
-else()
-    message(STATUS "No Moose directory found. Will attempt to clone.")
-    set(MOOSE_DIR "${PROJECT_BINARY_DIR}/moose")
-
-    set(MOOSE_REPO_URL "https://github.com/idaholab/moose.git")
-
-    message(STATUS "  Fetching from ${MOOSE_REPO_URL}")
-    set(FETCH_CONTENT_QUIET FALSE)
-    FetchContent_Declare(
-        moose
-        GIT_REPOSITORY ${MOOSE_REPO_URL}
-        GIT_PROGRESS TRUE
-        GIT_TAG origin/master
-    )
-
-    FetchContent_MakeAvailable(moose)
-    set(MOOSE_DIR ${moose_SOURCE_DIR})
-    message("MOOSE_DIR: ${MOOSE_DIR}")
-endif()
 
 set(ADDITIONAL_INSTALL_DIRECTORIES ${XDMF_INSTALL_DIR} ${VORO_INSTALL_DIR})
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${ADDITIONAL_INSTALL_DIRECTORIES})
@@ -66,6 +41,7 @@ if(${not_conda_test} STREQUAL "true")
     # TODO: On osx-arm64 some c++ projects struggle to find $PREFIX/bin/python during conda-builds and others don't.
     # Trace the source and remove the hint when CMake configures with the correct python version during conda-build.
     if (DEFINED ENV{PREFIX})
+        message("PREFIX $ENV{PREFIX}")
         set(Python_ROOT_DIR "$ENV{PREFIX}/bin")
     endif()
     find_package(Python COMPONENTS Interpreter REQUIRED)
@@ -126,6 +102,7 @@ set(upstream_packages "tardigrade_error_tools" "tardigrade_vector_tools" "tardig
 # Add overlap coupling if required. At this time, using overlap_coupling requires
 # that xdmf is installed. This requirement may change in time
 set(optional_upstream_packages "overlap_coupling")
+include(FetchContent)
 foreach(package ${upstream_packages})
     string(TOUPPER "${package}" package_upper)
     find_package(${package} ${upstream_required} CONFIG)
@@ -155,6 +132,33 @@ foreach(package ${optional_upstream_packages})
     endif()
 endforeach(package)
 
+if(DEFINED ENV{MOOSE_DIR})
+    message(STATUS "MOOSE_DIR defined: $ENV{MOOSE_DIR}")
+elseif(EXISTS "${PROJECT_BINARY_DIR}/deps_/moose-src") #Prevents pulling the repo if we've already done that
+    message(STATUS "MOOSE_DIR not defined but a previously existing Git fetch discovered")
+    set(ENV{MOOSE_DIR} "${PROJECT_BINARY_DIR}/deps_/moose-src")
+    message(STATUS "  Setting MOOSE_DIR to: $ENV{MOOSE_DIR}")
+else()
+    message(STATUS "No Moose directory found. Will attempt to clone.")
+
+    set(MOOSE_REPO_URL "https://github.com/idaholab/moose.git")
+
+    message(STATUS "  Fetching from ${MOOSE_REPO_URL}")
+    set(FETCH_CONTENT_QUIET FALSE)
+    FetchContent_Declare(
+        moose
+        GIT_REPOSITORY ${MOOSE_REPO_URL}
+        GIT_PROGRESS TRUE
+        GIT_TAG origin/master
+    )
+
+    FetchContent_MakeAvailable(moose)
+    set(ENV{MOOSE_DIR} ${moose_SOURCE_DIR})
+    message("  Setting MOOSE_DIR to: $ENV{MOOSE_DIR}")
+endif()
+
+
+
 ## Fetch additional header files
 #FetchContent_Declare(
 #    quickhull
@@ -168,94 +172,64 @@ endforeach(package)
 ##=============================================================================================== ADD PROJECT TARGETS ===
 # MUST COME AFTER DEPENDENCY LOCATING
 # Add project source directories
+add_custom_target(${PROJECT_NAME} ALL
+                  COMMAND MOOSE_DIR=$ENV{MOOSE_DIR} make -j4 -f "${PROJECT_NAME}_Makefile"
+                  WORKING_DIRECTORY ${PROJECT_BINARY_DIRECTORY})
+
 include_directories(${CPP_INC_PATH})
+add_subdirectory(${CPP_SRC_PATH})
+add_subdirectory(${CPP_INC_PATH})
 add_subdirectory(${CPP_TEST_PATH})
 
-## Only add tests and documentation for current project builds. Protects downstream project builds.
-#if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-#    # Find Boost. Required for tests
-#    find_package(Boost 1.53.0 REQUIRED COMPONENTS unit_test_framework)
-#    # Add c++ tests and docs
-#    add_subdirectory(${CPP_TEST_PATH})
-#    add_subdirectory(${DOXYGEN_SRC_PATH})
-#    add_subdirectory(${SPHINX_SRC_PATH})
-#endif()
-
-# Add all of the supporting source files
-set(FILE_DIRECTORIES "auxkernels" "base" "bcs" "kernels" "materials" "nodalkernels" "outputs" "transfers" "userobjects")
-set(auxkernels_FILENAMES "DOFTimeDerivative" "NodalVolumeAverages" "VolumeIntegralConstant")
-set(base_FILENAMES "tardigradeApp")
-set(bcs_FILENAMES "CoupledDirichletBC")
-set(kernels_FILENAMES "InternalCouple" "InternalForce" "MicromorphicInertialCouple" "MicromorphicInertialForce")
-set(materials_FILENAMES "MicromorphicMaterial")
-set(nodalkernels_FILENAMES "CouplingForce" "MinimumExample")
-set(outputs_FILENAMES "Xdmf")
-set(transfers_FILENAMES "MultiAppOverlapCouplingTransfer")
-set(userobjects_FILENAMES "ElementIntegrateUserObject" "OutputXdmf" "OverlapCoupling")
-
-set(OVERLAP_COUPLING_DEPENDENT_FILENAMES "CoupledDirichletBC" "CouplingForce" "MinimumExample" "MultiAppOverlapCouplingTransfer" "OverlapCoupling")
-set(XDMF_DEPENDENT_FILENAMES "OutputXdmf" "Xdmf")
-
-# Build the files to be excluded
-set(EXCLUDE_FILENAMES "")
-if(xdmf_FOUND)
-else()
-  set(EXCLUDE_FILENAMES ${EXCLUDE_FILENAMES} ${XDMF_DEPENDENT_FILENAMES})
-endif()
-if(overlap_coupling_FOUND)
-else()
-  set(EXCLUDE_FILENAMES ${EXCLUDE_FILENAMES} ${OVERLAP_COUPLING_DEPENDENT_FILENAMES})
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    find_package(Boost 1.53.0 REQUIRED COMPONENTS unit_test_framework)
+    add_subdirectory(${CPP_REGRESSION_TEST_PATH})
+    target_sources(${PROJECT_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/testroot")
+    target_sources(${PROJECT_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/run_tests")
+    add_test(NAME "${PROJECT_NAME}_Regression_Tests"
+             COMMAND run_tests
+             WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+    set_tests_properties("${PROJECT_NAME}_Regression_Tests" PROPERTIES
+                         ENVIRONMENT MOOSE_DIR=$ENV{MOOSE_DIR} )
+    # Add docs
+    if(${not_conda_test} STREQUAL "true")
+        add_subdirectory(${DOXYGEN_SRC_PATH})
+        add_subdirectory(${SPHINX_SRC_PATH})
+    endif()
 endif()
 
-# Configure the target
-set(tardigrade_SRC_FILES "${CPP_SRC_PATH}/main.C")
-set(tardigrade_INC_FILES "")
-foreach(source_directory ${FILE_DIRECTORIES})
-    foreach(filename ${${source_directory}_FILENAMES})
-        if ("${filename}" IN_LIST EXCLUDE_FILENAMES)
-        else()
-            set(current_inc_path "${CPP_INC_PATH}/${source_directory}/${filename}.h")
-            set(current_src_path "${CPP_SRC_PATH}/${source_directory}/${filename}.C")
-            set(tardigrade_INC_FILES ${tardigrade_INC_FILES} ${current_inc_path})
-            set(tardigrade_SRC_FILES ${tardigrade_SRC_FILES} ${current_src_path})
-        endif()
-    endforeach(filename)
-endforeach(source_directory)
-
-foreach(src_file ${tardigrade_SRC_FILES})
-    configure_file(${src_file} "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/${src_file}")
-endforeach(src_file)
-
-foreach(inc_file ${tardigrade_INC_FILES})
-    configure_file(${inc_file} "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/${inc_file}")
-endforeach(inc_file)
-
-set(overlap_coupling_REQUIRED_LIBRARIES "lvoro++" "loverlap" "lyaml-cpp")
-set(xdmf_REQUIRED_LIBRARIES "lXdmf" "lXdmfCore lXdmfUtils lxml2")
 
 # Configure the tardigrade makefile
-configure_file("${PROJECT_SOURCE_DIR}/Makefile.in" "${PROJECT_BINARY_DIR}/${PROJECT_NAME}/Makefile")
+configure_file("${PROJECT_SOURCE_DIR}/Makefile.in" "${PROJECT_BINARY_DIR}/${PROJECT_NAME}_Makefile")
 
-#==================================================================================== SETUP INSTALLATION CMAKE FILES ===
-foreach(package ${PROJECT_NAME})
-    include(CMakePackageConfigHelpers)
-    write_basic_package_version_file("${package}ConfigVersion.cmake"
-                                     VERSION ${PROJECT_VERSION}
-                                     COMPATIBILITY SameMajorVersion)
-    configure_package_config_file(
-      "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}/Config.cmake.in"
-      "${PROJECT_BINARY_DIR}/${package}Config.cmake"
-      INSTALL_DESTINATION
-      ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+# Copy all of the projects source files to the build directory
+get_target_property(${PROJECT_NAME}_SOURCES ${PROJECT_NAME} SOURCES)
 
-    # CMake won't build the targets for local builds of upstream projects
-    if(cmake_build_type_lower STREQUAL release)
-        install(EXPORT ${package}_Targets
-                FILE ${package}Targets.cmake
-                DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-    endif()
+foreach(source_file ${${PROJECT_NAME}_SOURCES})
+    file(RELATIVE_PATH rel ${PROJECT_SOURCE_DIR} ${source_file})
+    configure_file("${source_file}" "${PROJECT_BINARY_DIR}/${rel}" COPYONLY)
+endforeach(source_file)
 
-    install(FILES "${PROJECT_BINARY_DIR}/${package}Config.cmake"
-                  "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
-            DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-endforeach(package)
+###==================================================================================== SETUP INSTALLATION CMAKE FILES ===
+##foreach(package ${PROJECT_NAME})
+##    include(CMakePackageConfigHelpers)
+##    write_basic_package_version_file("${package}ConfigVersion.cmake"
+##                                     VERSION ${PROJECT_VERSION}
+##                                     COMPATIBILITY SameMajorVersion)
+##    configure_package_config_file(
+##      "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}/Config.cmake.in"
+##      "${PROJECT_BINARY_DIR}/${package}Config.cmake"
+##      INSTALL_DESTINATION
+##      ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+##
+##    # CMake won't build the targets for local builds of upstream projects
+##    if(cmake_build_type_lower STREQUAL release)
+##        install(EXPORT ${package}_Targets
+##                FILE ${package}Targets.cmake
+##                DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+##    endif()
+##
+##    install(FILES "${PROJECT_BINARY_DIR}/${package}Config.cmake"
+##                  "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
+##            DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+##endforeach(package)

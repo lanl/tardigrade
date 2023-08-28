@@ -1,0 +1,5 @@
+set(input_filename "simple_diffusion.i")
+set(output_filename "gold/simple_diffusion_out.e")
+target_sources(${PROJECT_NAME} PRIVATE ${input_filename})
+target_sources(${PROJECT_NAME} PRIVATE ${output_filename})
+target_sources(${PROJECT_NAME} PRIVATE "tests")

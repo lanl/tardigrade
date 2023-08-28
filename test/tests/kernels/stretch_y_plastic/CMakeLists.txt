@@ -1,0 +1,5 @@
+set(input_filename "stretch_y_plastic.i")
+set(output_filename "gold/stretch_y_plastic_out.e")
+target_sources(${PROJECT_NAME} PRIVATE ${input_filename})
+target_sources(${PROJECT_NAME} PRIVATE ${output_filename})
+target_sources(${PROJECT_NAME} PRIVATE "tests")

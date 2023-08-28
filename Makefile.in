@@ -7,7 +7,6 @@
 #
 ###############################################################################
 # Use the MOOSE submodule if it exists and MOOSE_DIR is not set
-export MOOSE_DIR = @MOOSE_DIR@
 MOOSE_SUBMODULE    := $(CURDIR)/moose
 ifneq ($(wildcard $(MOOSE_SUBMODULE)/framework/Makefile),)
   MOOSE_DIR        ?= $(MOOSE_SUBMODULE)
@@ -54,7 +53,7 @@ include $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
 # dep apps
-APPLICATION_DIR    := $(CURDIR)
+APPLICATION_DIR    := @PROJECT_BINARY_DIR@
 ANACONDA_INCLUDE   := $(CONDA_PREFIX)/include
 ANACONDA_LIB       := $(CONDA_PREFIX)/lib
 APPLICATION_NAME   := tardigrade
