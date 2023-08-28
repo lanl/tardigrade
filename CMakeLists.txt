@@ -210,26 +210,33 @@ foreach(source_file ${${PROJECT_NAME}_SOURCES})
     configure_file("${source_file}" "${PROJECT_BINARY_DIR}/${rel}" COPYONLY)
 endforeach(source_file)
 
-###==================================================================================== SETUP INSTALLATION CMAKE FILES ===
-##foreach(package ${PROJECT_NAME})
-##    include(CMakePackageConfigHelpers)
-##    write_basic_package_version_file("${package}ConfigVersion.cmake"
-##                                     VERSION ${PROJECT_VERSION}
-##                                     COMPATIBILITY SameMajorVersion)
-##    configure_package_config_file(
-##      "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}/Config.cmake.in"
-##      "${PROJECT_BINARY_DIR}/${package}Config.cmake"
-##      INSTALL_DESTINATION
-##      ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-##
-##    # CMake won't build the targets for local builds of upstream projects
-##    if(cmake_build_type_lower STREQUAL release)
-##        install(EXPORT ${package}_Targets
-##                FILE ${package}Targets.cmake
-##                DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-##    endif()
-##
-##    install(FILES "${PROJECT_BINARY_DIR}/${package}Config.cmake"
-##                  "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
-##            DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-##endforeach(package)
+#==================================================================================== SETUP INSTALLATION CMAKE FILES ===
+foreach(package ${PROJECT_NAME})
+    include(CMakePackageConfigHelpers)
+    write_basic_package_version_file("${package}ConfigVersion.cmake"
+                                     VERSION ${PROJECT_VERSION}
+                                     COMPATIBILITY SameMajorVersion)
+    configure_package_config_file(
+      "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}/Config.cmake.in"
+      "${PROJECT_BINARY_DIR}/${package}Config.cmake"
+      INSTALL_DESTINATION
+      ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+
+    # CMake won't build the targets for local builds of upstream projects
+    if(cmake_build_type_lower STREQUAL release)
+        install(EXPORT ${package}_Targets
+                FILE ${package}Targets.cmake
+                DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+    endif()
+
+    install(FILES "${PROJECT_BINARY_DIR}/${package}Config.cmake"
+                  "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
+            DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+
+    message("INSTALL DATA: ${CMAKE_INSTALL_DATAROOTDIR}/${package}")
+
+    configure_file("INSTALL.sh.in" "${PROJECT_BINARY_DIR}/INSTALL.sh")
+
+    install(CODE "execute_process(COMMAND INSTALL.sh)")
+
+endforeach(package)
