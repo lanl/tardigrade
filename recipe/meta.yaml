@@ -39,7 +39,6 @@ requirements:
     - cmake >=3.18
     - eigen >=3.3.7
     - tardigrade_micromorphic_element >=1.4
-    - moose-dev
     - boost >=1.59  # TODO: Separate the package/test configuration to make BOOST an optional build dependency
     - doxygen  # TODO: Separate the package/documentation configuration to make Doxygen an optional build dependency
     - sphinx  # TODO: Separate the package/documentation configuration to make Sphinx an optional build dependency
