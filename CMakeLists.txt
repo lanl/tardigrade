@@ -41,7 +41,6 @@ if(${not_conda_test} STREQUAL "true")
     # TODO: On osx-arm64 some c++ projects struggle to find $PREFIX/bin/python during conda-builds and others don't.
     # Trace the source and remove the hint when CMake configures with the correct python version during conda-build.
     if (DEFINED ENV{PREFIX})
-        message("PREFIX $ENV{PREFIX}")
         set(Python_ROOT_DIR "$ENV{PREFIX}/bin")
     endif()
     find_package(Python COMPONENTS Interpreter REQUIRED)
@@ -175,7 +174,7 @@ endif()
 
 # Configure MOOSE for installation
 if(cmake_build_type_lower STREQUAL release)
-    execute_process(COMMAND "./configure --prefix=${PREFIX}"
+    execute_process(COMMAND "./configure --prefix=${INSTALL_PREFIX}"
                     WORKING_DIRECTORY $ENV{MOOSE_DIR})
 endif()
 
