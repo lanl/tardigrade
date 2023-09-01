@@ -174,8 +174,14 @@ endif()
 
 # Configure MOOSE for installation
 if(cmake_build_type_lower STREQUAL release)
-    execute_process(COMMAND "./configure --prefix=${MOOSE_INSTALL_PREFIX}"
-                    WORKING_DIRECTORY $ENV{MOOSE_DIR})
+    set(MOOSE_CONFIGURE_COMMAND "$ENV{MOOSE_DIR}/configure")
+    set(MOOSE_CONFIGURE_OPTIONS "--prefix=${MOOSE_INSTALL_PREFIX}")
+    execute_process(COMMAND ${MOOSE_CONFIGURE_COMMAND} ${MOOSE_CONFIGURE_OPTIONS}
+                    WORKING_DIRECTORY $ENV{MOOSE_DIR}
+                    RESULT_VARIABLE MOOSE_CONFIGURE_RESULT
+                    OUTPUT_VARIABLE MOOSE_CONFIGURE_OUTPUT)
+    message("MOOSE_CONFIGURE_RESULT:\n${MOOSE_CONFIGURE_RESULT}")
+    message("MOOSE_CONFIGURE_OUTPUT:\n${MOOSE_CONFIGURE_OUTPUT}")
 endif()
 
 add_custom_target(${PROJECT_NAME} ALL
@@ -228,17 +234,22 @@ foreach(package ${PROJECT_NAME})
       INSTALL_DESTINATION
       ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
 
-#    # CMake won't build the targets for local builds of upstream projects
-#    if(cmake_build_type_lower STREQUAL release)
-#        install(EXPORT ${package}_Targets
-#                FILE ${package}Targets.cmake
-#                DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-#    endif()
+    # CMake won't build the targets for local builds of upstream projects
+    if(cmake_build_type_lower STREQUAL release)
+
+#        set(${PROJECT_NAME}_INSTALL_COMMAND "execute_process(COMMAND MOOSE_DIR=$ENV{MOOSE_DIR} make -f ${PROJECT_NAME}_Makefile install WORKING_DIRECTORY ${PROJECT_BINARY_DIR} RESULT_VARIABLE tmp_res OUTPUT_VARIABLE tmp_out)")
+        set(${PROJECT_NAME}_INSTALL_COMMAND "execute_process(COMMAND /bin/bash -c \"MOOSE_DIR=$ENV{MOOSE_DIR} make -f ${PROJECT_NAME}_Makefile install\" WORKING_DIRECTORY ${PROJECT_BINARY_DIR} RESULT_VARIABLE tmp_res OUTPUT_VARIABLE tmp_out)")
+        message("${PROJECT_NAME}_INSTALL_COMMAND: ${${PROJECT_NAME}_INSTALL_COMMAND}")
+    
+        install(CODE "${${PROJECT_NAME}_INSTALL_COMMAND}")
+        install(CODE [=[message("MOOSE INSTALL ERRORS:\n${tmp_res}")]=])
+        install(CODE [=[message("MOOSE INSTALL OUTPUT:\n${tmp_out}")]=])
+
+    endif()
 
     install(FILES "${PROJECT_BINARY_DIR}/${package}Config.cmake"
                   "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
             DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
 
-    install(CODE "execute_process(COMMAND make install)")
 
 endforeach(package)
