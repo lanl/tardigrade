@@ -174,7 +174,7 @@ endif()
 
 # Configure MOOSE for installation
 if(cmake_build_type_lower STREQUAL release)
-    execute_process(COMMAND "./configure --prefix=${INSTALL_PREFIX}"
+    execute_process(COMMAND "./configure --prefix=${MOOSE_INSTALL_PREFIX}"
                     WORKING_DIRECTORY $ENV{MOOSE_DIR})
 endif()
 

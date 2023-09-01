@@ -15,8 +15,6 @@
 
 #include "Material.h"
 #include "MooseException.h"
-#include<balance_equations.h>
-#include<micromorphic_material_library.h>
 
 //Forward declarations
 class MicromorphicMaterial;

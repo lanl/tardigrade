@@ -1,11 +1,8 @@
 boost>=1.59
 breathe>=4.30.0
 cmake>=3.18
-tardigrade_constitutive_tools>=0.7
 doxygen>=1.9
 eigen>=3.3.7
-tardigrade_error_tools>=0.7
-tardigrade_vector_tools>=0.7
 tardigrade_micromorphic_element>=1.4
 compilers
 setuptools_scm>=6.2
