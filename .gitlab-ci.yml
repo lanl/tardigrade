@@ -169,7 +169,7 @@ conda-build:
     - umask 0022
     - mkdir ${conda_artifacts_directory}
     - croot="/scratch/$USER/$(basename $PWD)/${conda_artifacts_directory}"
-    - VERSION=$(python -m setuptools_scm) conda build recipe --channel https://conda.software.inl.gov/public --channel file://${aea_conda_channel} --channel conda-forge --override-channels --no-anaconda-upload --croot ${croot} --output-folder ${conda_artifacts_directory} ${variants}
+    - VERSION=$(python -m setuptools_scm) conda build recipe --channel https://conda.software.inl.gov/public --channel file://${aea_conda_channel} --channel conda-forge --override-channels --strict-channel-priority --no-anaconda-upload --croot ${croot} --output-folder ${conda_artifacts_directory} ${variants}
     - conda build purge --croot ${croot}
   artifacts:
     expire_in: '2 hrs'
