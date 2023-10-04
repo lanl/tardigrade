@@ -15,6 +15,7 @@
 
 //MOOSE includes
 #include "Function.h"
+#include "micromorphic_material_library.h"
 
 registerMooseObject("tardigradeApp", MicromorphicMaterial);
 

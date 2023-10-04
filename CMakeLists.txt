@@ -1,5 +1,5 @@
 #===================================================================================================== PROJECT SETUP ===
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.18)
 project(tardigrade)
 set(PROJECT_EXECUTABLE_NAME "tardigrade-opt")
 
@@ -41,7 +41,6 @@ if(${not_conda_test} STREQUAL "true")
     # TODO: On osx-arm64 some c++ projects struggle to find $PREFIX/bin/python during conda-builds and others don't.
     # Trace the source and remove the hint when CMake configures with the correct python version during conda-build.
     if (DEFINED ENV{PREFIX})
-        message("PREFIX $ENV{PREFIX}")
         set(Python_ROOT_DIR "$ENV{PREFIX}/bin")
     endif()
     find_package(Python COMPONENTS Interpreter REQUIRED)
@@ -172,6 +171,19 @@ endif()
 ##=============================================================================================== ADD PROJECT TARGETS ===
 # MUST COME AFTER DEPENDENCY LOCATING
 # Add project source directories
+
+# Configure MOOSE for installation
+if(cmake_build_type_lower STREQUAL release)
+    set(MOOSE_CONFIGURE_COMMAND "$ENV{MOOSE_DIR}/configure")
+    set(MOOSE_CONFIGURE_OPTIONS "--prefix=${MOOSE_INSTALL_PREFIX}")
+    execute_process(COMMAND ${MOOSE_CONFIGURE_COMMAND} ${MOOSE_CONFIGURE_OPTIONS}
+                    WORKING_DIRECTORY $ENV{MOOSE_DIR}
+                    RESULT_VARIABLE MOOSE_CONFIGURE_RESULT
+                    OUTPUT_VARIABLE MOOSE_CONFIGURE_OUTPUT)
+    message("MOOSE_CONFIGURE_RESULT:\n${MOOSE_CONFIGURE_RESULT}")
+    message("MOOSE_CONFIGURE_OUTPUT:\n${MOOSE_CONFIGURE_OUTPUT}")
+endif()
+
 add_custom_target(${PROJECT_NAME} ALL
                   COMMAND MOOSE_DIR=$ENV{MOOSE_DIR} make -j4 -f "${PROJECT_NAME}_Makefile"
                   WORKING_DIRECTORY ${PROJECT_BINARY_DIRECTORY})
@@ -210,26 +222,34 @@ foreach(source_file ${${PROJECT_NAME}_SOURCES})
     configure_file("${source_file}" "${PROJECT_BINARY_DIR}/${rel}" COPYONLY)
 endforeach(source_file)
 
-###==================================================================================== SETUP INSTALLATION CMAKE FILES ===
-##foreach(package ${PROJECT_NAME})
-##    include(CMakePackageConfigHelpers)
-##    write_basic_package_version_file("${package}ConfigVersion.cmake"
-##                                     VERSION ${PROJECT_VERSION}
-##                                     COMPATIBILITY SameMajorVersion)
-##    configure_package_config_file(
-##      "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}/Config.cmake.in"
-##      "${PROJECT_BINARY_DIR}/${package}Config.cmake"
-##      INSTALL_DESTINATION
-##      ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-##
-##    # CMake won't build the targets for local builds of upstream projects
-##    if(cmake_build_type_lower STREQUAL release)
-##        install(EXPORT ${package}_Targets
-##                FILE ${package}Targets.cmake
-##                DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-##    endif()
-##
-##    install(FILES "${PROJECT_BINARY_DIR}/${package}Config.cmake"
-##                  "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
-##            DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
-##endforeach(package)
+#==================================================================================== SETUP INSTALLATION CMAKE FILES ===
+foreach(package ${PROJECT_NAME})
+    include(CMakePackageConfigHelpers)
+    write_basic_package_version_file("${package}ConfigVersion.cmake"
+                                     VERSION ${PROJECT_VERSION}
+                                     COMPATIBILITY SameMajorVersion)
+    configure_package_config_file(
+      "${PROJECT_SOURCE_DIR}/${CMAKE_SRC_PATH}/Config.cmake.in"
+      "${PROJECT_BINARY_DIR}/${package}Config.cmake"
+      INSTALL_DESTINATION
+      ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+
+    # CMake won't build the targets for local builds of upstream projects
+    if(cmake_build_type_lower STREQUAL release)
+
+#        set(${PROJECT_NAME}_INSTALL_COMMAND "execute_process(COMMAND MOOSE_DIR=$ENV{MOOSE_DIR} make -f ${PROJECT_NAME}_Makefile install WORKING_DIRECTORY ${PROJECT_BINARY_DIR} RESULT_VARIABLE tmp_res OUTPUT_VARIABLE tmp_out)")
+        set(${PROJECT_NAME}_INSTALL_COMMAND "execute_process(COMMAND /bin/bash -c \"MOOSE_DIR=$ENV{MOOSE_DIR} make -f ${PROJECT_NAME}_Makefile install\" WORKING_DIRECTORY ${PROJECT_BINARY_DIR} RESULT_VARIABLE tmp_res OUTPUT_VARIABLE tmp_out)")
+        message("${PROJECT_NAME}_INSTALL_COMMAND: ${${PROJECT_NAME}_INSTALL_COMMAND}")
+    
+        install(CODE "${${PROJECT_NAME}_INSTALL_COMMAND}")
+        install(CODE [=[message("MOOSE INSTALL ERRORS:\n${tmp_res}")]=])
+        install(CODE [=[message("MOOSE INSTALL OUTPUT:\n${tmp_out}")]=])
+
+    endif()
+
+    install(FILES "${PROJECT_BINARY_DIR}/${package}Config.cmake"
+                  "${PROJECT_BINARY_DIR}/${package}ConfigVersion.cmake"
+            DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${package}/cmake)
+
+
+endforeach(package)

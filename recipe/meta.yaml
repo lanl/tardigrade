@@ -23,7 +23,7 @@ build:
   script:
     - mkdir build-package
     - cd build-package
-    - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=lib
+    - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=lib -DMOOSE_INSTALL_PREFIX=${PREFIX}
     - cmake --build . --target tardigrade
     - cmake --install . --prefix ${PREFIX}
   ignore_run_exports:
@@ -43,6 +43,7 @@ requirements:
     - boost >=1.59  # TODO: Separate the package/test configuration to make BOOST an optional build dependency
     - doxygen  # TODO: Separate the package/documentation configuration to make Doxygen an optional build dependency
     - sphinx  # TODO: Separate the package/documentation configuration to make Sphinx an optional build dependency
+    - numpy >=1.17 # TODO: Workaround for mpi failure (https://github.com/conda/conda-build/issues/4498)
   run:
     - eigen >=3.3.7
     - tardigrade_micromorphic_element >=1.4
@@ -61,12 +62,26 @@ test:
     - doxygen  # TODO: Separate the package/documentation configuration to make Doxygen an optional build dependency
     - sphinx  # TODO: Separate the package/documentation configuration to make Sphinx an optional build dependency
   source_files:
-    - CMakeLists.txt
-    - src/cpp/tests/CMakeLists.txt
-    - src/cpp/tests/test_tardigrade.cpp
+    - run_tests
+    - test/tests/kernels/const_mms/tests
+    - test/tests/kernels/const_mms/*.i
+    - test/tests/kernels/const_mms/gold/*.e
+    - test/tests/kernels/linear_mms/tests
+    - test/tests/kernels/linear_mms/*.i
+    - test/tests/kernels/linear_mms/gold/*.e
+    - test/tests/kernels/rotate_stretch/tests
+    - test/tests/kernels/rotate_stretch/*.i
+    - test/tests/kernels/rotate_stretch/gold/*.e
+    - test/tests/kernels/simple_diffusion/tests
+    - test/tests/kernels/simple_diffusion/*.i
+    - test/tests/kernels/simple_diffusion/gold/*.e
+    - test/tests/kernels/stretch_y/tests
+    - test/tests/kernels/stretch_y/*.i
+    - test/tests/kernels/stretch_y/gold/*.e
+    - test/tests/kernels/stretch_y_plastic/tests
+    - test/tests/kernels/stretch_y_plastic/*.i
+    - test/tests/kernels/stretch_y_plastic/gold/*.e
   commands:
     - mkdir build-tests
     - cd build-tests
-    - cmake .. -DCMAKE_BUILD_TYPE=conda-test -DCMAKE_INSTALL_LIBDIR=lib
-    - cmake --build . --verbose
-    - ctest --output-on-failure
+    - ./run_tests
