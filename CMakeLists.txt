@@ -104,6 +104,7 @@ set(optional_upstream_packages "overlap_coupling")
 include(FetchContent)
 foreach(package ${upstream_packages})
     string(TOUPPER "${package}" package_upper)
+    set(${package_upper}_BUILD_PYTHON_BINDINGS OFF CACHE INTERNAL "Setting ${package}'s python binding flag to off")
     find_package(${package} ${upstream_required} CONFIG)
     if(${package}_FOUND)
         message(STATUS "Found ${package}: ${${package}_DIR}")
@@ -113,7 +114,7 @@ foreach(package ${upstream_packages})
         # TODO: Decide how to handle main/dev build differences. bash env variables for GIT TAG?
         FetchContent_Declare(
             ${package}
-            GIT_REPOSITORY ssh://git@re-git.lanl.gov:10022/aea/material-models/${package}.git
+            GIT_REPOSITORY https://github.com/UCBoulder/${package}.git
             GIT_TAG        origin/dev
         )
         FetchContent_MakeAvailable(${package})
